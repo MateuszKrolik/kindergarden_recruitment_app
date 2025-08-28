@@ -14,8 +14,8 @@ func NewUserHandler(svc IUserService) *userHandler {
 	return &userHandler{svc: svc}
 }
 
-func (h *userHandler) RegisterRoutes() {
-	http.HandleFunc("/users", h.registerUser)
+func (h *userHandler) RegisterRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/users", h.registerUser)
 }
 
 func (h *userHandler) registerUser(w http.ResponseWriter, r *http.Request) {
