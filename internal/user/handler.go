@@ -15,7 +15,8 @@ func NewUserHandler(svc IUserService) *userHandler {
 }
 
 func (h *userHandler) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("/users", h.registerUser)
+	mux.HandleFunc("/signup", http.HandlerFunc(h.registerUser))
+	mux.HandleFunc("/login", http.HandlerFunc(h.loginUser))
 }
 
 func (h *userHandler) registerUser(w http.ResponseWriter, r *http.Request) {
@@ -49,4 +50,47 @@ func (h *userHandler) registerUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	encoder.Encode(response)
+}
+
+func (h *userHandler) loginUser(w http.ResponseWriter, r *http.Request) {
+	encoder := json.NewEncoder(w)
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		encoder.Encode(map[string]string{"error": "Method not allowed!"})
+		return
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		encoder.Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	type request struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	var req request
+	if err := json.Unmarshal(body, &req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		encoder.Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	token, err := h.svc.LoginUser(r.Context(), req.Email, req.Password)
+	if err != nil {
+		if err == ErrorUserNotFound {
+			w.WriteHeader(http.StatusNotFound)
+			encoder.Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		encoder.Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	encoder.Encode(map[string]string{"token": token})
 }

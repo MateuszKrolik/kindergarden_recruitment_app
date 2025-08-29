@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/cmd/server/middleware"
+	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/internal/property"
 	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/internal/user"
 )
 
@@ -19,6 +20,12 @@ func main() {
 	userSvc := user.NewUserService(userRepo)
 	userHandler := user.NewUserHandler(userSvc)
 	userHandler.RegisterRoutes(mux)
+
+	// Properties
+	propertyRepo := property.NewInMemoryPropertyRepository()
+	propertySvc := property.NewPropertyService(propertyRepo)
+	propertyHandler := property.NewPropertyHandler(propertySvc)
+	propertyHandler.RegisterRoutes(mux, middleware.Authenticate)
 
 	handler := middleware.CORS(middleware.Logging(logger, mux))
 	if err := http.ListenAndServe(":8080", handler); err != nil {
