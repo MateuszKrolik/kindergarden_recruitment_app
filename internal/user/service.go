@@ -11,6 +11,7 @@ type IUserService interface {
 	LoginUser(c context.Context, email, password string) (string, error)
 	Exists(c context.Context, userID uuid.UUID) (bool, error)
 	SaveParentUserDetails(c context.Context, pU ParentUserDetails) error
+	GetParentConditionKeys(c context.Context, userID uuid.UUID) (*ParentConditionKeys, error)
 }
 
 type userService struct {
@@ -58,4 +59,11 @@ func (s *userService) SaveParentUserDetails(
 ) error {
 	// TODO: Business logic validation
 	return s.repo.SaveParentUserDetails(c, pU)
+}
+
+func (s *userService) GetParentConditionKeys(
+	c context.Context,
+	userID uuid.UUID,
+) (*ParentConditionKeys, error) {
+	return s.repo.GetParentConditionKeys(c, userID)
 }

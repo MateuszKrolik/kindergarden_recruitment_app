@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/cmd/server/adapter"
 	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/cmd/server/middleware"
 	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/internal/property"
 	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/internal/user"
@@ -24,8 +25,8 @@ func main() {
 
 	// Properties
 	propertyRepo := property.NewInMemoryPropertyRepository()
-	// inject userSvc as loosely-coupled IUserClient
-	propertySvc := property.NewPropertyService(propertyRepo, userSvc)
+	propertyUserClientAdapter := adapter.NewPropertyUserClientAdapter(userSvc)
+	propertySvc := property.NewPropertyService(propertyRepo, propertyUserClientAdapter)
 	propertyHandler := property.NewPropertyHandler(propertySvc)
 	propertyHandler.RegisterRoutes(mux, authenticator)
 

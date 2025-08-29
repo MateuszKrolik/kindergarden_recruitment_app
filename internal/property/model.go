@@ -12,3 +12,11 @@ type PropertyUser struct {
 	UserID     uuid.UUID `json:"user_id"`
 	Role       UserRole  `json:"role"`
 }
+
+type PropertyParentDocumentRequirement struct {
+	PropertyID      uuid.UUID       `json:"property_id"`
+	DocumentType    DocumentType    `json:"document_type"`
+	RequirementType RequirementType `json:"requirement_type"`
+	ConditionKey    ConditionKey    `json:"condition_key"`
+	PointValue      int             `json:"point_value"`
+}

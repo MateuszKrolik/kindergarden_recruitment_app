@@ -11,6 +11,7 @@ var (
 	ErrorUserAlreadyExists             error = errors.New("User with this email already exists!")
 	ErrorUserNotFound                  error = errors.New("User with this email not found!")
 	ErrorParentUserDetailsAlreadyExist error = errors.New("Parent user details already exist!")
+	ErrorParentUserDetailsDontExist    error = errors.New("Parent user details don't!")
 )
 
 type IUserRepository interface {
@@ -19,6 +20,7 @@ type IUserRepository interface {
 	Exists(c context.Context, userID uuid.UUID) (bool, error)
 	DoParentUserDetailsExist(c context.Context, userID uuid.UUID) (bool, error)
 	SaveParentUserDetails(c context.Context, pU ParentUserDetails) error
+	GetParentConditionKeys(c context.Context, userID uuid.UUID) (*ParentConditionKeys, error)
 }
 
 type inMemoryUserRepository struct {
@@ -95,4 +97,22 @@ func (r *inMemoryUserRepository) DoParentUserDetailsExist(
 		return true, nil
 	}
 	return false, nil
+}
+
+func (r *inMemoryUserRepository) GetParentConditionKeys(
+	c context.Context,
+	userID uuid.UUID,
+) (*ParentConditionKeys, error) {
+	details, exists := r.ParentUserDetails[userID]
+	if !exists {
+		return nil, ErrorParentUserDetailsDontExist
+	}
+
+	return &ParentConditionKeys{
+		IsEmployed:                details.IsEmployed,
+		IsSelfEmployed:            details.IsEmployed,
+		IsStudent:                 details.IsStudent,
+		FiledTaxInDesiredLocation: details.FiledTaxInDesiredLocation,
+		ResidesInDesiredLocation:  details.ResidesInDesiredLocation,
+	}, nil
 }

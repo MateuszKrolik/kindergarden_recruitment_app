@@ -16,6 +16,7 @@ type IPropertyService interface {
 		propertyId, userId uuid.UUID,
 		userRole UserRole,
 	) (*PropertyUser, error)
+	// TODO: Get document requirements for given user
 }
 
 type propertyService struct {

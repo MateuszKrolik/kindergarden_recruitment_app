@@ -16,17 +16,23 @@ type IPropertyRepository interface {
 		propertyId, userId uuid.UUID,
 		userRole UserRole,
 	) (*PropertyUser, error)
+	GetPropertyParentDocumentRequirements(
+		c context.Context,
+		propertyID uuid.UUID,
+	) (*[]PropertyParentDocumentRequirement, error)
 }
 
 type inMemoryPropertyRepository struct {
-	Properties    map[uuid.UUID]*Property
-	PropertyUsers map[uuid.UUID]*PropertyUser
+	Properties                         map[uuid.UUID]*Property
+	PropertyUsers                      map[uuid.UUID]*PropertyUser
+	PropertyParentDocumentRequirements []PropertyParentDocumentRequirement
 }
 
 func NewInMemoryPropertyRepository() IPropertyRepository {
 	return &inMemoryPropertyRepository{
-		Properties:    dummyInMemoryProperties,
-		PropertyUsers: dummyInMemoryPropertyUsers,
+		Properties:                         dummyInMemoryProperties,
+		PropertyUsers:                      dummyInMemoryPropertyUsers,
+		PropertyParentDocumentRequirements: inMemoryPropertyParentDocumentRequirements,
 	}
 }
 
@@ -52,4 +58,11 @@ func (r *inMemoryPropertyRepository) RegisterUserToProperty(
 	r.PropertyUsers[userId] = propertyUser
 
 	return propertyUser, nil
+}
+
+func (r *inMemoryPropertyRepository) GetPropertyParentDocumentRequirements(
+	c context.Context,
+	propertyID uuid.UUID,
+) (*[]PropertyParentDocumentRequirement, error) {
+	return &r.PropertyParentDocumentRequirements, nil
 }

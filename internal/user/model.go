@@ -22,7 +22,7 @@ type ParentUserDetails struct {
 	HomeAddress string    `json:"home_address"`
 	Workplace   string    `json:"workplace"`
 	Gender      Gender    `json:"gender"`
-	// Requirement flags
+	// Condition Keys
 	IsEmployed                *bool `json:"is_employed"`
 	IsSelfEmployed            *bool `json:"is_self_employed"`
 	IsStudent                 *bool `json:"is_student"`

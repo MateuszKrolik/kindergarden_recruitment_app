@@ -16,3 +16,41 @@ var dummyInMemoryPropertyUsers map[uuid.UUID]*PropertyUser = map[uuid.UUID]*Prop
 	parentID: {PropertyID: propertyID, UserID: parentID, Role: Parent},
 	adminID:  {PropertyID: propertyID, UserID: parentID, Role: Admin},
 }
+
+var inMemoryPropertyParentDocumentRequirements []PropertyParentDocumentRequirement = []PropertyParentDocumentRequirement{
+	{
+		PropertyID:      propertyID,
+		DocumentType:    EmploymentProof,
+		RequirementType: Conditional,
+		ConditionKey:    IsEmployed,
+		PointValue:      5,
+	},
+	{
+		PropertyID:      propertyID,
+		DocumentType:    SelfEmploymentProof,
+		RequirementType: Conditional,
+		ConditionKey:    IsSelfEmployed,
+		PointValue:      5,
+	},
+	{
+		PropertyID:      propertyID,
+		DocumentType:    StudentProof,
+		RequirementType: Conditional,
+		ConditionKey:    IsStudent,
+		PointValue:      5,
+	},
+	{
+		PropertyID:      propertyID,
+		DocumentType:    FiledTaxInDesiredLocationProof,
+		RequirementType: Conditional,
+		ConditionKey:    FiledTaxInDesiredLocation,
+		PointValue:      5,
+	},
+	{
+		PropertyID:      propertyID,
+		DocumentType:    ResidesInDesiredLocationProof,
+		RequirementType: Conditional,
+		ConditionKey:    ResidesInDesiredLocation,
+		PointValue:      5,
+	},
+}

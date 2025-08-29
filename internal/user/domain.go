@@ -1,10 +1,4 @@
-package property
-
-import (
-	"context"
-
-	"github.com/google/uuid"
-)
+package user
 
 type ParentConditionKeys struct {
 	IsEmployed                *bool `json:"is_employed"`
@@ -12,9 +6,4 @@ type ParentConditionKeys struct {
 	IsStudent                 *bool `json:"is_student"`
 	FiledTaxInDesiredLocation *bool `json:"filed_tax_in_desired_location"`
 	ResidesInDesiredLocation  *bool `json:"resides_in_desired_location"`
-}
-
-type IUserClient interface {
-	Exists(c context.Context, userID uuid.UUID) (bool, error)
-	GetParentConditionKeys(c context.Context, userID uuid.UUID) (*ParentConditionKeys, error)
 }
