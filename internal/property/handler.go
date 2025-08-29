@@ -56,6 +56,7 @@ func (h *propertyHandler) getPropertyById(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	encoder.Encode(property)
 }
@@ -109,6 +110,7 @@ func (h *propertyHandler) registerUserToProperty(w http.ResponseWriter, r *http.
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	encoder.Encode(propertyUser)
 }

@@ -14,19 +14,20 @@ import (
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	mux := http.NewServeMux()
+	authenticator := middleware.Authenticate
 
 	// Users
 	userRepo := user.NewInMemoryUserRepository()
 	userSvc := user.NewUserService(userRepo)
 	userHandler := user.NewUserHandler(userSvc)
-	userHandler.RegisterRoutes(mux)
+	userHandler.RegisterRoutes(mux, authenticator)
 
 	// Properties
 	propertyRepo := property.NewInMemoryPropertyRepository()
 	// inject userSvc as loosely-coupled IUserClient
 	propertySvc := property.NewPropertyService(propertyRepo, userSvc)
 	propertyHandler := property.NewPropertyHandler(propertySvc)
-	propertyHandler.RegisterRoutes(mux, middleware.Authenticate)
+	propertyHandler.RegisterRoutes(mux, authenticator)
 
 	handler := middleware.CORS(middleware.Logging(logger, mux))
 	if err := http.ListenAndServe(":8080", handler); err != nil {

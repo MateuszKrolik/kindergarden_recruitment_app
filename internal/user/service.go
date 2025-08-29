@@ -10,6 +10,7 @@ type IUserService interface {
 	RegisterUser(c context.Context, email, password string) (*User, error)
 	LoginUser(c context.Context, email, password string) (string, error)
 	Exists(c context.Context, userID uuid.UUID) (bool, error)
+	SaveParentUserDetails(c context.Context, pU ParentUserDetails) error
 }
 
 type userService struct {
@@ -49,4 +50,12 @@ func (s *userService) LoginUser(
 
 func (s *userService) Exists(c context.Context, userID uuid.UUID) (bool, error) {
 	return s.repo.Exists(c, userID)
+}
+
+func (s *userService) SaveParentUserDetails(
+	c context.Context,
+	pU ParentUserDetails,
+) error {
+	// TODO: Business logic validation
+	return s.repo.SaveParentUserDetails(c, pU)
 }
