@@ -46,13 +46,11 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		// Store userId in request context
 		ctx := context.WithValue(r.Context(), "userId", userId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// Helper function to send JSON error responses
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)

@@ -3,8 +3,6 @@ package user
 import (
 	"context"
 	"errors"
-
-	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/cmd/server/utils"
 )
 
 var (
@@ -39,8 +37,7 @@ func (r *inMemoryUserRepository) Login(c context.Context, email, password string
 	if !exists {
 		return nil, ErrorUserNotFound
 	}
-	err := utils.ComparePasswords(password, user.Password)
-	if err != nil {
+	if err := ComparePasswords(password, user.Password); err != nil {
 		return nil, err
 	}
 	return user, nil

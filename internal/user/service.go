@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-
-	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/cmd/server/utils"
 )
 
 type IUserService interface {
@@ -22,8 +20,11 @@ func NewUserService(repository IUserRepository) IUserService {
 }
 
 func (s *userService) RegisterUser(c context.Context, email, password string) (*User, error) {
-	// TODO: pwd hashing
-	user := &User{ID: uuid.New(), Email: email, Password: password}
+	hashedPassword, err := HashPassword(password)
+	if err != nil {
+		return nil, err
+	}
+	user := &User{ID: uuid.New(), Email: email, Password: hashedPassword}
 	if err := s.repo.Save(c, user); err != nil {
 		return nil, err
 	}
@@ -38,7 +39,7 @@ func (s *userService) LoginUser(
 	if err != nil {
 		return "", err
 	}
-	token, err := utils.GenerateToken(user.Email, user.ID)
+	token, err := GenerateToken(user.Email, user.ID)
 	if err != nil {
 		return "", err
 	}
