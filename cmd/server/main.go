@@ -23,7 +23,8 @@ func main() {
 
 	// Properties
 	propertyRepo := property.NewInMemoryPropertyRepository()
-	propertySvc := property.NewPropertyService(propertyRepo)
+	// inject userSvc as loosely-coupled IUserClient
+	propertySvc := property.NewPropertyService(propertyRepo, userSvc)
 	propertyHandler := property.NewPropertyHandler(propertySvc)
 	propertyHandler.RegisterRoutes(mux, middleware.Authenticate)
 

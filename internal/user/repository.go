@@ -3,6 +3,8 @@ package user
 import (
 	"context"
 	"errors"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -13,6 +15,7 @@ var (
 type IUserRepository interface {
 	Save(c context.Context, user *User) error
 	Login(c context.Context, email, password string) (*User, error)
+	Exists(c context.Context, userID uuid.UUID) (bool, error)
 }
 
 type inMemoryUserRepository struct {
@@ -41,4 +44,14 @@ func (r *inMemoryUserRepository) Login(c context.Context, email, password string
 		return nil, err
 	}
 	return user, nil
+}
+
+func (r *inMemoryUserRepository) Exists(c context.Context, userID uuid.UUID) (bool, error) {
+	found := false
+	for _, u := range r.Users {
+		if u.ID == userID {
+			found = true
+		}
+	}
+	return found, nil
 }

@@ -9,6 +9,7 @@ import (
 type IUserService interface {
 	RegisterUser(c context.Context, email, password string) (*User, error)
 	LoginUser(c context.Context, email, password string) (string, error)
+	Exists(c context.Context, userID uuid.UUID) (bool, error)
 }
 
 type userService struct {
@@ -44,4 +45,8 @@ func (s *userService) LoginUser(
 		return "", err
 	}
 	return token, nil
+}
+
+func (s *userService) Exists(c context.Context, userID uuid.UUID) (bool, error) {
+	return s.repo.Exists(c, userID)
 }
