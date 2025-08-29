@@ -30,34 +30,29 @@ func (h *propertyHandler) RegisterRoutes(
 func (h *propertyHandler) getPropertyById(w http.ResponseWriter, r *http.Request) {
 	encoder := json.NewEncoder(w)
 	if r.Method != http.MethodGet {
-		encoder.Encode(map[string]string{"error": "Method not allowed!"})
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
 	}
 
 	propertyIdParam := strings.TrimPrefix(r.URL.Path, "/properties/")
 	if propertyIdParam == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		encoder.Encode(map[string]string{"error": "PropertyId cannot be empty!"})
+		http.Error(w, "PropertyId cannot be empty!", http.StatusBadRequest)
 		return
 	}
 
 	propertyId, err := uuid.Parse(propertyIdParam)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		encoder.Encode(map[string]string{"error": err.Error()})
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	property, err := h.svc.GetPropertyByID(r.Context(), propertyId)
 	if err != nil {
 		if err == ErrorPropertyNotFound {
-			w.WriteHeader(http.StatusNotFound)
-			encoder.Encode(map[string]string{"error": err.Error()})
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		encoder.Encode(map[string]string{"error": err.Error()})
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -68,57 +63,49 @@ func (h *propertyHandler) getPropertyById(w http.ResponseWriter, r *http.Request
 func (h *propertyHandler) registerUserToProperty(w http.ResponseWriter, r *http.Request) {
 	encoder := json.NewEncoder(w)
 	if r.Method != http.MethodPost {
-		encoder.Encode(map[string]string{"error": "Method not allowed!"})
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
 	}
 
 	pathParts := strings.Split(r.URL.Path, "/")
 	propertyIdParam := pathParts[2]
 	if propertyIdParam == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		encoder.Encode(map[string]string{"error": "PropertyId cannot be empty!"})
+		http.Error(w, "PropertyId cannot be empty!", http.StatusBadRequest)
 		return
 	}
 
 	propertyId, err := uuid.Parse(propertyIdParam)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		encoder.Encode(map[string]string{"error": err.Error()})
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	userIdClaim := r.Context().Value("userId")
 	userId, ok := userIdClaim.(uuid.UUID)
 	if !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		encoder.Encode(map[string]string{"error": "Invalid userId!"})
+		http.Error(w, "Invalid userId!", http.StatusUnauthorized)
 		return
 	}
 
 	roleParam := pathParts[4]
 	if roleParam == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		encoder.Encode(map[string]string{"error": "Role cannot be empty!"})
+		http.Error(w, "Role cannot be empty!", http.StatusBadRequest)
 		return
 	}
 
 	userRole := UserRole(roleParam)
 	if !userRole.IsValid() {
-		w.WriteHeader(http.StatusBadRequest)
-		encoder.Encode(map[string]string{"error": "Invalid user role!"})
+		http.Error(w, "Invalid user role!", http.StatusBadRequest)
 		return
 	}
 
 	propertyUser, err := h.svc.RegisterUserToProperty(r.Context(), propertyId, userId, userRole)
 	if err != nil {
 		if err == ErrorPropertyNotFound || err == ErrUserDoesntExist {
-			w.WriteHeader(http.StatusNotFound)
-			encoder.Encode(map[string]string{"error": err.Error()})
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		encoder.Encode(map[string]string{"error": err.Error()})
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

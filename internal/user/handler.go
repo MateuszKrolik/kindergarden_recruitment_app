@@ -21,7 +21,7 @@ func (h *userHandler) RegisterRoutes(mux *http.ServeMux) {
 
 func (h *userHandler) registerUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -29,22 +29,19 @@ func (h *userHandler) registerUser(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		encoder.Encode(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var user User
 	if err := json.Unmarshal(body, &user); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		encoder.Encode(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	response, err := h.svc.RegisterUser(r.Context(), user.Email, user.Password)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		encoder.Encode(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -55,15 +52,13 @@ func (h *userHandler) registerUser(w http.ResponseWriter, r *http.Request) {
 func (h *userHandler) loginUser(w http.ResponseWriter, r *http.Request) {
 	encoder := json.NewEncoder(w)
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		encoder.Encode(map[string]string{"error": "Method not allowed!"})
+		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
 	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		encoder.Encode(map[string]string{"error": err.Error()})
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -74,20 +69,17 @@ func (h *userHandler) loginUser(w http.ResponseWriter, r *http.Request) {
 
 	var req request
 	if err := json.Unmarshal(body, &req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		encoder.Encode(map[string]string{"error": err.Error()})
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	token, err := h.svc.LoginUser(r.Context(), req.Email, req.Password)
 	if err != nil {
 		if err == ErrorUserNotFound {
-			w.WriteHeader(http.StatusNotFound)
-			encoder.Encode(map[string]string{"error": err.Error()})
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		encoder.Encode(map[string]string{"error": err.Error()})
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
