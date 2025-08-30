@@ -40,7 +40,7 @@ func main() {
 
 	// Compliance
 	complianceRepo := compliance.NewInMemoryComplianceRepository()
-	complianceSvc := compliance.NewComplianceService(complianceRepo)
+	complianceSvc := compliance.NewComplianceService(complianceRepo, propertySvc)
 	complianceHandler := compliance.NewComplianceHandler(complianceSvc)
 	complianceHandler.RegisterRoutes(mux, authenticator)
 

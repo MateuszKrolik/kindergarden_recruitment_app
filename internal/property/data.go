@@ -14,7 +14,7 @@ var dummyInMemoryProperties map[uuid.UUID]*Property = map[uuid.UUID]*Property{
 
 var dummyInMemoryPropertyUsers map[uuid.UUID]*PropertyUser = map[uuid.UUID]*PropertyUser{
 	parentID: {PropertyID: propertyID, UserID: parentID, Role: Parent},
-	adminID:  {PropertyID: propertyID, UserID: parentID, Role: Admin},
+	adminID:  {PropertyID: propertyID, UserID: adminID, Role: Admin},
 }
 
 var inMemoryPropertyParentDocumentRequirements []PropertyParentDocumentRequirement = []PropertyParentDocumentRequirement{

@@ -15,3 +15,10 @@ func (s RequestStatus) IsValid() bool {
 	}
 	return false
 }
+
+type UserRole string
+
+var (
+	Admin  UserRole = "admin"
+	Parent UserRole = "parent"
+)

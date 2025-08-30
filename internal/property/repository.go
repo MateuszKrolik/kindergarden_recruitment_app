@@ -3,11 +3,15 @@ package property
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 )
 
-var ErrorPropertyNotFound error = errors.New("Property not found!")
+var (
+	ErrorPropertyNotFound     error = errors.New("Property not found!")
+	ErrorPropertyUserNotFound error = errors.New("Property user not found!")
+)
 
 type IPropertyRepository interface {
 	GetByID(c context.Context, id uuid.UUID) (*Property, error)
@@ -20,6 +24,11 @@ type IPropertyRepository interface {
 		c context.Context,
 		propertyID uuid.UUID,
 	) (*[]PropertyParentDocumentRequirement, error)
+	GetPropertyUserRole(
+		c context.Context,
+		propertyID,
+		userID uuid.UUID,
+	) (*string, error)
 }
 
 type inMemoryPropertyRepository struct {
@@ -65,4 +74,21 @@ func (r *inMemoryPropertyRepository) GetPropertyParentDocumentRequirements(
 	propertyID uuid.UUID,
 ) (*[]PropertyParentDocumentRequirement, error) {
 	return &r.PropertyParentDocumentRequirements, nil
+}
+
+func (r *inMemoryPropertyRepository) GetPropertyUserRole(
+	c context.Context,
+	propertyID,
+	userID uuid.UUID,
+) (*string, error) {
+	for _, pu := range r.PropertyUsers {
+		fmt.Printf("propID: %v", pu.PropertyID)
+		fmt.Printf("userID: %v", pu.UserID)
+		if pu != nil && pu.PropertyID == propertyID && pu.UserID == userID {
+			role := string(pu.Role)
+			return &role, nil
+		}
+	}
+
+	return nil, ErrorPropertyUserNotFound
 }

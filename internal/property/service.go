@@ -16,11 +16,15 @@ type IPropertyService interface {
 		propertyId, userId uuid.UUID,
 		userRole UserRole,
 	) (*PropertyUser, error)
-	// TODO: Get document requirements for given user
 	GetDocumentRequirementsForGivenPropertyParent(
 		c context.Context,
 		propertyID, userID uuid.UUID,
 	) (*[]PropertyParentDocumentRequirement, error)
+	GetPropertyUserRole(
+		c context.Context,
+		propertyID,
+		userID uuid.UUID,
+	) (*string, error)
 }
 
 type propertyService struct {
@@ -81,6 +85,14 @@ func (s *propertyService) GetDocumentRequirementsForGivenPropertyParent(
 	}
 
 	return &activeRequirements, nil
+}
+
+func (s *propertyService) GetPropertyUserRole(
+	c context.Context,
+	propertyID,
+	userID uuid.UUID,
+) (*string, error) {
+	return s.repo.GetPropertyUserRole(c, propertyID, userID)
 }
 
 func isParentRequirementActive(
