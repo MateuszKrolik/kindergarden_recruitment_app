@@ -17,6 +17,10 @@ type IPropertyService interface {
 		userRole UserRole,
 	) (*PropertyUser, error)
 	// TODO: Get document requirements for given user
+	GetDocumentRequirementsForGivenPropertyParent(
+		c context.Context,
+		propertyID, userID uuid.UUID,
+	) (*[]PropertyParentDocumentRequirement, error)
 }
 
 type propertyService struct {
@@ -54,4 +58,69 @@ func (s *propertyService) RegisterUserToProperty(
 	}
 
 	return propertyUser, nil
+}
+
+func (s *propertyService) GetDocumentRequirementsForGivenPropertyParent(
+	c context.Context,
+	propertyID, userID uuid.UUID,
+) (*[]PropertyParentDocumentRequirement, error) {
+	allRequirements, err := s.repo.GetPropertyParentDocumentRequirements(c, propertyID)
+	if err != nil {
+		return nil, err
+	}
+	conditionKeys, err := s.userClient.GetParentConditionKeys(c, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	activeRequirements := []PropertyParentDocumentRequirement{}
+	for _, r := range *allRequirements {
+		if isParentRequirementActive(*conditionKeys, r) {
+			activeRequirements = append(activeRequirements, r)
+		}
+	}
+
+	return &activeRequirements, nil
+}
+
+func isParentRequirementActive(
+	cK ParentConditionKeys,
+	r PropertyParentDocumentRequirement,
+) bool {
+	if r.RequirementType == Always {
+		return true
+	}
+
+	if r.RequirementType == Conditional {
+		switch r.ConditionKey {
+		case IsEmployed:
+			if cK.IsEmployed == nil {
+				return false
+			}
+			return *cK.IsEmployed
+		case IsSelfEmployed:
+			if cK.IsSelfEmployed == nil {
+				return false
+			}
+			return *cK.IsSelfEmployed
+		case IsStudent:
+			if cK.IsStudent == nil {
+				return false
+			}
+			return *cK.IsStudent
+		case FiledTaxInDesiredLocation:
+			if cK.FiledTaxInDesiredLocation == nil {
+				return false
+			}
+			return *cK.FiledTaxInDesiredLocation
+		case ResidesInDesiredLocation:
+			if cK.ResidesInDesiredLocation == nil {
+				return false
+			}
+			return *cK.ResidesInDesiredLocation
+		default:
+			return false
+		}
+	}
+	return false
 }

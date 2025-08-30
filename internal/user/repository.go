@@ -11,7 +11,7 @@ var (
 	ErrorUserAlreadyExists             error = errors.New("User with this email already exists!")
 	ErrorUserNotFound                  error = errors.New("User with this email not found!")
 	ErrorParentUserDetailsAlreadyExist error = errors.New("Parent user details already exist!")
-	ErrorParentUserDetailsDontExist    error = errors.New("Parent user details don't!")
+	ErrorParentUserDetailsDontExist    error = errors.New("Parent user details don't exist!")
 )
 
 type IUserRepository interface {

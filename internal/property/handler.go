@@ -8,6 +8,15 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	ErrorMethodNotAllowed           string = "Method not allowed!"
+	ErrorPropertyIdCannotBeEmpty    string = "PropertyId cannot be empty!"
+	ErrorInvalidUserID              string = "Invalid userID!"
+	ErrorRoleCannotBeEmpty          string = "Role cannot be empty!"
+	ErrorInvalidUserRole            string = "Invalid user role!"
+	ErrorParentUserDetailsDontExist string = "Parent user details don't exist!"
+)
+
 type propertyHandler struct {
 	svc IPropertyService
 }
@@ -25,18 +34,22 @@ func (h *propertyHandler) RegisterRoutes(
 		"/properties/{id}/roles/{role}",
 		authenticator(http.HandlerFunc(h.registerUserToProperty)),
 	)
+	mux.Handle(
+		"/properties/{id}/users/me/parent-requirements",
+		authenticator(http.HandlerFunc(h.getDocumentRequirementsForGivenPropertyParent)),
+	)
 }
 
 func (h *propertyHandler) getPropertyById(w http.ResponseWriter, r *http.Request) {
 	encoder := json.NewEncoder(w)
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
+		http.Error(w, ErrorMethodNotAllowed, http.StatusMethodNotAllowed)
 		return
 	}
 
 	propertyIdParam := strings.TrimPrefix(r.URL.Path, "/properties/")
 	if propertyIdParam == "" {
-		http.Error(w, "PropertyId cannot be empty!", http.StatusBadRequest)
+		http.Error(w, ErrorPropertyIdCannotBeEmpty, http.StatusBadRequest)
 		return
 	}
 
@@ -64,14 +77,14 @@ func (h *propertyHandler) getPropertyById(w http.ResponseWriter, r *http.Request
 func (h *propertyHandler) registerUserToProperty(w http.ResponseWriter, r *http.Request) {
 	encoder := json.NewEncoder(w)
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
+		http.Error(w, ErrorMethodNotAllowed, http.StatusMethodNotAllowed)
 		return
 	}
 
 	pathParts := strings.Split(r.URL.Path, "/")
 	propertyIdParam := pathParts[2]
 	if propertyIdParam == "" {
-		http.Error(w, "PropertyId cannot be empty!", http.StatusBadRequest)
+		http.Error(w, ErrorPropertyIdCannotBeEmpty, http.StatusBadRequest)
 		return
 	}
 
@@ -84,19 +97,19 @@ func (h *propertyHandler) registerUserToProperty(w http.ResponseWriter, r *http.
 	userIdClaim := r.Context().Value("userId")
 	userId, ok := userIdClaim.(uuid.UUID)
 	if !ok {
-		http.Error(w, "Invalid userId!", http.StatusUnauthorized)
+		http.Error(w, ErrorInvalidUserID, http.StatusUnauthorized)
 		return
 	}
 
 	roleParam := pathParts[4]
 	if roleParam == "" {
-		http.Error(w, "Role cannot be empty!", http.StatusBadRequest)
+		http.Error(w, ErrorRoleCannotBeEmpty, http.StatusBadRequest)
 		return
 	}
 
 	userRole := UserRole(roleParam)
 	if !userRole.IsValid() {
-		http.Error(w, "Invalid user role!", http.StatusBadRequest)
+		http.Error(w, ErrorInvalidUserRole, http.StatusBadRequest)
 		return
 	}
 
@@ -113,4 +126,52 @@ func (h *propertyHandler) registerUserToProperty(w http.ResponseWriter, r *http.
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	encoder.Encode(propertyUser)
+}
+
+func (h *propertyHandler) getDocumentRequirementsForGivenPropertyParent(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	if r.Method != http.MethodGet {
+		http.Error(w, ErrorMethodNotAllowed, http.StatusMethodNotAllowed)
+		return
+	}
+
+	userIDClaim := r.Context().Value("userId")
+	userID, ok := userIDClaim.(uuid.UUID)
+	if !ok {
+		http.Error(w, ErrorInvalidUserID, http.StatusUnauthorized)
+		return
+	}
+
+	pathParts := strings.Split(r.URL.Path, "/")
+	propertyIDParam := pathParts[2]
+	if propertyIDParam == "" {
+		http.Error(w, ErrorPropertyIdCannotBeEmpty, http.StatusBadRequest)
+		return
+	}
+
+	propertyID, err := uuid.Parse(propertyIDParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	requirements, err := h.svc.GetDocumentRequirementsForGivenPropertyParent(
+		r.Context(),
+		propertyID,
+		userID,
+	)
+	if err != nil {
+		if err.Error() == ErrorParentUserDetailsDontExist {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(requirements)
 }
