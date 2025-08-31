@@ -21,17 +21,22 @@ type IUserRepository interface {
 	DoParentUserDetailsExist(c context.Context, userID uuid.UUID) (bool, error)
 	SaveParentUserDetails(c context.Context, pU ParentUserDetails) error
 	GetParentConditionKeys(c context.Context, userID uuid.UUID) (*ParentConditionKeys, error)
+	GetAllChildrenForGivenParent(c context.Context, userID uuid.UUID) (*[]ParentUserChild, error)
 }
 
 type inMemoryUserRepository struct {
-	Users             map[string]*User
-	ParentUserDetails map[uuid.UUID]*ParentUserDetails
+	Users              map[string]*User
+	ParentUserDetails  map[uuid.UUID]*ParentUserDetails
+	Children           map[uuid.UUID]*Child
+	ParentUserChildren map[uuid.UUID]*ParentUserChild
 }
 
 func NewInMemoryUserRepository() IUserRepository {
 	return &inMemoryUserRepository{
-		Users:             dummyInMemoryUsers,
-		ParentUserDetails: dummyInMemoryParentUserDetails,
+		Users:              dummyInMemoryUsers,
+		ParentUserDetails:  dummyInMemoryParentUserDetails,
+		Children:           inMemoryChildren,
+		ParentUserChildren: inMemoryParentUserChildren,
 	}
 }
 
@@ -115,4 +120,18 @@ func (r *inMemoryUserRepository) GetParentConditionKeys(
 		FiledTaxInDesiredLocation: details.FiledTaxInDesiredLocation,
 		ResidesInDesiredLocation:  details.ResidesInDesiredLocation,
 	}, nil
+}
+
+func (r *inMemoryUserRepository) GetAllChildrenForGivenParent(
+	c context.Context,
+	userID uuid.UUID,
+) (*[]ParentUserChild, error) {
+	result := []ParentUserChild{}
+	for _, puc := range r.ParentUserChildren {
+		if puc != nil && puc.UserID == userID {
+			result = append(result, *puc)
+		}
+	}
+
+	return &result, nil
 }

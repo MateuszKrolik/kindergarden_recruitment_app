@@ -11,6 +11,7 @@ import (
 var (
 	ErrorMethodNotAllowed           string = "Method not allowed!"
 	ErrorPropertyIdCannotBeEmpty    string = "PropertyId cannot be empty!"
+	ErrorChildIDCannotBeEmpty       string = "ChildID cannot be empty!"
 	ErrorInvalidUserID              string = "Invalid userID!"
 	ErrorRoleCannotBeEmpty          string = "Role cannot be empty!"
 	ErrorInvalidUserRole            string = "Invalid user role!"
@@ -37,6 +38,10 @@ func (h *propertyHandler) RegisterRoutes(
 	mux.Handle(
 		"/properties/{id}/users/me/parent-requirements",
 		authenticator(http.HandlerFunc(h.getDocumentRequirementsForGivenPropertyParent)),
+	)
+	mux.Handle(
+		"/properties/{id}/children/{childID}",
+		authenticator(http.HandlerFunc(h.getPropertyChildByID)),
 	)
 }
 
@@ -174,4 +179,51 @@ func (h *propertyHandler) getDocumentRequirementsForGivenPropertyParent(
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(requirements)
+}
+
+func (h *propertyHandler) getPropertyChildByID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, ErrorMethodNotAllowed, http.StatusMethodNotAllowed)
+		return
+	}
+
+	// TODO: 403 Forbidden check
+	pathParts := strings.Split(r.URL.Path, "/")
+	propertyIDParam := pathParts[2]
+	if propertyIDParam == "" {
+		http.Error(w, ErrorPropertyIdCannotBeEmpty, http.StatusBadRequest)
+		return
+	}
+
+	propertyID, err := uuid.Parse(propertyIDParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	childIDParam := pathParts[4]
+	if childIDParam == "" {
+		http.Error(w, ErrorChildIDCannotBeEmpty, http.StatusBadRequest)
+		return
+	}
+
+	childID, err := uuid.Parse(childIDParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	child, err := h.svc.GetPropertyChildByID(r.Context(), propertyID, childID)
+	if err != nil {
+		if err == ErrorPropertyChildNotFound {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(child)
 }

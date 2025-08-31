@@ -3,14 +3,17 @@ package property
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 )
 
 var (
-	ErrorPropertyNotFound     error = errors.New("Property not found!")
-	ErrorPropertyUserNotFound error = errors.New("Property user not found!")
+	ErrorPropertyNotFound                          error = errors.New("Property not found!")
+	ErrorPropertyUserNotFound                      error = errors.New("Property user not found!")
+	ErrorPropertyChildNotFound                     error = errors.New("Property child not found!")
+	ErrorPropertyParentDocumentRequirementNotFound error = errors.New(
+		"Property parent doc requirement not found!",
+	)
 )
 
 type IPropertyRepository interface {
@@ -24,17 +27,43 @@ type IPropertyRepository interface {
 		c context.Context,
 		propertyID uuid.UUID,
 	) (*[]PropertyParentDocumentRequirement, error)
+	GetPropertyUser(
+		c context.Context,
+		propertyID,
+		userID uuid.UUID,
+	) (*PropertyUser, error)
 	GetPropertyUserRole(
 		c context.Context,
 		propertyID,
 		userID uuid.UUID,
 	) (*string, error)
+	GetAllChildrenForGivenProperty(
+		c context.Context,
+		propertyID uuid.UUID,
+	) (*[]PropertyChild, error)
+	IncrementPropertyChildPoints(
+		c context.Context,
+		propertyID,
+		childID uuid.UUID,
+		pointValue int,
+	) error
+	GetPropertyParentDocRequirementPointValueByDocType(
+		c context.Context,
+		propertyID uuid.UUID,
+		docType string,
+	) (*int, error)
+	GetPropertyChildByID(
+		c context.Context,
+		propertyID,
+		childID uuid.UUID,
+	) (*PropertyChild, error)
 }
 
 type inMemoryPropertyRepository struct {
 	Properties                         map[uuid.UUID]*Property
 	PropertyUsers                      map[uuid.UUID]*PropertyUser
 	PropertyParentDocumentRequirements []PropertyParentDocumentRequirement
+	PropertyChildren                   map[uuid.UUID]*PropertyChild
 }
 
 func NewInMemoryPropertyRepository() IPropertyRepository {
@@ -42,6 +71,7 @@ func NewInMemoryPropertyRepository() IPropertyRepository {
 		Properties:                         dummyInMemoryProperties,
 		PropertyUsers:                      dummyInMemoryPropertyUsers,
 		PropertyParentDocumentRequirements: inMemoryPropertyParentDocumentRequirements,
+		PropertyChildren:                   inMemoryPropertyChildren,
 	}
 }
 
@@ -76,19 +106,86 @@ func (r *inMemoryPropertyRepository) GetPropertyParentDocumentRequirements(
 	return &r.PropertyParentDocumentRequirements, nil
 }
 
+func (r *inMemoryPropertyRepository) GetPropertyUser(
+	c context.Context,
+	propertyID,
+	userID uuid.UUID,
+) (*PropertyUser, error) {
+	for _, pu := range r.PropertyUsers {
+		if pu != nil && pu.PropertyID == propertyID && pu.UserID == userID {
+			return pu, nil
+		}
+	}
+
+	return nil, ErrorPropertyUserNotFound
+}
+
 func (r *inMemoryPropertyRepository) GetPropertyUserRole(
 	c context.Context,
 	propertyID,
 	userID uuid.UUID,
 ) (*string, error) {
-	for _, pu := range r.PropertyUsers {
-		fmt.Printf("propID: %v", pu.PropertyID)
-		fmt.Printf("userID: %v", pu.UserID)
-		if pu != nil && pu.PropertyID == propertyID && pu.UserID == userID {
-			role := string(pu.Role)
-			return &role, nil
+	pU, err := r.GetPropertyUser(c, propertyID, userID)
+	if err != nil {
+		return nil, err
+	}
+	roleStr := string((*pU).Role)
+	return &roleStr, nil
+}
+
+func (r *inMemoryPropertyRepository) GetAllChildrenForGivenProperty(
+	c context.Context,
+	propertyID uuid.UUID,
+) (*[]PropertyChild, error) {
+	result := []PropertyChild{}
+	for _, pc := range r.PropertyChildren {
+		if pc != nil && pc.PropertyID == propertyID {
+			result = append(result, *pc)
 		}
 	}
 
-	return nil, ErrorPropertyUserNotFound
+	return &result, nil
+}
+
+func (r *inMemoryPropertyRepository) IncrementPropertyChildPoints(
+	c context.Context,
+	propertyID,
+	childID uuid.UUID,
+	pointValue int,
+) error {
+	child, exists := r.PropertyChildren[childID]
+	if !exists {
+		return ErrorPropertyChildNotFound
+	}
+	child.Points += pointValue
+	r.PropertyChildren[childID] = child
+	return nil
+}
+
+func (r *inMemoryPropertyRepository) GetPropertyParentDocRequirementPointValueByDocType(
+	c context.Context,
+	propertyID uuid.UUID,
+	docType string,
+) (*int, error) {
+	for _, ppdr := range r.PropertyParentDocumentRequirements {
+		if ppdr.PropertyID == propertyID && string(ppdr.DocumentType) == docType {
+			return &ppdr.PointValue, nil
+		}
+	}
+
+	return nil, ErrorPropertyParentDocumentRequirementNotFound
+}
+
+func (r *inMemoryPropertyRepository) GetPropertyChildByID(
+	c context.Context,
+	propertyID,
+	childID uuid.UUID,
+) (*PropertyChild, error) {
+	for _, pc := range r.PropertyChildren {
+		if pc != nil && pc.PropertyID == propertyID && pc.ChildID == childID {
+			return pc, nil
+		}
+	}
+
+	return nil, ErrorPropertyChildNotFound
 }

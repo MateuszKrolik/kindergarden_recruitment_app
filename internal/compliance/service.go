@@ -3,8 +3,12 @@ package compliance
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/cmd/server/bus"
+	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/cmd/server/shared"
 )
 
 var ErrorUserNeedsToBeAdmin error = errors.New(
@@ -30,15 +34,18 @@ type IComplianceService interface {
 type complianceService struct {
 	repo           IComplianceRepository
 	propertyClient IPropertyClient
+	bus            bus.IEventBus
 }
 
 func NewComplianceService(
 	repo IComplianceRepository,
 	propertyClient IPropertyClient,
+	bus bus.IEventBus,
 ) IComplianceService {
 	return &complianceService{
 		repo:           repo,
 		propertyClient: propertyClient,
+		bus:            bus,
 	}
 }
 
@@ -77,8 +84,26 @@ func (s *complianceService) EditPropertyParentDocApprovalRequestStatus(
 	}
 
 	// TODO: Send ChildPointsAssigned event to bus
+	if err := s.repo.EditPropertyParentDocApprovalRequestStatus(c, propertyID, adminID, docID, status); err != nil {
+		return err
+	}
 
-	return s.repo.EditPropertyParentDocApprovalRequestStatus(c, propertyID, adminID, docID, status)
+	eventData := shared.PropertyParentDocumentStatusUpdated{
+		PropertyID:       propertyID,
+		ParentID:         existingRequest.ParentID,
+		ParentDocumentID: docID,
+		Status:           shared.RequestStatus(status),
+		ApprovedBy:       adminID,
+		Timestamp:        time.Now(),
+	}
+
+	s.bus.Publish(bus.Event{
+		ID:   uuid.New().String(),
+		Name: eventData.Name(),
+		Data: eventData,
+	})
+
+	return nil
 }
 
 func (s *complianceService) GetAllParentDocRequestsForGivenProperty(

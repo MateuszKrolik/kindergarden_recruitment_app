@@ -25,15 +25,45 @@ type IPropertyService interface {
 		propertyID,
 		userID uuid.UUID,
 	) (*string, error)
+	GetPropertyChildrenByParentID(
+		c context.Context,
+		propertyID,
+		parentID uuid.UUID,
+	) (*[]PropertyChild, error)
+	IncrementPropertyChildPoints(
+		c context.Context,
+		propertyID,
+		childID uuid.UUID,
+		pointValue int,
+	) error
+	GetPropertyParentDocRequirementPointValueByDocType(
+		c context.Context,
+		propertyID uuid.UUID,
+		docType string,
+	) (*int, error)
+	GetPropertyChildByID(
+		c context.Context,
+		propertyID,
+		childID uuid.UUID,
+	) (*PropertyChild, error)
 }
 
 type propertyService struct {
 	repo       IPropertyRepository
 	userClient IUserClient
+	docClient  IDocumentClient
 }
 
-func NewPropertyService(repository IPropertyRepository, userClient IUserClient) IPropertyService {
-	return &propertyService{repo: repository, userClient: userClient}
+func NewPropertyService(
+	repository IPropertyRepository,
+	userClient IUserClient,
+	docClient IDocumentClient,
+) IPropertyService {
+	return &propertyService{
+		repo:       repository,
+		userClient: userClient,
+		docClient:  docClient,
+	}
 }
 
 func (s *propertyService) GetPropertyByID(c context.Context, id uuid.UUID) (*Property, error) {
@@ -93,6 +123,73 @@ func (s *propertyService) GetPropertyUserRole(
 	userID uuid.UUID,
 ) (*string, error) {
 	return s.repo.GetPropertyUserRole(c, propertyID, userID)
+}
+
+func (s *propertyService) GetPropertyChildrenByParentID(
+	c context.Context,
+	propertyID,
+	parentID uuid.UUID,
+) (*[]PropertyChild, error) {
+	// TODO: SQL JOIN IN THE FUTURE
+	// 1. Get all children registered to property
+	// 2. Get all children for given parent from identity client
+	// 3. Filter out only relevant PropertyChildren and return
+	allPropertyChildren, err := s.repo.GetAllChildrenForGivenProperty(c, propertyID)
+	if err != nil {
+		return nil, err
+	}
+	parentChildren, err := s.userClient.GetAllChildrenForGivenParent(c, parentID)
+	if err != nil {
+		return nil, err
+	}
+
+	if allPropertyChildren == nil || parentChildren == nil {
+		return &[]PropertyChild{}, nil
+	}
+
+	if len(*allPropertyChildren) == 0 || len(*parentChildren) == 0 {
+		return &[]PropertyChild{}, nil
+	}
+
+	result := []PropertyChild{}
+	parentChildrenIDs := make(map[uuid.UUID]bool, len(*parentChildren))
+	for _, parentChild := range *parentChildren {
+		parentChildrenIDs[parentChild.ChildID] = true
+	}
+
+	for _, propChild := range *allPropertyChildren {
+		if parentChildrenIDs[propChild.ChildID] {
+			result = append(result, propChild)
+		}
+	}
+
+	return &result, nil
+}
+
+func (s *propertyService) IncrementPropertyChildPoints(
+	c context.Context,
+	propertyID,
+	childID uuid.UUID,
+	pointValue int,
+) error {
+	return s.repo.IncrementPropertyChildPoints(c, propertyID, childID, pointValue)
+}
+
+func (s *propertyService) GetPropertyParentDocRequirementPointValueByDocType(
+	c context.Context,
+	propertyID uuid.UUID,
+	docType string,
+) (*int, error) {
+	return s.repo.GetPropertyParentDocRequirementPointValueByDocType(c, propertyID, docType)
+}
+
+func (s *propertyService) GetPropertyChildByID(
+	c context.Context,
+	propertyID,
+	childID uuid.UUID,
+) (*PropertyChild, error) {
+	// TODO: Check if child belongs to user/user is admin and throw 403 if not
+	return s.repo.GetPropertyChildByID(c, propertyID, childID)
 }
 
 func isParentRequirementActive(

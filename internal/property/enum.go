@@ -69,3 +69,11 @@ func (rT RequirementType) IsValid() bool {
 	}
 	return false
 }
+
+type RequestStatus string
+
+var (
+	PendingStatus  RequestStatus = "pending"
+	ApprovedStatus RequestStatus = "approved"
+	RejectedStatus RequestStatus = "rejected"
+)

@@ -12,6 +12,10 @@ var ErrorParentDocumentDoesntExist error = errors.New("Parent document doesn't e
 type IDocumentRepository interface {
 	GetParentDocumentByID(c context.Context, documentID uuid.UUID) (*ParentDocument, error)
 	DoesDocumentBelongToParent(c context.Context, userID, docID uuid.UUID) (bool, error)
+	GetParentDocumentTypeByID(
+		c context.Context,
+		documentID uuid.UUID,
+	) (*string, error)
 }
 
 type inMemoryDocumentRepository struct {
@@ -47,4 +51,16 @@ func (r *inMemoryDocumentRepository) DoesDocumentBelongToParent(
 		return false, nil
 	}
 	return true, nil
+}
+
+func (r *inMemoryDocumentRepository) GetParentDocumentTypeByID(
+	c context.Context,
+	documentID uuid.UUID,
+) (*string, error) {
+	doc, err := r.GetParentDocumentByID(c, documentID)
+	if err != nil {
+		return nil, err
+	}
+	docType := string(doc.DocumentType)
+	return &docType, nil
 }

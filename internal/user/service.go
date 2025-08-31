@@ -12,6 +12,7 @@ type IUserService interface {
 	Exists(c context.Context, userID uuid.UUID) (bool, error)
 	SaveParentUserDetails(c context.Context, pU ParentUserDetails) error
 	GetParentConditionKeys(c context.Context, userID uuid.UUID) (*ParentConditionKeys, error)
+	GetAllChildrenForGivenParent(c context.Context, userID uuid.UUID) (*[]ParentUserChild, error)
 }
 
 type userService struct {
@@ -66,4 +67,11 @@ func (s *userService) GetParentConditionKeys(
 	userID uuid.UUID,
 ) (*ParentConditionKeys, error) {
 	return s.repo.GetParentConditionKeys(c, userID)
+}
+
+func (s *userService) GetAllChildrenForGivenParent(
+	c context.Context,
+	userID uuid.UUID,
+) (*[]ParentUserChild, error) {
+	return s.repo.GetAllChildrenForGivenParent(c, userID)
 }

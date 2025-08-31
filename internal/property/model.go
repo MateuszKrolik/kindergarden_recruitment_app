@@ -20,3 +20,9 @@ type PropertyParentDocumentRequirement struct {
 	ConditionKey    ConditionKey    `json:"condition_key"`
 	PointValue      int             `json:"point_value"`
 }
+
+type PropertyChild struct {
+	PropertyID uuid.UUID `json:"property_id"`
+	ChildID    uuid.UUID `json:"child_id"`
+	Points     int       `json:"points"`
+}

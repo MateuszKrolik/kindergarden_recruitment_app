@@ -55,6 +55,13 @@ func (h *complianceHandler) sendPropertyParentDocApprovalRequest(
 		return
 	}
 
+	parentUserIDClaim := r.Context().Value("userId")
+	parentUserID, ok := parentUserIDClaim.(uuid.UUID)
+	if !ok {
+		http.Error(w, ErrorInvalidUserID, http.StatusUnauthorized)
+		return
+	}
+
 	pathParams := strings.Split(r.URL.Path, "/")
 
 	propertyIDPathParam := pathParams[2]
@@ -83,6 +90,7 @@ func (h *complianceHandler) sendPropertyParentDocApprovalRequest(
 
 	docRequest := PropertyParentDocument{
 		PropertyID:       propertyID,
+		ParentID:         parentUserID,
 		ParentDocumentID: documentID,
 		Status:           PendingStatus,
 	}

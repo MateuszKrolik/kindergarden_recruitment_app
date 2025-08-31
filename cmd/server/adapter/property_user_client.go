@@ -38,3 +38,25 @@ func (a *propertyUserClientAdapter) GetParentConditionKeys(
 		ResidesInDesiredLocation:  userKeys.ResidesInDesiredLocation,
 	}, nil
 }
+
+func (a *propertyUserClientAdapter) GetAllChildrenForGivenParent(
+	c context.Context,
+	userID uuid.UUID,
+) (*[]property.ParentUserChild, error) {
+	childrenPtr, err := a.userService.GetAllChildrenForGivenParent(c, userID)
+	if err != nil {
+		return nil, err
+	}
+	if childrenPtr == nil {
+		return nil, nil
+	}
+	children := *childrenPtr
+	result := make([]property.ParentUserChild, len(children))
+	for i, child := range children {
+		result[i] = property.ParentUserChild{
+			UserID:  child.ChildID,
+			ChildID: child.ChildID,
+		}
+	}
+	return &result, nil
+}
