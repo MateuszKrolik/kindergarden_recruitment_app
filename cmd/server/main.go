@@ -39,18 +39,7 @@ func main() {
 	propertySvc := property.NewPropertyService(propertyRepo, propertyUserClientAdapter, docSvc)
 	propertyHandler := property.NewPropertyHandler(propertySvc)
 	propertyHandler.RegisterRoutes(mux, authenticator)
-	propertyParentDocumentStatusUpdatedEventHandler := property.NewPropertyParentDocumentStatusUpdatedEventHandler(
-		bus,
-		propertySvc,
-		docSvc,
-		logger,
-	)
-
-	bus.Subscribe(
-		propertyParentDocumentStatusUpdatedEventHandler.EventName(),
-		propertyParentDocumentStatusUpdatedEventHandler.Name(),
-		propertyParentDocumentStatusUpdatedEventHandler.Handle,
-	)
+	property.RegisterEventHandlers(bus, propertySvc, docSvc, logger)
 
 	// Compliance
 	complianceRepo := compliance.NewInMemoryComplianceRepository()

@@ -67,11 +67,11 @@ func (s *complianceService) EditPropertyParentDocApprovalRequestStatus(
 	status RequestStatus,
 ) error {
 	// Validate admin role
-	roleStr, err := s.propertyClient.GetPropertyUserRole(c, propertyID, adminID)
+	roleStrPtr, err := s.propertyClient.GetPropertyUserRole(c, propertyID, adminID)
 	if err != nil {
 		return err
 	}
-	if UserRole(*roleStr) != Admin {
+	if UserRole(*roleStrPtr) != Admin {
 		return ErrorUserNeedsToBeAdmin
 	}
 	// Validate already in desired status
@@ -83,7 +83,6 @@ func (s *complianceService) EditPropertyParentDocApprovalRequestStatus(
 		return ErrorRequestAlreadyInDesiredStatus
 	}
 
-	// TODO: Send ChildPointsAssigned event to bus
 	if err := s.repo.EditPropertyParentDocApprovalRequestStatus(c, propertyID, adminID, docID, status); err != nil {
 		return err
 	}
@@ -99,7 +98,7 @@ func (s *complianceService) EditPropertyParentDocApprovalRequestStatus(
 
 	s.bus.Publish(bus.Event{
 		ID:   uuid.New().String(),
-		Name: eventData.Name(),
+		Name: shared.PropertyParentDocumentStatusUpdatedEventName,
 		Data: eventData,
 	})
 

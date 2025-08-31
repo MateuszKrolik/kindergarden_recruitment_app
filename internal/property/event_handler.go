@@ -11,6 +11,26 @@ import (
 	"github.com/MateuszKrolik/kindergarden_recruitment_app_v3/cmd/server/shared"
 )
 
+func RegisterEventHandlers(
+	bus bus.IEventBus,
+	propertySvc IPropertyService,
+	docClient IDocumentClient,
+	logger *slog.Logger,
+) {
+	propertyParentDocumentStatusUpdatedEventHandler := NewPropertyParentDocumentStatusUpdatedEventHandler(
+		bus,
+		propertySvc,
+		docClient,
+		logger,
+	)
+
+	bus.Subscribe(
+		propertyParentDocumentStatusUpdatedEventHandler.EventName(),
+		propertyParentDocumentStatusUpdatedEventHandler.Name(),
+		propertyParentDocumentStatusUpdatedEventHandler.Handle,
+	)
+}
+
 type IPropertyParentDocumentStatusUpdatedEventHandler interface {
 	Handle(e bus.Event) error
 	Name() string
@@ -45,13 +65,12 @@ func (h *propertyParentDocumentStatusUpdatedEventHandler) Name() string {
 }
 
 func (h *propertyParentDocumentStatusUpdatedEventHandler) EventName() string {
-	return shared.PropertyParentDocumentStatusUpdated{}.Name()
+	return shared.PropertyParentDocumentStatusUpdatedEventName
 }
 
 func (h *propertyParentDocumentStatusUpdatedEventHandler) Handle(event bus.Event) error {
 	e, ok := event.Data.(shared.PropertyParentDocumentStatusUpdated)
 	if !ok {
-		h.logger.Log(h.ctx, slog.LevelDebug, "Invalid event type, returning early...")
 		return nil
 	}
 
@@ -59,10 +78,12 @@ func (h *propertyParentDocumentStatusUpdatedEventHandler) Handle(event bus.Event
 		h.logger.Log(
 			h.ctx,
 			slog.LevelInfo,
-			"Request not in approved status, no need to assign points.",
+			"Requested status is not approved, no need to assign points.",
 		)
 		return nil
 	}
+
+	// TODO: Indempotent consumer table pattern
 
 	propertyChildren, err := h.propertySvc.GetPropertyChildrenByParentID(
 		h.ctx,
@@ -156,6 +177,13 @@ func (h *propertyParentDocumentStatusUpdatedEventHandler) Handle(event bus.Event
 		return errors.Join(allErrs...)
 	}
 
-	h.logger.Log(h.ctx, slog.LevelInfo, "Event processed successfully!")
+	h.logger.Log(
+		h.ctx,
+		slog.LevelInfo,
+		fmt.Sprintf(
+			"Event: %s with id: %v processed successfully!",
+			h.EventName(),
+			event.ID,
+		))
 	return nil
 }
