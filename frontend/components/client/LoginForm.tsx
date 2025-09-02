@@ -1,5 +1,5 @@
 "use client";
-import { signIn } from "@/actions/login";
+import { signIn } from "@/app/actions/login";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 

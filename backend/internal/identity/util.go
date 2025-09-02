@@ -44,3 +44,5 @@ func GenerateToken(email string, userId uuid.UUID) (string, error) {
 		"exp":    time.Now().Add(time.Hour * 2).Unix(),
 	}).SignedString([]byte(secretKey))
 }
+
+// TODO: Refresh token

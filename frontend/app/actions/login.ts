@@ -1,6 +1,7 @@
 "use server";
 
 import { signInSchema } from "@/types/schemas";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import z from "zod";
 
@@ -24,9 +25,19 @@ export async function signIn(unsafeData: z.infer<typeof signInSchema>) {
       const errMsg = await response.text();
       return errMsg;
     }
+
+    const { token } = await response.json();
+    const cookieStore = await cookies();
+
+    cookieStore.set("session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 2 * 60 * 60, // 2 hrs
+    });
   } catch {
     return genericErrMessage;
   }
 
-  redirect("/");
+  redirect("/auth");
 }
