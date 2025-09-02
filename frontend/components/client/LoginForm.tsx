@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 
 import React, { useRef } from "react";
 import LoginSubmitButton from "./LoginSubmitButton";
+import { toast } from "sonner";
 
 export const LoginForm = () => {
   const ref = useRef<HTMLFormElement>(null);
@@ -13,12 +14,12 @@ export const LoginForm = () => {
       <form
         ref={ref}
         action={async (formData) => {
-          const errMsg = await signIn({
+          const { error } = await signIn({
             email: formData.get("email") as string,
             password: formData.get("password") as string,
           });
-          if (errMsg) {
-            alert(errMsg);
+          if (error) {
+            toast(error);
           }
         }}
       >

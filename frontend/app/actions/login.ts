@@ -5,11 +5,17 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import z from "zod";
 
-export async function signIn(unsafeData: z.infer<typeof signInSchema>) {
+type SignInResponse = {
+  error?: string;
+};
+
+export async function signIn(
+  unsafeData: z.infer<typeof signInSchema>,
+): Promise<SignInResponse> {
   const { success, data } = signInSchema.safeParse(unsafeData);
   const genericErrMessage = "Unable to log you in!";
 
-  if (!success) return genericErrMessage;
+  if (!success) return { error: genericErrMessage };
 
   try {
     const response = await fetch("http://localhost:8080/login", {
@@ -23,7 +29,7 @@ export async function signIn(unsafeData: z.infer<typeof signInSchema>) {
 
     if (!response.ok) {
       const errMsg = await response.text();
-      return errMsg;
+      return { error: errMsg };
     }
 
     const { token } = await response.json();
@@ -36,7 +42,7 @@ export async function signIn(unsafeData: z.infer<typeof signInSchema>) {
       maxAge: 2 * 60 * 60, // 2 hrs
     });
   } catch {
-    return genericErrMessage;
+    return { error: genericErrMessage };
   }
 
   redirect("/protected");
