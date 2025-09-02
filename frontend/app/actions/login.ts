@@ -39,5 +39,5 @@ export async function signIn(unsafeData: z.infer<typeof signInSchema>) {
     return genericErrMessage;
   }
 
-  redirect("/auth");
+  redirect("/protected");
 }
