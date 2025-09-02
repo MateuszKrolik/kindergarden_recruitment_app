@@ -14,12 +14,12 @@ export const LoginForm = () => {
       <form
         ref={ref}
         action={async (formData) => {
-          const { error } = await signIn({
+          const error = await signIn({
             email: formData.get("email") as string,
             password: formData.get("password") as string,
           });
           if (error) {
-            toast(error);
+            toast.error(error);
           }
         }}
       >
