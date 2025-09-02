@@ -7,21 +7,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { LoginForm } from "@/components/client/LoginForm";
-import { getJwtClaims } from "@/util/session";
 
 export default async function AuthForm() {
-  console.log(await getJwtClaims());
   return (
-    <Card className="max-w-md w-full">
-      <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>
-          Enter your credentials to access your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <LoginForm />
-      </CardContent>
-    </Card>
+    <div className="min-h-screen flex items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Login</CardTitle>
+          <CardDescription>
+            Enter your credentials to access your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <LoginForm />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
