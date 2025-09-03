@@ -3,7 +3,7 @@ import { signIn } from "@/app/actions/login";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import React, { useRef } from "react";
+import { useRef } from "react";
 import LoginSubmitButton from "./LoginSubmitButton";
 import { toast } from "sonner";
 

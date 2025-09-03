@@ -5,6 +5,8 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+
+	"github.com/MateuszKrolik/kindergarden_recruitment_app/cmd/server/shared"
 )
 
 var ErrUserDoesntExist error = errors.New("User doesn't exist!")
@@ -46,6 +48,11 @@ type IPropertyService interface {
 		propertyID,
 		childID uuid.UUID,
 	) (*PropertyChild, error)
+	GetAllProperties(
+		c context.Context,
+		offset,
+		limit int64,
+	) (shared.PagedResponse[Property], error)
 }
 
 type propertyService struct {
@@ -190,6 +197,14 @@ func (s *propertyService) GetPropertyChildByID(
 ) (*PropertyChild, error) {
 	// TODO: Check if child belongs to user/user is admin and throw 403 if not
 	return s.repo.GetPropertyChildByID(c, propertyID, childID)
+}
+
+func (s *propertyService) GetAllProperties(
+	c context.Context,
+	offset,
+	limit int64,
+) (shared.PagedResponse[Property], error) {
+	return s.repo.GetAllProperties(c, offset, limit)
 }
 
 func isParentRequirementActive(

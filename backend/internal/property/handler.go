@@ -3,6 +3,7 @@ package property
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -42,6 +43,10 @@ func (h *propertyHandler) RegisterRoutes(
 	mux.Handle(
 		"/properties/{id}/children/{childID}",
 		authenticator(http.HandlerFunc(h.getPropertyChildByID)),
+	)
+	mux.Handle(
+		"/properties",
+		authenticator(http.HandlerFunc(h.getAllProperties)),
 	)
 }
 
@@ -226,4 +231,35 @@ func (h *propertyHandler) getPropertyChildByID(w http.ResponseWriter, r *http.Re
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(child)
+}
+
+func (h *propertyHandler) getAllProperties(w http.ResponseWriter, r *http.Request) {
+	encoder := json.NewEncoder(w)
+	if r.Method != http.MethodGet {
+		http.Error(w, ErrorMethodNotAllowed, http.StatusMethodNotAllowed)
+		return
+	}
+
+	queryParams := r.URL.Query()
+	pageSizeStr := queryParams.Get("pageSize")
+	pageSize, err := strconv.ParseInt(pageSizeStr, 10, 64)
+	if err != nil {
+		pageSize = 5
+	}
+
+	pageNumberStr := queryParams.Get("pageNumber")
+	pageNumber, err := strconv.ParseInt(pageNumberStr, 10, 64)
+	if err != nil {
+		pageNumber = 5
+	}
+
+	properties, err := h.svc.GetAllProperties(r.Context(), pageNumber, pageSize)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	encoder.Encode(properties)
 }

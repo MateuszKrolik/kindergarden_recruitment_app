@@ -5,6 +5,8 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+
+	"github.com/MateuszKrolik/kindergarden_recruitment_app/cmd/server/shared"
 )
 
 var (
@@ -57,6 +59,11 @@ type IPropertyRepository interface {
 		propertyID,
 		childID uuid.UUID,
 	) (*PropertyChild, error)
+	GetAllProperties(
+		c context.Context,
+		offset,
+		limit int64,
+	) (shared.PagedResponse[Property], error)
 }
 
 type inMemoryPropertyRepository struct {
@@ -188,4 +195,18 @@ func (r *inMemoryPropertyRepository) GetPropertyChildByID(
 	}
 
 	return nil, ErrorPropertyChildNotFound
+}
+
+func (r *inMemoryPropertyRepository) GetAllProperties(
+	c context.Context,
+	offset,
+	limit int64,
+) (shared.PagedResponse[Property], error) {
+	result := make([]Property, 0)
+	for _, v := range r.Properties {
+		if v != nil {
+			result = append(result, *v)
+		}
+	}
+	return shared.NewPagedResponse(result, int64(len(result)), offset, limit), nil
 }
