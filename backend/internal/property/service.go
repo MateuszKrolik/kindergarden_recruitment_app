@@ -50,8 +50,8 @@ type IPropertyService interface {
 	) (*PropertyChild, error)
 	GetAllProperties(
 		c context.Context,
-		offset,
-		limit int64,
+		pageNumber,
+		pageSize int64,
 	) (shared.PagedResponse[Property], error)
 }
 
@@ -201,10 +201,10 @@ func (s *propertyService) GetPropertyChildByID(
 
 func (s *propertyService) GetAllProperties(
 	c context.Context,
-	offset,
-	limit int64,
+	pageNumber,
+	pageSize int64,
 ) (shared.PagedResponse[Property], error) {
-	return s.repo.GetAllProperties(c, offset, limit)
+	return s.repo.GetAllProperties(c, pageNumber, pageSize)
 }
 
 func isParentRequirementActive(

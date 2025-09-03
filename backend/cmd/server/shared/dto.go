@@ -14,6 +14,6 @@ func NewPagedResponse[T any](items []T, total, pageNumber, pageSize int64) Paged
 		Total:      total,
 		PageNumber: pageNumber,
 		PageSize:   pageSize,
-		More:       pageNumber+pageSize < total,
+		More:       (pageNumber * pageSize) < total,
 	}
 }

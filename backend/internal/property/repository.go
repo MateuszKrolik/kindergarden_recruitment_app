@@ -61,8 +61,8 @@ type IPropertyRepository interface {
 	) (*PropertyChild, error)
 	GetAllProperties(
 		c context.Context,
-		offset,
-		limit int64,
+		pageNumber,
+		pageSize int64,
 	) (shared.PagedResponse[Property], error)
 }
 
@@ -199,8 +199,8 @@ func (r *inMemoryPropertyRepository) GetPropertyChildByID(
 
 func (r *inMemoryPropertyRepository) GetAllProperties(
 	c context.Context,
-	offset,
-	limit int64,
+	pageNumber,
+	pageSize int64,
 ) (shared.PagedResponse[Property], error) {
 	result := make([]Property, 0)
 	for _, v := range r.Properties {
@@ -208,5 +208,11 @@ func (r *inMemoryPropertyRepository) GetAllProperties(
 			result = append(result, *v)
 		}
 	}
-	return shared.NewPagedResponse(result, int64(len(result)), offset, limit), nil
+
+	start := min((pageNumber-1)*pageSize, int64(len(result)))
+	end := min(start+pageSize, int64(len(result)))
+
+	paginatedItems := result[start:end]
+
+	return shared.NewPagedResponse(paginatedItems, int64(len(result)), pageNumber, pageSize), nil
 }

@@ -41,5 +41,5 @@ export async function signIn(
     return getErrorMessage(error);
   }
 
-  redirect("/protected");
+  redirect("/protected/properties");
 }
