@@ -36,7 +36,7 @@ import { getErrorMessage } from "@/util/error";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { formTargetPageUrl } from "@/util/pagination";
+import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
 
 interface PropertiesTableProps {
   fetchProperties: (
@@ -191,7 +191,7 @@ export default function PropertyTable({
               <DropdownMenuSeparator />
               {[1, 2].map((size) => (
                 <DropdownMenuItem key={size} asChild>
-                  <Link key={size} href={`?currentPage=1&pageSize=${size}`}>
+                  <Link key={size} href={formPageResizeUrl(size)}>
                     {size}
                   </Link>
                 </DropdownMenuItem>
@@ -204,6 +204,7 @@ export default function PropertyTable({
               disabled={!hasPreviousPage || isLoading}
               variant="outline"
               size="sm"
+              asChild
             >
               <Link
                 href={formTargetPageUrl(currentPage - 1, totalPages, pageSize)}
@@ -215,6 +216,7 @@ export default function PropertyTable({
               variant="outline"
               size="sm"
               disabled={!hasNextPage || isLoading}
+              asChild
             >
               <Link
                 href={formTargetPageUrl(currentPage + 1, totalPages, pageSize)}
