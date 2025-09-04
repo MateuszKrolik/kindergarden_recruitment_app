@@ -34,6 +34,9 @@ import { PagedResponse } from "@/types/pagination";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/util/error";
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { formTargetPageUrl } from "@/util/pagination";
 
 interface PropertiesTableProps {
   fetchProperties: (
@@ -48,9 +51,12 @@ interface PropertiesTableProps {
 export default function PropertyTable({
   fetchProperties,
 }: PropertiesTableProps) {
+  const searchParams = useSearchParams();
+  const currentPageParam = searchParams.get("currentPage");
+  const pageSizeParam = searchParams.get("pageSize");
+  const pageSize = parseInt(pageSizeParam || "1");
+  const currentPage = parseInt(currentPageParam || "1");
   const [data, setData] = useState<Property[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(1);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -111,12 +117,9 @@ export default function PropertyTable({
     loadProperties(currentPage, pageSize);
   }, [loadProperties, currentPage, pageSize]);
 
-  const goToPage = (page: number) =>
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-
   return (
     <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-4xl">
         <div className="flex items-center py-4"></div>
         <div className="overflow-hidden rounded-md border">
           <Table>
@@ -187,14 +190,10 @@ export default function PropertyTable({
               <DropdownMenuLabel>Rows per page</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {[1, 2].map((size) => (
-                <DropdownMenuItem
-                  key={size}
-                  onClick={() => {
-                    setPageSize(size);
-                    setCurrentPage(1);
-                  }}
-                >
-                  {size}
+                <DropdownMenuItem key={size} asChild>
+                  <Link key={size} href={`?currentPage=1&pageSize=${size}`}>
+                    {size}
+                  </Link>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -202,20 +201,26 @@ export default function PropertyTable({
 
           <div className="space-x-2">
             <Button
+              disabled={!hasPreviousPage || isLoading}
               variant="outline"
               size="sm"
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={!hasPreviousPage || isLoading}
             >
-              Previous
+              <Link
+                href={formTargetPageUrl(currentPage - 1, totalPages, pageSize)}
+              >
+                Previous
+              </Link>
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => goToPage(currentPage + 1)}
               disabled={!hasNextPage || isLoading}
             >
-              Next
+              <Link
+                href={formTargetPageUrl(currentPage + 1, totalPages, pageSize)}
+              >
+                Next
+              </Link>
             </Button>
           </div>
         </div>
