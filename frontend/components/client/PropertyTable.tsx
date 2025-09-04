@@ -52,10 +52,10 @@ export default function PropertyTable({
   fetchProperties,
 }: PropertiesTableProps) {
   const searchParams = useSearchParams();
-  const currentPageParam = searchParams.get("currentPage");
+  const pageNumberParam = searchParams.get("pageNumber");
+  const pageNumber = parseInt(pageNumberParam || "1");
   const pageSizeParam = searchParams.get("pageSize");
   const pageSize = parseInt(pageSizeParam || "1");
-  const currentPage = parseInt(currentPageParam || "1");
   const [data, setData] = useState<Property[]>([]);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
@@ -114,8 +114,8 @@ export default function PropertyTable({
   });
 
   useEffect(() => {
-    loadProperties(currentPage, pageSize);
-  }, [loadProperties, currentPage, pageSize]);
+    loadProperties(pageNumber, pageSize);
+  }, [loadProperties, pageNumber, pageSize]);
 
   return (
     <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
@@ -177,7 +177,7 @@ export default function PropertyTable({
         </div>
         <div className="flex items-center justify-end space-x-2 py-4">
           <div className="text-muted-foreground flex-1 text-sm">
-            Page {currentPage} of {totalPages} • {totalCount} total items
+            Page {pageNumber} of {totalPages} • {totalCount} total items
           </div>
 
           <DropdownMenu>
@@ -201,28 +201,32 @@ export default function PropertyTable({
 
           <div className="space-x-2">
             <Button
-              disabled={!hasPreviousPage || isLoading}
               variant="outline"
               size="sm"
-              asChild
+              disabled={!hasPreviousPage || isLoading}
+              asChild={hasPreviousPage && !isLoading}
             >
-              <Link
-                href={formTargetPageUrl(currentPage - 1, totalPages, pageSize)}
-              >
-                Previous
-              </Link>
+              {hasPreviousPage && !isLoading ? (
+                <Link href={formTargetPageUrl(pageNumber - 1, pageSize)}>
+                  Previous
+                </Link>
+              ) : (
+                <span>Previous</span>
+              )}
             </Button>
             <Button
               variant="outline"
               size="sm"
               disabled={!hasNextPage || isLoading}
-              asChild
+              asChild={hasNextPage && !isLoading}
             >
-              <Link
-                href={formTargetPageUrl(currentPage + 1, totalPages, pageSize)}
-              >
-                Next
-              </Link>
+              {hasNextPage && !isLoading ? (
+                <Link href={formTargetPageUrl(pageNumber + 1, pageSize)}>
+                  Next
+                </Link>
+              ) : (
+                <span>Next</span>
+              )}
             </Button>
           </div>
         </div>

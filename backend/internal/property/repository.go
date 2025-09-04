@@ -202,10 +202,15 @@ func (r *inMemoryPropertyRepository) GetAllProperties(
 	pageNumber,
 	pageSize int64,
 ) (shared.PagedResponse[Property], error) {
-	result := make([]Property, 0)
-	for _, v := range r.Properties {
-		if v != nil {
-			result = append(result, *v)
+	keys := make([]uuid.UUID, 0, len(r.Properties))
+	for u := range r.Properties {
+		keys = append(keys, u)
+	}
+
+	result := make([]Property, 0, len(keys))
+	for _, key := range keys {
+		if prop := r.Properties[key]; prop != nil {
+			result = append(result, *prop)
 		}
 	}
 
