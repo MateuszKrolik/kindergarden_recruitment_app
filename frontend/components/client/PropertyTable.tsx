@@ -115,7 +115,7 @@ export default function PropertyTable({
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
       <div className="w-full max-w-2xl">
         <div className="flex items-center py-4"></div>
         <div className="overflow-hidden rounded-md border">

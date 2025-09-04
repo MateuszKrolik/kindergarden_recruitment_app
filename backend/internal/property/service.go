@@ -53,6 +53,11 @@ type IPropertyService interface {
 		pageNumber,
 		pageSize int64,
 	) (shared.PagedResponse[Property], error)
+	GetPropertyUser(
+		c context.Context,
+		propertyID,
+		userID uuid.UUID,
+	) (*PropertyUser, error)
 }
 
 type propertyService struct {
@@ -205,6 +210,14 @@ func (s *propertyService) GetAllProperties(
 	pageSize int64,
 ) (shared.PagedResponse[Property], error) {
 	return s.repo.GetAllProperties(c, pageNumber, pageSize)
+}
+
+func (s *propertyService) GetPropertyUser(
+	c context.Context,
+	propertyID,
+	userID uuid.UUID,
+) (*PropertyUser, error) {
+	return s.repo.GetPropertyUser(c, propertyID, userID)
 }
 
 func isParentRequirementActive(

@@ -7,25 +7,22 @@ export type JwtClaims = {
   exp: number;
 };
 
-export async function getJwtClaims(): Promise<JwtClaims | null> {
+export async function getJwtTokenWithClaims(): Promise<{
+  token?: string;
+  claims?: JwtClaims;
+}> {
   const token = await getSessionToken();
-  if (!token) return null;
+  if (!token) return {};
 
   try {
     const claims = decodeJwt<JwtClaims>(token);
     if (claims.exp && claims.exp < getNowSeconds()) {
-      return null;
+      return {};
     }
-    return claims;
+    return { token: token, claims: claims };
   } catch {
-    return null;
+    return {};
   }
-}
-
-export async function getAuthHeaders(): Promise<{ Authorization?: string }> {
-  const token = await getSessionToken();
-  if (!token) return {};
-  return (await getJwtClaims()) ? { Authorization: token } : {};
 }
 
 async function getSessionToken(): Promise<string | undefined> {

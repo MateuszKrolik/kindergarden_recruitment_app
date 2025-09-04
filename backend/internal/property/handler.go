@@ -48,6 +48,7 @@ func (h *propertyHandler) RegisterRoutes(
 		"/properties",
 		authenticator(http.HandlerFunc(h.getAllProperties)),
 	)
+	mux.Handle("/properties/{id}/users/me", authenticator(http.HandlerFunc(h.getPropertyUser)))
 }
 
 func (h *propertyHandler) getPropertyById(w http.ResponseWriter, r *http.Request) {
@@ -262,4 +263,40 @@ func (h *propertyHandler) getAllProperties(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	encoder.Encode(properties)
+}
+
+func (h *propertyHandler) getPropertyUser(w http.ResponseWriter, r *http.Request) {
+	encoder := json.NewEncoder(w)
+	if r.Method != http.MethodGet {
+		http.Error(w, ErrorMethodNotAllowed, http.StatusMethodNotAllowed)
+		return
+	}
+
+	userIdClaim := r.Context().Value("userId")
+	userId, ok := userIdClaim.(uuid.UUID)
+	if !ok {
+		http.Error(w, ErrorInvalidUserID, http.StatusUnauthorized)
+		return
+	}
+
+	params := strings.Split(r.URL.Path, "/")
+	propertyId, err := uuid.Parse(params[2])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	propertyUser, err := h.svc.GetPropertyUser(r.Context(), propertyId, userId)
+	if err != nil {
+		if err == ErrorPropertyUserNotFound {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	encoder.Encode(propertyUser)
 }
