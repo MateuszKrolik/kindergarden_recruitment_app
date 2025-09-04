@@ -51,13 +51,15 @@ export default function PropertyTable({
   const [data, setData] = useState<Property[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState<boolean>(false);
+  const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const totalPages = totalCount > 0 ? Math.ceil(totalCount / pageSize) : 1;
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   const loadProperties = useCallback(
     async (pageNumber: number, size: number) => {
@@ -75,6 +77,9 @@ export default function PropertyTable({
 
         setData(data.items);
         setTotalCount(data.total);
+        setHasNextPage(data.has_next_page);
+        setHasPreviousPage(data.has_previous_page);
+        setTotalPages(data.total_pages);
       } catch (error) {
         toast.error(getErrorMessage(error));
       } finally {
@@ -169,8 +174,7 @@ export default function PropertyTable({
         </div>
         <div className="flex items-center justify-end space-x-2 py-4">
           <div className="text-muted-foreground flex-1 text-sm">
-            Page {currentPage} of {Math.ceil(totalCount / pageSize)} •{" "}
-            {totalCount} total items
+            Page {currentPage} of {totalPages} • {totalCount} total items
           </div>
 
           <DropdownMenu>
@@ -201,7 +205,7 @@ export default function PropertyTable({
               variant="outline"
               size="sm"
               onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage <= 1 || isLoading}
+              disabled={!hasPreviousPage || isLoading}
             >
               Previous
             </Button>
@@ -209,7 +213,7 @@ export default function PropertyTable({
               variant="outline"
               size="sm"
               onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage >= totalPages || isLoading}
+              disabled={!hasNextPage || isLoading}
             >
               Next
             </Button>
