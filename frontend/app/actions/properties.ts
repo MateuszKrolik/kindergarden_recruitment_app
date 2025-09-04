@@ -57,10 +57,20 @@ async function getAllProperties(
   }
 }
 
+export async function getPropertyUserMeMenuAction(
+  propertyId: string,
+): Promise<{ data: PropertyUser | null; error: string | null }> {
+  const { token, claims } = await getJwtTokenWithClaims();
+  if (!token || !claims) {
+    redirect("/logout");
+  }
+  return await getPropertyUserMe(token, propertyId, claims.userId);
+}
+
 export async function getPropertyUserMe(
   token: string,
-  userId: string,
   propertyId: string,
+  userId: string,
 ): Promise<{ data: PropertyUser | null; error: string | null }> {
   "use cache";
   try {
