@@ -1,13 +1,26 @@
 import { betterAuth } from "better-auth";
 import { pool } from "./db";
-import { authSchema } from "./auth-schema";
 import { nextCookies } from "better-auth/next-js";
+import { redisClient } from "./redis-client";
 
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
   database: pool,
-  schema: authSchema,
   plugins: [nextCookies()],
+  secondaryStorage: {
+    get: async (key) => {
+      return await redisClient.get(key);
+    },
+    set: async (key, value, ttl) => {
+      if (ttl) await redisClient.set(key, value, { EX: ttl });
+      // or for ioredis:
+      // if (ttl) await redis.set(key, value, 'EX', ttl)
+      else await redisClient.set(key, value);
+    },
+    delete: async (key) => {
+      await redisClient.del(key);
+    },
+  },
 });
