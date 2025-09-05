@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 import { PropertyUser } from "@/types/property";
 import { useState } from "react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 type PropertyTableRowActionMenuContentProps = {
   propertyId: string;
@@ -47,7 +48,13 @@ export const PropertyTableRowActionMenu = ({
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         {propertyUser ? (
-          <DropdownMenuItem>Go to property</DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/protected/properties/${propertyId}/${propertyUser.role}`}
+            >
+              Go to property
+            </Link>
+          </DropdownMenuItem>
         ) : (
           <DropdownMenuItem>Register to property</DropdownMenuItem>
         )}
