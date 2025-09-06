@@ -3,8 +3,6 @@ services:
     platform: linux/amd64
     image: postgres:17-alpine
     restart: always
-    volumes:
-      - data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -17,6 +15,10 @@ services:
       timeout: 5s
       retries: 5
     user: "0:0"
+    volumes:
+      - data:/var/lib/postgresql/data
+      - ./data-access-layer/modules/property-management/migrations:/docker-entrypoint-initdb.d/
+      - ./data-access-layer/modules/identity/migrations:/docker-entrypoint-initdb.d/
 
   redis:
     image: redis:alpine

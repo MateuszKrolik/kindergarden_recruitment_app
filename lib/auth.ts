@@ -8,6 +8,11 @@ export const auth = betterAuth({
     enabled: true,
   },
   database: pool,
+  advanced: {
+    database: {
+      generateId: false,
+    },
+  },
   plugins: [nextCookies()],
   secondaryStorage: {
     get: async (key) => {
