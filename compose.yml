@@ -17,8 +17,7 @@ services:
     user: "0:0"
     volumes:
       - data:/var/lib/postgresql/data
-      - ./data-access-layer/modules/property-management/migrations:/docker-entrypoint-initdb.d/
-      - ./data-access-layer/modules/identity/migrations:/docker-entrypoint-initdb.d/
+      - ./data-access-layer/migrations:/docker-entrypoint-initdb.d/
 
   redis:
     image: redis:alpine

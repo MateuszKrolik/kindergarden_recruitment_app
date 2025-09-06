@@ -1,6 +1,6 @@
 "use client";
 
-import { doesAccountExist } from "@/data-access-layer/modules/identity/action";
+import { doesAccountExist } from "@/app/actions/identity";
 import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 

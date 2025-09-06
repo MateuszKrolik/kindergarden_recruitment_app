@@ -1,10 +1,10 @@
 "use server";
 
-import { PostgresIdentityHandler } from "@/data-access-layer/modules/identity/handler";
+import { IdentitySvc } from "@/data-access-layer/modules/identity/svc";
 import { auth } from "@/lib/auth";
 import { unstable_cacheTag as cacheTag } from "next/cache";
 
-const h = new PostgresIdentityHandler();
+const svc = new IdentitySvc();
 
 export const doesAccountExist = async (
   accountId: string,
@@ -12,7 +12,7 @@ export const doesAccountExist = async (
   "use cache";
   cacheTag(`account:${accountId}:exists`);
 
-  return await h.svc.doesAccountExist(accountId);
+  return await svc.doesAccountExist(accountId);
 };
 
 export const signIn = async () => {
