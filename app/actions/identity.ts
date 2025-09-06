@@ -18,7 +18,7 @@ export const doesAccountExist = async (
 export const signIn = async () => {
   await auth.api.signInEmail({
     body: {
-      email: "test1@test.com",
+      email: "test@test.com",
       password: "password",
     },
   });
@@ -27,9 +27,9 @@ export const signIn = async () => {
 export const signUp = async () => {
   await auth.api.signUpEmail({
     body: {
-      email: "test1@test.com",
+      email: "test@test.com",
       password: "password",
-      name: "Testing Tester",
+      name: "Test User",
     },
   });
 };
