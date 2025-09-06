@@ -2,7 +2,7 @@
 
 import { DummyForm } from "@/components/client/DummyForm";
 import { SignoutButton } from "@/components/client/SignoutButton";
-import { signIn, signUp } from "@/data-access-layer/modules/identity/action";
+import { signIn, signUp } from "@/app/actions/identity";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 

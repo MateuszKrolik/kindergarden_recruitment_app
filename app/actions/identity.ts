@@ -1,13 +1,10 @@
 "use server";
 
-import { PgIdentityRepo } from "@/data-access-layer/modules/identity/repo";
-import { IdentitySvc } from "@/data-access-layer/modules/identity/svc";
+import { PostgresIdentityHandler } from "@/data-access-layer/modules/identity/handler";
 import { auth } from "@/lib/auth";
-import { pool } from "@/lib/db";
 import { unstable_cacheTag as cacheTag } from "next/cache";
 
-const repo = new PgIdentityRepo(pool);
-const svc = new IdentitySvc(repo);
+const h = new PostgresIdentityHandler();
 
 export const doesAccountExist = async (
   accountId: string,
@@ -15,7 +12,7 @@ export const doesAccountExist = async (
   "use cache";
   cacheTag(`account:${accountId}:exists`);
 
-  return await svc.doesAccountExist(accountId);
+  return await h.svc.doesAccountExist(accountId);
 };
 
 export const signIn = async () => {
