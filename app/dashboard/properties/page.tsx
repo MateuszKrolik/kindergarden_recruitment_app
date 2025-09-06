@@ -1,8 +1,23 @@
 "use server";
 
-import { getAllProperties } from "@/app/actions/property-management";
+import {
+  getAllProperties,
+  getPropertyUser,
+} from "@/app/actions/property-management";
 import PropertyTable from "@/components/client/PropertiesTable";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export default async function PropertySelectionPage() {
-  return <PropertyTable getAllProperties={getAllProperties} />;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const userId = session?.user.id || "";
+  return (
+    <PropertyTable
+      userId={userId}
+      getPropertyUser={getPropertyUser}
+      getAllProperties={getAllProperties}
+    />
+  );
 }

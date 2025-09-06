@@ -1,5 +1,8 @@
 "use client";
-import { Property } from "@/data-access-layer/modules/property-management/model";
+import {
+  Property,
+  PropertyUser,
+} from "@/data-access-layer/modules/property-management/model";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -11,7 +14,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,16 +40,24 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
+import { PropertyTableRowActionMenu } from "./PropertyTableRowActionMenu";
 
 interface PropertiesTableProps {
+  userId: string;
   getAllProperties(
     pageSize: number,
     pageNumber: number,
   ): Promise<PagedResponse<Property> | Error>;
+  getPropertyUser(
+    propertyId: string,
+    userId: string,
+  ): Promise<PropertyUser | Error>;
 }
 
 export default function PropertyTable({
+  userId,
   getAllProperties,
+  getPropertyUser,
 }: PropertiesTableProps) {
   const searchParams = useSearchParams();
   const pageNumberParam = searchParams.get("pageNumber");
@@ -115,25 +126,12 @@ export default function PropertyTable({
       enableHiding: false,
       cell: ({ row }) => {
         const property = row.original;
-
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(property.id)}
-              >
-                Copy property ID
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <PropertyTableRowActionMenu
+            getPropertyUser={getPropertyUser}
+            propertyId={property.id}
+            userId={userId}
+          />
         );
       },
     },

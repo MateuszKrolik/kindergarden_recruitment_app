@@ -1,5 +1,5 @@
 import { newPagedResponse, PagedResponse } from "@/types/pagination";
-import { Property } from "./model";
+import { Property, PropertyUser } from "./model";
 import { Pool } from "pg";
 import { executeQuery } from "@/data-access-layer/util/query";
 
@@ -8,6 +8,10 @@ export interface IPropertyManagementRepo {
     pageSize: number,
     pageNumber: number,
   ): Promise<PagedResponse<Property> | Error>;
+  getPropertyUser(
+    propertyId: string,
+    userId: string,
+  ): Promise<PropertyUser | Error>;
 }
 
 export class PropertyManagementRepo implements IPropertyManagementRepo {
@@ -39,5 +43,22 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
       pageNumber,
       pageSize,
     );
+  }
+
+  async getPropertyUser(
+    propertyId: string,
+    userId: string,
+  ): Promise<PropertyUser | Error> {
+    const sql = `
+    SELECT *
+    FROM property_management.property_users
+    WHERE property_id = $1 AND user_id = $2;
+    `;
+    const result = await executeQuery<PropertyUser>(this.pool, sql, [
+      propertyId,
+      userId,
+    ]);
+    if (result instanceof Error) return result;
+    return result.rows[0];
   }
 }
