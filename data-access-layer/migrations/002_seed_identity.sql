@@ -19,4 +19,38 @@ INSERT INTO identity.account (
   NOW()
 );
 
+INSERT INTO identity.parent_user_details(
+  user_id,
+  first_name,
+  last_name,
+  phone,
+  pesel,
+  birth_date,
+  home_address,
+  workplace,
+  gender,
+  -- condition keys
+  is_employed,
+  is_self_employed,
+  is_student,
+  filed_tax_in_desired_location,
+  resides_in_desired_location
+) VALUES (
+  '6ceaa734-b828-41ba-8351-a0198f64c089',
+  'Test',
+  'User',
+  '+48 888 888 888',
+  '1234',
+  NOW(),
+  'Random City, Random Street',
+  'Random City, Random Street',
+  'male',
+  -- condition keys
+  false,
+  true,
+  false,
+  true,
+  true
+);
+
 COMMIT;

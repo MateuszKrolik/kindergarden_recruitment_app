@@ -14,3 +14,32 @@ export type PropertyUser = {
   user_id: string;
   role: PropertyUserRole;
 };
+
+export enum DocumentType {
+  EmploymentProof = "employment_proof",
+  SelfEmploymentProof = "self_employment_proof",
+  StudentProof = "student_proof",
+  FiledTaxInDesiredLocationProof = "filed_tax_in_desired_location_proof",
+  ResidesInDesiredLocationProof = "resides_in_desired_location_proof",
+}
+
+export enum RequirementType {
+  Always = "always",
+  Conditional = "conditional",
+}
+
+export enum ConditionKey {
+  IsEmployed = "is_employed",
+  IsSelfEmployed = "is_self_employed",
+  IsStudent = "is_student",
+  FiledTaxInDesiredLocation = "filed_tax_in_desired_location",
+  ResidesInDesiredLocation = "resides_in_desired_location",
+}
+
+export type PropertyParentDocumentRequirement = {
+  property_id: string;
+  document_type: DocumentType;
+  requirement_type: RequirementType;
+  condition_key: ConditionKey;
+  point_value: number;
+};

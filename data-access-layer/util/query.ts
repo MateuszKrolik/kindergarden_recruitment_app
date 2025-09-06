@@ -9,3 +9,7 @@ export async function executeQuery<R extends QueryResultRow>(
   const [error, result] = await catchError(pool.query<R>(sql, params));
   return error || result;
 }
+
+export function calculateOffset(pageSize: number, pageNumber: number): number {
+  return (pageNumber - 1) * pageSize;
+}

@@ -1,6 +1,10 @@
 "use server";
 
-import { getPropertyUser } from "@/app/actions/property-management";
+import {
+  getPropertyParentDocumentRequirements,
+  getPropertyUser,
+} from "@/app/actions/property-management";
+import { ParentDocumentRequirementsTable } from "@/components/client/ParentDocumentRequirementsTable";
 import { PropertyUserRole } from "@/data-access-layer/modules/property-management/model";
 import { auth } from "@/lib/auth";
 import { getErrorMessage } from "@/util/error";
@@ -25,5 +29,17 @@ export default async function PropertyParentPage({
   if (result?.role != PropertyUserRole.Parent) {
     redirect(`/dashboard/properties/${propertyId}/parent/403`);
   }
-  return <div>PropertyParentPage</div>;
+
+  // DUMMY
+  const reqResult = await getPropertyParentDocumentRequirements(
+    propertyId,
+    userId,
+    10,
+    1,
+  );
+  // DUMMY
+
+  // DUMMY
+  return <ParentDocumentRequirementsTable data={reqResult} />;
+  // DUMMY
 }

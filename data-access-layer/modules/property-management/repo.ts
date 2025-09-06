@@ -1,7 +1,11 @@
 import { newPagedResponse, PagedResponse } from "@/types/pagination";
-import { Property, PropertyUser } from "./model";
+import {
+  Property,
+  PropertyParentDocumentRequirement,
+  PropertyUser,
+} from "./model";
 import { Pool } from "pg";
-import { executeQuery } from "@/data-access-layer/util/query";
+import { calculateOffset, executeQuery } from "@/data-access-layer/util/query";
 
 export interface IPropertyManagementRepo {
   getAllProperties(
@@ -12,6 +16,9 @@ export interface IPropertyManagementRepo {
     propertyId: string,
     userId: string,
   ): Promise<PropertyUser | Error>;
+  getAllPropertyParentDocumentRequirements(
+    propertyId: string,
+  ): Promise<PropertyParentDocumentRequirement[] | Error>;
 }
 
 export class PropertyManagementRepo implements IPropertyManagementRepo {
@@ -21,7 +28,6 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
     pageSize: number,
     pageNumber: number,
   ): Promise<PagedResponse<Property> | Error> {
-    const offset = (pageNumber - 1) * pageSize;
     const sql = `
     SELECT 
       *,
@@ -33,7 +39,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
     const queryResult = await executeQuery<Property & { total_count: number }>(
       this.pool,
       sql,
-      [pageSize, offset],
+      [pageSize, calculateOffset(pageSize, pageNumber)],
     );
     if (queryResult instanceof Error) return queryResult;
     const total_count = queryResult.rows[0].total_count;
@@ -60,5 +66,22 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
     ]);
     if (result instanceof Error) return result;
     return result.rows[0];
+  }
+
+  async getAllPropertyParentDocumentRequirements(
+    propertyId: string,
+  ): Promise<PropertyParentDocumentRequirement[] | Error> {
+    const sql = `
+    SELECT *
+    FROM property_management.property_parent_document_requirements
+    WHERE property_id = $1;
+    `;
+    const result = await executeQuery<PropertyParentDocumentRequirement>(
+      this.pool,
+      sql,
+      [propertyId],
+    );
+    if (result instanceof Error) return result;
+    return result.rows;
   }
 }

@@ -5,10 +5,13 @@ import { PropertyManagementSvc } from "@/data-access-layer/modules/property-mana
 import { PagedResponse } from "@/types/pagination";
 import {
   Property,
+  PropertyParentDocumentRequirement,
   PropertyUser,
 } from "@/data-access-layer/modules/property-management/model";
+import { IdentitySvc } from "@/data-access-layer/modules/identity/svc";
 
-const svc = new PropertyManagementSvc();
+const client = new IdentitySvc();
+const svc = new PropertyManagementSvc(client);
 
 export async function getAllProperties(
   pageSize: number,
@@ -26,4 +29,20 @@ export async function getPropertyUser(
   "use cache";
   cacheTag(`properties:${propertyId}:users:${userId}`);
   return svc.getPropertyUser(propertyId, userId);
+}
+
+export async function getPropertyParentDocumentRequirements(
+  propertyId: string,
+  userId: string,
+  pageSize: number,
+  pageNumber: number,
+): Promise<PagedResponse<PropertyParentDocumentRequirement> | Error> {
+  "use cache";
+  cacheTag(`properties:${propertyId}:parents:${userId}:requirements`);
+  return svc.getDocumentRequirementsForGivenPropertyParent(
+    propertyId,
+    userId,
+    pageSize,
+    pageNumber,
+  );
 }
