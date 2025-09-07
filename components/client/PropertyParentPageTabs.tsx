@@ -28,6 +28,20 @@ type PropertyParentPageTabsProps = {
     userId: string,
     parentDocId: string,
   ): Promise<PropertyParentDocument | Error>;
+  sendPropertyParentDocumentApprovalRequest(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<PropertyParentDocument | Error>;
+  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
+    propertyId: string,
+    userId: string,
+  ): Promise<void>;
+  revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<void>;
 };
 
 export const PropertyParentPageTabs = ({
@@ -37,6 +51,9 @@ export const PropertyParentPageTabs = ({
   getPropertyParentDocumentRequirements,
   getPropertyParentDocumentApprovalRequests,
   getPropertyParentDocumentApprovalRequestByDocumentId,
+  sendPropertyParentDocumentApprovalRequest,
+  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag,
+  revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
 }: PropertyParentPageTabsProps) => {
   return (
     <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
@@ -60,6 +77,15 @@ export const PropertyParentPageTabs = ({
               }
               getPropertyParentDocumentApprovalRequestByDocumentId={
                 getPropertyParentDocumentApprovalRequestByDocumentId
+              }
+              sendPropertyParentDocumentApprovalRequest={
+                sendPropertyParentDocumentApprovalRequest
+              }
+              revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag={
+                revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag
+              }
+              revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
+                revalidateGetPropertyParentDocumentApprovalRequestCacheTag
               }
             />
           </TabsContent>

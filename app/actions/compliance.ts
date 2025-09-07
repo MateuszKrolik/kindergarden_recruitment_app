@@ -2,7 +2,7 @@
 
 import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
 import { ComplianceSvc } from "@/data-access-layer/modules/compliance/svc";
-import { unstable_cacheTag as cacheTag } from "next/cache";
+import { unstable_cacheTag as cacheTag, revalidateTag } from "next/cache";
 import {
   getAllPropertyParentDocumentApprovalRequestsCacheTag,
   getPropertyParentDocumentApprovalRequestCacheTag,
@@ -41,5 +41,48 @@ export async function getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId,
     userId,
     parentDocId,
+  );
+}
+
+export async function sendPropertyParentDocumentApprovalRequest(
+  propertyId: string,
+  userId: string,
+  parentDocumentId: string,
+): Promise<PropertyParentDocument | Error> {
+  "use cache";
+  cacheTag(
+    getPropertyParentDocumentApprovalRequestCacheTag(
+      propertyId,
+      userId,
+      parentDocumentId,
+    ),
+  );
+  return svc.sendPropertyParentDocumentApprovalRequest(
+    propertyId,
+    userId,
+    parentDocumentId,
+  );
+}
+
+export async function revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
+  propertyId: string,
+  userId: string,
+): Promise<void> {
+  revalidateTag(
+    getAllPropertyParentDocumentApprovalRequestsCacheTag(propertyId, userId),
+  );
+}
+
+export async function revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
+  propertyId: string,
+  userId: string,
+  parentDocumentId: string,
+): Promise<void> {
+  revalidateTag(
+    getPropertyParentDocumentApprovalRequestCacheTag(
+      propertyId,
+      userId,
+      parentDocumentId,
+    ),
   );
 }

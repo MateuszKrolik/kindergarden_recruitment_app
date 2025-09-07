@@ -3,6 +3,9 @@
 import {
   getPropertyParentDocumentApprovalRequestByDocumentId,
   getPropertyParentDocumentApprovalRequests,
+  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag,
+  revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
+  sendPropertyParentDocumentApprovalRequest,
 } from "@/app/actions/compliance";
 import {
   getPropertyParentDocumentRequirements,
@@ -50,6 +53,15 @@ export default async function PropertyParentPage({
       }
       getPropertyParentDocumentApprovalRequestByDocumentId={
         getPropertyParentDocumentApprovalRequestByDocumentId
+      }
+      sendPropertyParentDocumentApprovalRequest={
+        sendPropertyParentDocumentApprovalRequest
+      }
+      revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag={
+        revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag
+      }
+      revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
+        revalidateGetPropertyParentDocumentApprovalRequestCacheTag
       }
     />
   );

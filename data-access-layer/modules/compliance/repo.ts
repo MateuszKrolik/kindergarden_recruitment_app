@@ -12,11 +12,11 @@ export interface IComplianceRepo {
     userId: string,
     parentDocId: string,
   ): Promise<PropertyParentDocument | Error>;
-  // sendPropertyParentDocumentApprovalRequest(
-  //   propertyId: string,
-  //   userId: string,
-  //   parentDocumentId: string,
-  // ): Promise<string | Error>;
+  sendPropertyParentDocumentApprovalRequest(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<PropertyParentDocument | Error>;
 }
 
 export class ComplianceRepo implements IComplianceRepo {
@@ -55,5 +55,28 @@ export class ComplianceRepo implements IComplianceRepo {
     ]);
     if (result instanceof Error) return result;
     return result.rows[0];
+  }
+  async sendPropertyParentDocumentApprovalRequest(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<PropertyParentDocument | Error> {
+    const sql = `
+    INSERT INTO compliance.property_parent_documents(
+      property_id,
+      user_id,
+      parent_document_id
+    ) VALUES (
+      $1,
+      $2,
+      $3
+    ) RETURNING *;
+    `;
+    const result = await executeQuery<PropertyParentDocument>(this.pool, sql, [
+      propertyId,
+      userId,
+      parentDocumentId,
+    ]);
+    return result instanceof Error ? result : result.rows[0];
   }
 }

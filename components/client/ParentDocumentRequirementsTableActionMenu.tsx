@@ -30,6 +30,20 @@ type ParentDocumentRequirementsTableActionMenuProps = {
     userId: string,
     parentDocId: string,
   ): Promise<PropertyParentDocument | Error>;
+  sendPropertyParentDocumentApprovalRequest(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<PropertyParentDocument | Error>;
+  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
+    propertyId: string,
+    userId: string,
+  ): Promise<void>;
+  revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<void>;
 };
 
 export const ParentDocumentRequirementsTableActionMenu = ({
@@ -38,6 +52,9 @@ export const ParentDocumentRequirementsTableActionMenu = ({
   requirement,
   getParentDocumentByType,
   getPropertyParentDocumentApprovalRequestByDocumentId,
+  sendPropertyParentDocumentApprovalRequest,
+  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag,
+  revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
 }: ParentDocumentRequirementsTableActionMenuProps) => {
   const [parentDoc, setParentDoc] = useState<ParentDocument | null>(null);
   const [disableApprovalRequest, setDisableApprovalRequest] =
@@ -97,9 +114,29 @@ export const ParentDocumentRequirementsTableActionMenu = ({
         ) : parentDoc ? (
           <DropdownMenuItem
             disabled={disableApprovalRequest}
-            onClick={() =>
-              navigator.clipboard.writeText(requirement.document_type)
-            }
+            onClick={async () => {
+              const result = sendPropertyParentDocumentApprovalRequest(
+                propertyId,
+                userId,
+                parentDoc.id,
+              );
+              if (result instanceof Error) {
+                toast.error(getErrorMessage(result));
+                return;
+              }
+              await revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
+                propertyId,
+                userId,
+                parentDoc.id,
+              );
+              await revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
+                propertyId,
+                userId,
+              );
+              toast.success(
+                `Successfully sent approval request for document: ${parentDoc.document_type}!`,
+              );
+            }}
           >
             Request approval
           </DropdownMenuItem>

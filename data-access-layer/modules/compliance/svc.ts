@@ -12,6 +12,11 @@ export interface IComplianceSvc {
     userId: string,
     parentDocId: string,
   ): Promise<PropertyParentDocument | Error>;
+  sendPropertyParentDocumentApprovalRequest(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<PropertyParentDocument | Error>;
 }
 
 export class ComplianceSvc implements IComplianceSvc {
@@ -39,6 +44,18 @@ export class ComplianceSvc implements IComplianceSvc {
       propertyId,
       userId,
       parentDocId,
+    );
+  }
+
+  async sendPropertyParentDocumentApprovalRequest(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<PropertyParentDocument | Error> {
+    return this.repo.sendPropertyParentDocumentApprovalRequest(
+      propertyId,
+      userId,
+      parentDocumentId,
     );
   }
 }

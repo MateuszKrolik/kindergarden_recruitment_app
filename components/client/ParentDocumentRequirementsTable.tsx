@@ -46,6 +46,20 @@ export type ParentDocumentRequirementsTableProps = {
     userId: string,
     parentDocId: string,
   ): Promise<PropertyParentDocument | Error>;
+  sendPropertyParentDocumentApprovalRequest(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<PropertyParentDocument | Error>;
+  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
+    propertyId: string,
+    userId: string,
+  ): Promise<void>;
+  revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<void>;
 };
 
 export const ParentDocumentRequirementsTable = ({
@@ -54,6 +68,9 @@ export const ParentDocumentRequirementsTable = ({
   getPropertyParentDocumentRequirements,
   getParentDocumentByType,
   getPropertyParentDocumentApprovalRequestByDocumentId,
+  sendPropertyParentDocumentApprovalRequest,
+  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag,
+  revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
 }: ParentDocumentRequirementsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -144,6 +161,15 @@ export const ParentDocumentRequirementsTable = ({
             requirement={requirement}
             getPropertyParentDocumentApprovalRequestByDocumentId={
               getPropertyParentDocumentApprovalRequestByDocumentId
+            }
+            sendPropertyParentDocumentApprovalRequest={
+              sendPropertyParentDocumentApprovalRequest
+            }
+            revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag={
+              revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag
+            }
+            revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
+              revalidateGetPropertyParentDocumentApprovalRequestCacheTag
             }
           />
         );
