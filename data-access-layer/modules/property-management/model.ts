@@ -1,3 +1,5 @@
+import { DocumentType } from "../shared/types/reporting";
+
 export type Property = {
   id: string;
   name: string;
@@ -14,14 +16,6 @@ export type PropertyUser = {
   user_id: string;
   role: PropertyUserRole;
 };
-
-export enum DocumentType {
-  EmploymentProof = "employment_proof",
-  SelfEmploymentProof = "self_employment_proof",
-  StudentProof = "student_proof",
-  FiledTaxInDesiredLocationProof = "filed_tax_in_desired_location_proof",
-  ResidesInDesiredLocationProof = "resides_in_desired_location_proof",
-}
 
 export enum RequirementType {
   Always = "always",

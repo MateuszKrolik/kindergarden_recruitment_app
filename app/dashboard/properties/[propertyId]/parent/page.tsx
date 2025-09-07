@@ -4,6 +4,7 @@ import {
   getPropertyParentDocumentRequirements,
   getPropertyUser,
 } from "@/app/actions/property-management";
+import { getParentDocumentByType } from "@/app/actions/reporting";
 import { ParentDocumentRequirementsTable } from "@/components/client/ParentDocumentRequirementsTable";
 import { PropertyUserRole } from "@/data-access-layer/modules/property-management/model";
 import { auth } from "@/lib/auth";
@@ -30,14 +31,16 @@ export default async function PropertyParentPage({
     redirect(`/dashboard/properties/${propertyId}/parent/403`);
   }
 
-  // DUMMY
   const reqResult = await getPropertyParentDocumentRequirements(
     propertyId,
     userId,
   );
-  // DUMMY
 
-  // DUMMY
-  return <ParentDocumentRequirementsTable data={reqResult} />;
-  // DUMMY
+  return (
+    <ParentDocumentRequirementsTable
+      userId={userId}
+      getParentDocumentByType={getParentDocumentByType}
+      data={reqResult}
+    />
+  );
 }

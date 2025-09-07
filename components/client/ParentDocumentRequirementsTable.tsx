@@ -5,14 +5,6 @@ import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import {
-  DropdownMenuTrigger,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "../ui/dropdown-menu";
-import {
   ColumnDef,
   ColumnFiltersState,
   flexRender,
@@ -23,7 +15,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -33,12 +25,24 @@ import {
   TableRow,
 } from "../ui/table";
 import { useEffect, useState } from "react";
+import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
+import { DocumentType } from "@/data-access-layer/modules/shared/types/reporting";
+import { ParentDocumentRequirementsTableActionMenu } from "./ParentDocumentRequirementsTableActionMenu";
+
+type ParentDocumentRequirementsTableProps = {
+  userId: string;
+  data: PropertyParentDocumentRequirement[] | Error;
+  getParentDocumentByType(
+    userId: string,
+    documentType: DocumentType,
+  ): Promise<ParentDocument | Error>;
+};
 
 export const ParentDocumentRequirementsTable = ({
+  userId,
   data,
-}: {
-  data: PropertyParentDocumentRequirement[] | Error;
-}) => {
+  getParentDocumentByType,
+}: ParentDocumentRequirementsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -119,28 +123,12 @@ export const ParentDocumentRequirementsTable = ({
       enableHiding: false,
       cell: ({ row }) => {
         const requirement = row.original;
-
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() =>
-                  navigator.clipboard.writeText(requirement.document_type)
-                }
-              >
-                Copy document type
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>TODO</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ParentDocumentRequirementsTableActionMenu
+            userId={userId}
+            getParentDocumentByType={getParentDocumentByType}
+            requirement={requirement}
+          />
         );
       },
     },
@@ -236,34 +224,3 @@ export const ParentDocumentRequirementsTable = ({
     </div>
   );
 };
-
-// return (
-//   <div className="document-requirements">
-//     <h2>Document Requirements</h2>
-//
-//     <div className="table-container">
-//       <table className="requirements-table">
-//         <thead>
-//           <tr>
-//             <th>Property ID</th>
-//             <th>Document Type</th>
-//             <th>Requirement Type</th>
-//             <th>Condition Key</th>
-//             <th>Point Value</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {data.items.map((item, index) => (
-//             <tr key={index}>
-//               <td>{item.property_id}</td>
-//               <td>{item.document_type}</td>
-//               <td>{item.requirement_type}</td>
-//               <td>{item.condition_key}</td>
-//               <td>{item.point_value}</td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   </div>
-// );
