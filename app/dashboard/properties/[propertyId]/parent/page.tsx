@@ -1,6 +1,10 @@
 "use server";
 
 import {
+  getPropertyParentDocumentApprovalRequestByDocumentId,
+  getPropertyParentDocumentApprovalRequests,
+} from "@/app/actions/compliance";
+import {
   getPropertyParentDocumentRequirements,
   getPropertyUser,
 } from "@/app/actions/property-management";
@@ -35,12 +39,18 @@ export default async function PropertyParentPage({
 
   return (
     <PropertyParentPageTabs
-      parentDocumentRequirementsTableProps={{
-        propertyId,
-        userId,
-        getParentDocumentByType,
-        getPropertyParentDocumentRequirements,
-      }}
+      propertyId={propertyId}
+      userId={userId}
+      getParentDocumentByType={getParentDocumentByType}
+      getPropertyParentDocumentRequirements={
+        getPropertyParentDocumentRequirements
+      }
+      getPropertyParentDocumentApprovalRequests={
+        getPropertyParentDocumentApprovalRequests
+      }
+      getPropertyParentDocumentApprovalRequestByDocumentId={
+        getPropertyParentDocumentApprovalRequestByDocumentId
+      }
     />
   );
 }

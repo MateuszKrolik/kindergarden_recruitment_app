@@ -1,33 +1,42 @@
 "use client";
 
-import { Button } from "../ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { PropertyParentDocumentRequirement } from "@/data-access-layer/modules/property-management/model";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import {
-  ParentDocumentRequirementsTable,
-  ParentDocumentRequirementsTableProps,
-} from "./ParentDocumentRequirementsTable";
+import { ParentDocumentRequirementsTable } from "./ParentDocumentRequirementsTable";
+import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
+import { DocumentType } from "@/data-access-layer/modules/shared/types/reporting";
+import { ParentDocumentApprovalsTable } from "./ParentDocumentApprovalsTable";
+import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
 
 type PropertyParentPageTabsProps = {
-  parentDocumentRequirementsTableProps: ParentDocumentRequirementsTableProps;
+  propertyId: string;
+  userId: string;
+  getPropertyParentDocumentRequirements(
+    propertyId: string,
+    userId: string,
+  ): Promise<PropertyParentDocumentRequirement[] | Error>;
+  getParentDocumentByType(
+    userId: string,
+    documentType: DocumentType,
+  ): Promise<ParentDocument | Error>;
+  getPropertyParentDocumentApprovalRequests(
+    propertyId: string,
+    userId: string,
+  ): Promise<PropertyParentDocument[] | Error>;
+  getPropertyParentDocumentApprovalRequestByDocumentId(
+    propertyId: string,
+    userId: string,
+    parentDocId: string,
+  ): Promise<PropertyParentDocument | Error>;
 };
 
 export const PropertyParentPageTabs = ({
-  parentDocumentRequirementsTableProps: {
-    propertyId,
-    userId,
-    getParentDocumentByType,
-    getPropertyParentDocumentRequirements,
-  },
+  propertyId,
+  userId,
+  getParentDocumentByType,
+  getPropertyParentDocumentRequirements,
+  getPropertyParentDocumentApprovalRequests,
+  getPropertyParentDocumentApprovalRequestByDocumentId,
 }: PropertyParentPageTabsProps) => {
   return (
     <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
@@ -49,31 +58,19 @@ export const PropertyParentPageTabs = ({
               getPropertyParentDocumentRequirements={
                 getPropertyParentDocumentRequirements
               }
+              getPropertyParentDocumentApprovalRequestByDocumentId={
+                getPropertyParentDocumentApprovalRequestByDocumentId
+              }
             />
           </TabsContent>
           <TabsContent value="approval_requests">
-            <Card>
-              <CardHeader>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>
-                  Change your password here. After saving, you&apos;ll be logged
-                  out.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="tabs-demo-current">Current password</Label>
-                  <Input id="tabs-demo-current" type="password" />
-                </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="tabs-demo-new">New password</Label>
-                  <Input id="tabs-demo-new" type="password" />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button>Save password</Button>
-              </CardFooter>
-            </Card>
+            <ParentDocumentApprovalsTable
+              propertyId={propertyId}
+              userId={userId}
+              getPropertyParentDocumentApprovalRequests={
+                getPropertyParentDocumentApprovalRequests
+              }
+            />
           </TabsContent>
         </Tabs>
       </div>

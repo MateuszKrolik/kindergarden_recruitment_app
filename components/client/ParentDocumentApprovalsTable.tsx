@@ -1,9 +1,6 @@
 "use client";
 
-import { PropertyParentDocumentRequirement } from "@/data-access-layer/modules/property-management/model";
-import { getErrorMessage } from "@/util/error";
-import { toast } from "sonner";
-import { Button } from "../ui/button";
+import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -15,7 +12,11 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
+import { useCallback, useEffect, useState } from "react";
+import { Button } from "../ui/button";
 import { ArrowUpDown } from "lucide-react";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/util/error";
 import {
   Table,
   TableBody,
@@ -24,135 +25,84 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { useCallback, useEffect, useState } from "react";
-import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
-import { DocumentType } from "@/data-access-layer/modules/shared/types/reporting";
-import { ParentDocumentRequirementsTableActionMenu } from "./ParentDocumentRequirementsTableActionMenu";
-import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
 
-export type ParentDocumentRequirementsTableProps = {
+type ParentDocumentApprovalsTableProps = {
   propertyId: string;
   userId: string;
-  getPropertyParentDocumentRequirements(
+  getPropertyParentDocumentApprovalRequests(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyParentDocumentRequirement[] | Error>;
-  getParentDocumentByType(
-    userId: string,
-    documentType: DocumentType,
-  ): Promise<ParentDocument | Error>;
-  getPropertyParentDocumentApprovalRequestByDocumentId(
-    propertyId: string,
-    userId: string,
-    parentDocId: string,
-  ): Promise<PropertyParentDocument | Error>;
+  ): Promise<PropertyParentDocument[] | Error>;
 };
 
-export const ParentDocumentRequirementsTable = ({
+export const ParentDocumentApprovalsTable = ({
   propertyId,
   userId,
-  getPropertyParentDocumentRequirements,
-  getParentDocumentByType,
-  getPropertyParentDocumentApprovalRequestByDocumentId,
-}: ParentDocumentRequirementsTableProps) => {
+  getPropertyParentDocumentApprovalRequests,
+}: ParentDocumentApprovalsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<PropertyParentDocumentRequirement[]>([]);
+  const [data, setData] = useState<PropertyParentDocument[]>([]);
 
-  const columns: ColumnDef<PropertyParentDocumentRequirement>[] = [
+  const columns: ColumnDef<PropertyParentDocument>[] = [
     {
-      accessorKey: "document_type",
+      accessorKey: "parent_document_id",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Document Type
+            Parent Document ID
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("document_type")}</div>
+        <div className="lowercase">{row.getValue("parent_document_id")}</div>
       ),
     },
     {
-      accessorKey: "requirement_type",
+      accessorKey: "request_status",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Requirement Type
+            Request Status
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("requirement_type")}</div>
+        <div className="lowercase">{row.getValue("request_status")}</div>
       ),
     },
     {
-      accessorKey: "condition_key",
+      accessorKey: "approved_by",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Condition Key
+            Approved By ID
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("condition_key")}</div>
+        <div className="lowercase">{row.getValue("approved_by")}</div>
       ),
-    },
-    {
-      accessorKey: "point_value",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Point Value
-            <ArrowUpDown />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("point_value")}</div>
-      ),
-    },
-    {
-      id: "actions",
-      enableHiding: false,
-      cell: ({ row }) => {
-        const requirement = row.original;
-        return (
-          <ParentDocumentRequirementsTableActionMenu
-            propertyId={propertyId}
-            userId={userId}
-            getParentDocumentByType={getParentDocumentByType}
-            requirement={requirement}
-            getPropertyParentDocumentApprovalRequestByDocumentId={
-              getPropertyParentDocumentApprovalRequestByDocumentId
-            }
-          />
-        );
-      },
     },
   ];
 
   const fetchData = useCallback(async () => {
-    const result = await getPropertyParentDocumentRequirements(
+    const result = await getPropertyParentDocumentApprovalRequests(
       propertyId,
       userId,
     );
@@ -170,13 +120,13 @@ export const ParentDocumentRequirementsTable = ({
     }
 
     setData(result);
-  }, [propertyId, userId, getPropertyParentDocumentRequirements]);
+  }, [propertyId, userId, getPropertyParentDocumentApprovalRequests]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const table = useReactTable<PropertyParentDocumentRequirement>({
+  const table = useReactTable<PropertyParentDocument>({
     data: error || data instanceof Error ? [] : data,
     columns,
     onSortingChange: setSorting,

@@ -14,35 +14,70 @@ import { DocumentType } from "@/data-access-layer/modules/shared/types/reporting
 import { useState } from "react";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/util/error";
+import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
+import { Progress } from "../ui/progress";
 
 type ParentDocumentRequirementsTableActionMenuProps = {
+  propertyId: string;
   userId: string;
   requirement: PropertyParentDocumentRequirement;
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
   ): Promise<ParentDocument | Error>;
+  getPropertyParentDocumentApprovalRequestByDocumentId(
+    propertyId: string,
+    userId: string,
+    parentDocId: string,
+  ): Promise<PropertyParentDocument | Error>;
 };
 
 export const ParentDocumentRequirementsTableActionMenu = ({
+  propertyId,
   userId,
   requirement,
   getParentDocumentByType,
+  getPropertyParentDocumentApprovalRequestByDocumentId,
 }: ParentDocumentRequirementsTableActionMenuProps) => {
   const [parentDoc, setParentDoc] = useState<ParentDocument | null>(null);
+  const [disableApprovalRequest, setDisableApprovalRequest] =
+    useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleOnOpenChange = async (open: boolean) => {
     if (open) {
-      const result = await getParentDocumentByType(
+      setIsLoading(true);
+      const parentDocResult = await getParentDocumentByType(
         userId,
         requirement.document_type,
       );
-      if (result instanceof Error) {
-        toast.error(getErrorMessage(result));
+      if (parentDocResult instanceof Error) {
+        toast.error(getErrorMessage(parentDocResult));
+        setIsLoading(false);
         return;
       }
-      console.log(result);
-      setParentDoc(result);
+      setParentDoc(parentDocResult);
+      if (!parentDocResult) {
+        setIsLoading(false);
+        return;
+      }
+      const approvalReqResult =
+        await getPropertyParentDocumentApprovalRequestByDocumentId(
+          propertyId,
+          userId,
+          parentDocResult.id,
+        );
+      if (approvalReqResult instanceof Error) {
+        toast.error(getErrorMessage(approvalReqResult));
+        setIsLoading(false);
+        return;
+      }
+      if (!approvalReqResult) {
+        setDisableApprovalRequest(false);
+      }
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
     }
   };
   return (
@@ -55,8 +90,13 @@ export const ParentDocumentRequirementsTableActionMenu = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        {parentDoc ? (
+        {isLoading ? (
+          <DropdownMenuItem>
+            <Progress value={33} />
+          </DropdownMenuItem>
+        ) : parentDoc ? (
           <DropdownMenuItem
+            disabled={disableApprovalRequest}
             onClick={() =>
               navigator.clipboard.writeText(requirement.document_type)
             }

@@ -28,7 +28,7 @@ export async function getPropertyUser(
 ): Promise<PropertyUser | Error> {
   "use cache";
   cacheTag(`properties:${propertyId}:users:${userId}`);
-  return svc.getPropertyUser(propertyId, userId);
+  return await svc.getPropertyUser(propertyId, userId);
 }
 
 export async function getPropertyParentDocumentRequirements(
@@ -37,5 +37,8 @@ export async function getPropertyParentDocumentRequirements(
 ): Promise<PropertyParentDocumentRequirement[] | Error> {
   "use cache";
   cacheTag(`properties:${propertyId}:parents:${userId}:requirements`);
-  return svc.getDocumentRequirementsForGivenPropertyParent(propertyId, userId);
+  return await svc.getDocumentRequirementsForGivenPropertyParent(
+    propertyId,
+    userId,
+  );
 }

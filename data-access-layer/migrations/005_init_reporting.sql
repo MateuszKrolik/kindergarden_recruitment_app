@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS reporting.parent_documents(
     'filed_tax_in_desired_location_proof',
     'resides_in_desired_location_proof'
   )),
-  file_path VARCHAR NOT NULL
+  file_path VARCHAR NOT NULL,
+  PRIMARY KEY (id)
 );
 
 COMMIT;

@@ -13,5 +13,5 @@ export async function getParentDocumentByType(
 ): Promise<ParentDocument | Error> {
   "use cache";
   cacheTag(`parents:${userId}:${documentType}`);
-  return svc.getParentDocumentByType(userId, documentType);
+  return await svc.getParentDocumentByType(userId, documentType);
 }
