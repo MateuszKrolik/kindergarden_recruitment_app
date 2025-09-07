@@ -2,24 +2,29 @@ import { Pool, QueryResult, QueryResultRow } from "pg";
 import { catchError, catchSyncError } from "./error";
 import { RedisClientType } from "../db/redis-client";
 
+type CachingMode = "read" | "write";
+
 export async function withRedisCache<T>(
   client: RedisClientType,
   cacheKey: string,
   fetchFn: () => Promise<T | Error>,
   ttlSeconds = 3600 * 24,
+  mode: CachingMode = "read",
 ): Promise<T | Error> {
-  const [error, cachedData] = await catchError(client.get(cacheKey));
-  if (error) console.error(`Redis GET error: ${error}`);
+  if (mode === "read") {
+    const [error, cachedData] = await catchError(client.get(cacheKey));
+    if (error) console.error(`Redis GET error: ${error}`);
 
-  if (cachedData) {
-    console.log("Redis was hit!");
-    const [jsonParseErr, parsedJson] = catchSyncError(() =>
-      JSON.parse(cachedData),
-    );
-    if (!jsonParseErr) {
-      return parsedJson as T;
+    if (cachedData) {
+      console.log("Redis was hit!");
+      const [jsonParseErr, parsedJson] = catchSyncError(() =>
+        JSON.parse(cachedData),
+      );
+      if (!jsonParseErr) {
+        return parsedJson as T;
+      }
+      console.error(jsonParseErr);
     }
-    console.error(jsonParseErr);
   }
 
   const result = await fetchFn();
