@@ -5,18 +5,20 @@ import {
   getPropertyUser,
 } from "@/app/actions/property-management";
 import { getParentDocumentByType } from "@/app/actions/reporting";
-import { ParentDocumentRequirementsTable } from "@/components/client/ParentDocumentRequirementsTable";
+import { PropertyParentPageTabs } from "@/components/client/PropertyParentPageTabs";
 import { PropertyUserRole } from "@/data-access-layer/modules/property-management/model";
 import { auth } from "@/lib/auth";
 import { getErrorMessage } from "@/util/error";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+type PropertyParentPageProps = {
+  params: Promise<{ propertyId: string }>;
+};
+
 export default async function PropertyParentPage({
   params,
-}: {
-  params: Promise<{ propertyId: string }>;
-}) {
+}: PropertyParentPageProps) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -31,16 +33,14 @@ export default async function PropertyParentPage({
     redirect(`/dashboard/properties/${propertyId}/parent/403`);
   }
 
-  const reqResult = await getPropertyParentDocumentRequirements(
-    propertyId,
-    userId,
-  );
-
   return (
-    <ParentDocumentRequirementsTable
-      userId={userId}
-      getParentDocumentByType={getParentDocumentByType}
-      data={reqResult}
+    <PropertyParentPageTabs
+      parentDocumentRequirementsTableProps={{
+        propertyId,
+        userId,
+        getParentDocumentByType,
+        getPropertyParentDocumentRequirements,
+      }}
     />
   );
 }

@@ -24,14 +24,18 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
 import { DocumentType } from "@/data-access-layer/modules/shared/types/reporting";
 import { ParentDocumentRequirementsTableActionMenu } from "./ParentDocumentRequirementsTableActionMenu";
 
-type ParentDocumentRequirementsTableProps = {
+export type ParentDocumentRequirementsTableProps = {
+  propertyId: string;
   userId: string;
-  data: PropertyParentDocumentRequirement[] | Error;
+  getPropertyParentDocumentRequirements(
+    propertyId: string,
+    userId: string,
+  ): Promise<PropertyParentDocumentRequirement[] | Error>;
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
@@ -39,8 +43,9 @@ type ParentDocumentRequirementsTableProps = {
 };
 
 export const ParentDocumentRequirementsTable = ({
+  propertyId,
   userId,
-  data,
+  getPropertyParentDocumentRequirements,
   getParentDocumentByType,
 }: ParentDocumentRequirementsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -48,6 +53,7 @@ export const ParentDocumentRequirementsTable = ({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<PropertyParentDocumentRequirement[]>([]);
 
   const columns: ColumnDef<PropertyParentDocumentRequirement>[] = [
     {
@@ -134,19 +140,30 @@ export const ParentDocumentRequirementsTable = ({
     },
   ];
 
-  useEffect(() => {
-    if (!data) {
+  const fetchData = useCallback(async () => {
+    const result = await getPropertyParentDocumentRequirements(
+      propertyId,
+      userId,
+    );
+
+    if (!result) {
       toast.error(`Error: No data available!`);
       return;
     }
 
-    if (data instanceof Error) {
-      const errMsg = getErrorMessage(data);
+    if (result instanceof Error) {
+      const errMsg = getErrorMessage(result);
       toast.error(`Error: ${errMsg}`);
       setError(errMsg);
       return;
     }
-  }, [data]);
+
+    setData(result);
+  }, [propertyId, userId, getPropertyParentDocumentRequirements]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const table = useReactTable<PropertyParentDocumentRequirement>({
     data: error || data instanceof Error ? [] : data,
@@ -167,59 +184,57 @@ export const ParentDocumentRequirementsTable = ({
   });
 
   return (
-    <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
-      <div className="w-full max-w-4xl">
-        <div className="flex items-center py-4"></div>
-        <div className="overflow-hidden rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
+    <div className="w-full max-w-4xl">
+      <div className="flex items-center py-4"></div>
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
                         )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
