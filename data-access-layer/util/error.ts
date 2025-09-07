@@ -9,3 +9,14 @@ export async function catchError<T>(
       return [error];
     });
 }
+
+export function catchSyncError<T>(
+  operation: () => T,
+): [undefined, T] | [Error] {
+  try {
+    const result = operation();
+    return [undefined, result];
+  } catch (error) {
+    return [error instanceof Error ? error : new Error(String(error))];
+  }
+}

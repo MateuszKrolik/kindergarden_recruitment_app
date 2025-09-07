@@ -5,3 +5,5 @@ export const redisClient = createClient({
 });
 
 await redisClient.connect();
+
+export type RedisClientType = typeof redisClient;

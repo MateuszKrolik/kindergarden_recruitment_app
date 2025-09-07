@@ -1,3 +1,4 @@
+import { redisClient } from "@/data-access-layer/db/redis-client";
 import { PropertyParentDocument } from "./model";
 import { ComplianceRepo, IComplianceRepo } from "./repo";
 import { pool } from "@/data-access-layer/db/db";
@@ -22,7 +23,7 @@ export interface IComplianceSvc {
 export class ComplianceSvc implements IComplianceSvc {
   private repo: IComplianceRepo;
   constructor(repo?: IComplianceRepo) {
-    this.repo = repo ?? new ComplianceRepo(pool);
+    this.repo = repo ?? new ComplianceRepo(pool, redisClient);
   }
 
   async getPropertyParentDocumentApprovalRequests(
