@@ -1,4 +1,4 @@
-import { newPagedResponse, PagedResponse } from "@/types/pagination";
+import { PagedResponse } from "@/types/pagination";
 import {
   ConditionKey,
   Property,
@@ -25,7 +25,7 @@ export interface IPropertyManagementSvc {
     userId: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<PagedResponse<PropertyParentDocumentRequirement> | Error>;
+  ): Promise<PropertyParentDocumentRequirement[] | Error>;
 }
 
 export class PropertyManagementSvc implements IPropertyManagementSvc {
@@ -51,9 +51,7 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
   async getDocumentRequirementsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-    pageSize: number,
-    pageNumber: number,
-  ): Promise<PagedResponse<PropertyParentDocumentRequirement> | Error> {
+  ): Promise<PropertyParentDocumentRequirement[] | Error> {
     const allReqResponse =
       await this.repo.getAllPropertyParentDocumentRequirements(propertyId);
     if (allReqResponse instanceof Error) return allReqResponse;
@@ -67,12 +65,7 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
         activeReqs.push(element);
       }
     });
-    return newPagedResponse(
-      activeReqs,
-      activeReqs.length,
-      pageNumber,
-      pageSize,
-    );
+    return activeReqs;
   }
 }
 

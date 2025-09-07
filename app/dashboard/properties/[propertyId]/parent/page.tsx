@@ -34,8 +34,6 @@ export default async function PropertyParentPage({
   const reqResult = await getPropertyParentDocumentRequirements(
     propertyId,
     userId,
-    10,
-    1,
   );
   // DUMMY
 

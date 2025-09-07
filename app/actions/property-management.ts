@@ -34,15 +34,8 @@ export async function getPropertyUser(
 export async function getPropertyParentDocumentRequirements(
   propertyId: string,
   userId: string,
-  pageSize: number,
-  pageNumber: number,
-): Promise<PagedResponse<PropertyParentDocumentRequirement> | Error> {
+): Promise<PropertyParentDocumentRequirement[] | Error> {
   "use cache";
   cacheTag(`properties:${propertyId}:parents:${userId}:requirements`);
-  return svc.getDocumentRequirementsForGivenPropertyParent(
-    propertyId,
-    userId,
-    pageSize,
-    pageNumber,
-  );
+  return svc.getDocumentRequirementsForGivenPropertyParent(propertyId, userId);
 }
