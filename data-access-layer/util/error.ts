@@ -1,22 +1,26 @@
 export async function catchError<T>(
   promise: Promise<T>,
-): Promise<[undefined, T] | [Error]> {
+): Promise<{ data?: T; error?: Error }> {
   return promise
     .then((data) => {
-      return [undefined, data] as [undefined, T];
+      return { data: data, error: undefined };
     })
     .catch((error) => {
-      return [error];
+      return { data: undefined, error: error };
     });
 }
 
-export function catchErrorSync<T>(
-  operation: () => T,
-): [undefined, T] | [Error] {
+export function catchErrorSync<T>(operation: () => T): {
+  data?: T;
+  error?: Error;
+} {
   try {
     const result = operation();
-    return [undefined, result];
+    return { data: result, error: undefined };
   } catch (error) {
-    return [error instanceof Error ? error : new Error(String(error))];
+    return {
+      data: undefined,
+      error: error instanceof Error ? error : new Error(String(error)),
+    };
   }
 }

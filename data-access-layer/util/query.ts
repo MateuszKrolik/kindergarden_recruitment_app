@@ -8,18 +8,21 @@ export async function withCacheAsideRedis<T>(
   fetchFn: () => Promise<{ data?: T; error?: Error }>,
   ttlSeconds = 3600 * 24,
 ): Promise<{ data?: T; error?: Error }> {
-  const [error, cachedData] = await catchError(client.get(cacheKey));
+  const { data: cachedData, error } = await catchError(client.get(cacheKey));
   if (error) console.error(`Redis GET error: ${error}`);
 
   if (cachedData) {
-    console.log("Redis was hit!");
-    const [jsonParseErr, parsedJson] = catchErrorSync(() =>
+    const { data: parsedJson, error: jsonParseErr } = catchErrorSync(() =>
       JSON.parse(cachedData),
     );
     if (!jsonParseErr) {
       return { data: parsedJson as T, error: undefined };
     }
+    // Remove corrupted data from redis if json parsing fails
     console.error(`Redis GET parse error: ${jsonParseErr}`);
+    const { error: deleteError } = await catchError(client.del(cacheKey));
+    if (deleteError) console.error(`Redis DEL error: ${deleteError}`);
+    // TODO: Consider "Thundering Herd" problem when load balancing at scale (not likely)
   }
 
   return await withWriteThroughRedisCache(
@@ -37,8 +40,9 @@ export async function withWriteThroughRedisCache<T>(
   ttlSeconds = 3600 * 24,
 ): Promise<{ data?: T; error?: Error }> {
   const { data, error } = await fetchFn();
-  if (data && !error) {
-    const [setErr] = await catchError(
+  if (error) return { data: undefined, error: error };
+  if (data) {
+    const { error: setErr } = await catchError(
       client.set(cacheKey, JSON.stringify(data), {
         expiration: { type: "EX", value: ttlSeconds },
       }),
@@ -53,8 +57,7 @@ export async function executeQuery<R extends QueryResultRow>(
   sql: string,
   params?: unknown[],
 ): Promise<{ data?: QueryResult<R>; error?: Error }> {
-  const [error, result] = await catchError(pool.query<R>(sql, params));
-  return { data: result, error: error };
+  return await catchError(pool.query<R>(sql, params));
 }
 
 export function calculateOffset(pageSize: number, pageNumber: number): number {
