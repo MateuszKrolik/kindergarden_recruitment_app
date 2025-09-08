@@ -63,3 +63,14 @@ export async function executeQuery<R extends QueryResultRow>(
 export function calculateOffset(pageSize: number, pageNumber: number): number {
   return (pageNumber - 1) * pageSize;
 }
+
+export async function invalidateCache(
+  client: RedisClientType,
+  cacheKey: string,
+): Promise<void> {
+  const { error } = await catchError(client.del(cacheKey));
+  if (error)
+    console.error(
+      `Error while invalidating cache with key '${cacheKey}': ${error}`,
+    );
+}

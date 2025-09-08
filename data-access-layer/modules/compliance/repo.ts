@@ -2,7 +2,9 @@ import { PropertyParentDocument } from "./model";
 import { Pool } from "pg";
 import {
   executeQuery,
+  invalidateCache,
   withCacheAsideRedis,
+  withWriteThroughRedisCache,
 } from "@/data-access-layer/util/query";
 import { RedisClientType } from "@/data-access-layer/db/redis-client";
 
@@ -32,18 +34,24 @@ export class ComplianceRepo implements IComplianceRepo {
     propertyId: string,
     userId: string,
   ): Promise<{ data?: PropertyParentDocument[]; error?: Error }> {
-    const sql = `
-    SELECT *
-    FROM compliance.property_parent_documents
-    WHERE property_id = $1 AND user_id = $2;
-    `;
-    const { data, error } = await executeQuery<PropertyParentDocument>(
-      this.pool,
-      sql,
-      [propertyId, userId],
+    const cacheKey = this.getAllPropertyParentDocumentApprovalRequestsCacheKey(
+      propertyId,
+      userId,
     );
-    if (error) return { data: undefined, error: error };
-    return { data: data?.rows, error: undefined };
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+      const sql = `
+      SELECT *
+      FROM compliance.property_parent_documents
+      WHERE property_id = $1 AND user_id = $2;
+      `;
+      const { data, error } = await executeQuery<PropertyParentDocument>(
+        this.pool,
+        sql,
+        [propertyId, userId],
+      );
+      if (error) return { data: undefined, error: error };
+      return { data: data?.rows, error: undefined };
+    });
   }
 
   async getPropertyParentDocumentApprovalRequestByDocumentId(
@@ -51,13 +59,12 @@ export class ComplianceRepo implements IComplianceRepo {
     userId: string,
     parentDocId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
-    // TODO: Decorator
     const cacheKey = this.getPropertyParentDocumentApprovalRequestCacheKey(
       propertyId,
       userId,
       parentDocId,
     );
-    return withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
       const sql = `
       SELECT *
       FROM compliance.property_parent_documents
@@ -77,24 +84,53 @@ export class ComplianceRepo implements IComplianceRepo {
     userId: string,
     parentDocumentId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
-    const sql = `
-    INSERT INTO compliance.property_parent_documents(
-      property_id,
-      user_id,
-      parent_document_id
-    ) VALUES (
-      $1,
-      $2,
-      $3
-    ) RETURNING *;
-    `;
-    const { data, error } = await executeQuery<PropertyParentDocument>(
-      this.pool,
-      sql,
-      [propertyId, userId, parentDocumentId],
+    const cacheKey = this.getPropertyParentDocumentApprovalRequestCacheKey(
+      propertyId,
+      userId,
+      parentDocumentId,
     );
-    if (error) return { data: undefined, error: error };
-    return { data: data?.rows[0], error: undefined };
+    const result = await withWriteThroughRedisCache(
+      this.redisClient,
+      cacheKey,
+      async () => {
+        const sql = `
+      INSERT INTO compliance.property_parent_documents(
+        property_id,
+        user_id,
+        parent_document_id
+      ) VALUES (
+        $1,
+        $2,
+        $3
+      ) RETURNING *;
+      `;
+        const { data, error } = await executeQuery<PropertyParentDocument>(
+          this.pool,
+          sql,
+          [propertyId, userId, parentDocumentId],
+        );
+        if (error) return { data: undefined, error: error };
+        return { data: data?.rows[0], error: undefined };
+      },
+    );
+
+    // TODO: append to list instead of deleting its entirety for boost in performance
+    await invalidateCache(
+      this.redisClient,
+      this.getAllPropertyParentDocumentApprovalRequestsCacheKey(
+        propertyId,
+        userId,
+      ),
+    );
+
+    return result;
+  }
+
+  private getAllPropertyParentDocumentApprovalRequestsCacheKey(
+    propertyId: string,
+    userId: string,
+  ): string {
+    return `properties:${propertyId}:parents:${userId}:requests`;
   }
 
   private getPropertyParentDocumentApprovalRequestCacheKey(
@@ -102,6 +138,6 @@ export class ComplianceRepo implements IComplianceRepo {
     userId: string,
     parentDocumentId: string,
   ): string {
-    return `properties:${propertyId}:users:${userId}:property_parent_documents:${parentDocumentId}`;
+    return `properties:${propertyId}:parents:${userId}:requests:${parentDocumentId}`;
   }
 }
