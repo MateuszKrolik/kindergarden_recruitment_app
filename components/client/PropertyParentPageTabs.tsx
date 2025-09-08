@@ -19,7 +19,7 @@ type PropertyParentPageTabsProps = {
     userId: string,
     documentType: DocumentType,
   ): Promise<{ data?: ParentDocument; error?: Error }>;
-  getPropertyParentDocumentApprovalRequests(
+  getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
   ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
@@ -33,7 +33,7 @@ type PropertyParentPageTabsProps = {
     userId: string,
     parentDocumentId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
-  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
     propertyId: string,
     userId: string,
   ): Promise<void>;
@@ -49,10 +49,10 @@ export const PropertyParentPageTabs = ({
   userId,
   getParentDocumentByType,
   getPropertyParentDocumentRequirements,
-  getPropertyParentDocumentApprovalRequests,
+  getAllDocumentApprovalRequestsForGivenPropertyParent,
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
-  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag,
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
   revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
 }: PropertyParentPageTabsProps) => {
   return (
@@ -81,8 +81,8 @@ export const PropertyParentPageTabs = ({
               sendPropertyParentDocumentApprovalRequest={
                 sendPropertyParentDocumentApprovalRequest
               }
-              revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag={
-                revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag
+              revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag={
+                revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag
               }
               revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
                 revalidateGetPropertyParentDocumentApprovalRequestCacheTag
@@ -93,8 +93,8 @@ export const PropertyParentPageTabs = ({
             <ParentDocumentApprovalsTable
               propertyId={propertyId}
               userId={userId}
-              getPropertyParentDocumentApprovalRequests={
-                getPropertyParentDocumentApprovalRequests
+              getAllDocumentApprovalRequestsForGivenPropertyParent={
+                getAllDocumentApprovalRequestsForGivenPropertyParent
               }
             />
           </TabsContent>

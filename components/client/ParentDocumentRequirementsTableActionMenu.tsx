@@ -35,7 +35,7 @@ type ParentDocumentRequirementsTableActionMenuProps = {
     userId: string,
     parentDocumentId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
-  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
     propertyId: string,
     userId: string,
   ): Promise<void>;
@@ -53,7 +53,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
   getParentDocumentByType,
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
-  revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag,
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
   revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
 }: ParentDocumentRequirementsTableActionMenuProps) => {
   const [parentDoc, setParentDoc] = useState<ParentDocument | null>(null);
@@ -129,7 +129,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
                 userId,
                 parentDoc.id,
               );
-              await revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
+              await revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
                 propertyId,
                 userId,
               );

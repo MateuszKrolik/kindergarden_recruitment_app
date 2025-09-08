@@ -9,7 +9,7 @@ import {
 import { RedisClientType } from "@/data-access-layer/db/redis-client";
 
 export interface IComplianceRepo {
-  getPropertyParentDocumentApprovalRequests(
+  getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
   ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
@@ -30,7 +30,7 @@ export class ComplianceRepo implements IComplianceRepo {
     private pool: Pool,
     private redisClient: RedisClientType,
   ) { }
-  async getPropertyParentDocumentApprovalRequests(
+  async getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
   ): Promise<{ data?: PropertyParentDocument[]; error?: Error }> {

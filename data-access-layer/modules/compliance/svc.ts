@@ -4,7 +4,7 @@ import { ComplianceRepo, IComplianceRepo } from "./repo";
 import { pool } from "@/data-access-layer/db/db";
 
 export interface IComplianceSvc {
-  getPropertyParentDocumentApprovalRequests(
+  getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
   ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
@@ -26,11 +26,11 @@ export class ComplianceSvc implements IComplianceSvc {
     this.repo = repo ?? new ComplianceRepo(pool, redisClient);
   }
 
-  async getPropertyParentDocumentApprovalRequests(
+  async getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
   ): Promise<{ data?: PropertyParentDocument[]; error?: Error }> {
-    return this.repo.getPropertyParentDocumentApprovalRequests(
+    return this.repo.getAllDocumentApprovalRequestsForGivenPropertyParent(
       propertyId,
       userId,
     );

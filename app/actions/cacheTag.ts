@@ -1,4 +1,4 @@
-export function getAllPropertyParentDocumentApprovalRequestsCacheTag(
+export function getAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
   propertyId: string,
   userId: string,
 ): string {

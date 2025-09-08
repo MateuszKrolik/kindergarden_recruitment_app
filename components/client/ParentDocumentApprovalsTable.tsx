@@ -29,7 +29,7 @@ import {
 type ParentDocumentApprovalsTableProps = {
   propertyId: string;
   userId: string;
-  getPropertyParentDocumentApprovalRequests(
+  getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
   ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
@@ -38,7 +38,7 @@ type ParentDocumentApprovalsTableProps = {
 export const ParentDocumentApprovalsTable = ({
   propertyId,
   userId,
-  getPropertyParentDocumentApprovalRequests,
+  getAllDocumentApprovalRequestsForGivenPropertyParent,
 }: ParentDocumentApprovalsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -103,7 +103,10 @@ export const ParentDocumentApprovalsTable = ({
 
   const fetchData = useCallback(async () => {
     const { data: result, error } =
-      await getPropertyParentDocumentApprovalRequests(propertyId, userId);
+      await getAllDocumentApprovalRequestsForGivenPropertyParent(
+        propertyId,
+        userId,
+      );
 
     if (error) {
       const errMsg = getErrorMessage(error);
@@ -118,7 +121,11 @@ export const ParentDocumentApprovalsTable = ({
     }
 
     setData(result);
-  }, [propertyId, userId, getPropertyParentDocumentApprovalRequests]);
+  }, [
+    propertyId,
+    userId,
+    getAllDocumentApprovalRequestsForGivenPropertyParent,
+  ]);
 
   useEffect(() => {
     fetchData();
