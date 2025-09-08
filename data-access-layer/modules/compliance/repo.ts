@@ -5,7 +5,7 @@ import {
   invalidateCache,
   withCacheAsideRedis,
   withWriteThroughRedisCache,
-} from "@/data-access-layer/util/query";
+} from "@/data-access-layer/shared/util/query";
 import { RedisClientType } from "@/data-access-layer/db/redis-client";
 
 export interface IComplianceRepo {

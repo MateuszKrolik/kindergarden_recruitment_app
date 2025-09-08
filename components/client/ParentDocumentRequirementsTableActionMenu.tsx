@@ -10,7 +10,7 @@ import {
 } from "../ui/dropdown-menu";
 import { PropertyParentDocumentRequirement } from "@/data-access-layer/modules/property-management/model";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
-import { DocumentType } from "@/data-access-layer/modules/shared/types/reporting";
+import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { useState } from "react";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/util/error";

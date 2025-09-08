@@ -5,7 +5,10 @@ import {
   PropertyUser,
 } from "./model";
 import { Pool } from "pg";
-import { calculateOffset, executeQuery } from "@/data-access-layer/util/query";
+import {
+  calculateOffset,
+  executeQuery,
+} from "@/data-access-layer/shared/util/query";
 
 export interface IPropertyManagementRepo {
   getAllProperties(

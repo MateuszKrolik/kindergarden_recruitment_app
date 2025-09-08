@@ -1,6 +1,6 @@
 import { pool } from "@/data-access-layer/db/db";
 import { IIdentityRepo, PgIdentityRepo } from "./repo";
-import { ParentConditionKeys } from "../shared/types/property_management";
+import { ParentConditionKeys } from "../../shared/types/property_management";
 
 export interface IIdentitySvc {
   doesAccountExist(

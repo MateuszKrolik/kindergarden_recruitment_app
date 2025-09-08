@@ -10,7 +10,6 @@ export default async function Home() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  console.log(session);
   return (
     <main className="flex flex-col items-center justify-center">
       <button onClick={signIn}>Sign in </button>

@@ -4,7 +4,7 @@ import { PropertyParentDocumentRequirement } from "@/data-access-layer/modules/p
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { ParentDocumentRequirementsTable } from "./ParentDocumentRequirementsTable";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
-import { DocumentType } from "@/data-access-layer/modules/shared/types/reporting";
+import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { ParentDocumentApprovalsTable } from "./ParentDocumentApprovalsTable";
 import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
 

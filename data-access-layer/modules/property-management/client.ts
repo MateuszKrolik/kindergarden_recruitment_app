@@ -1,4 +1,4 @@
-import { ParentConditionKeys } from "../shared/types/property_management";
+import { ParentConditionKeys } from "../../shared/types/property_management";
 
 export interface IIdentityClient {
   getParentConditionKeys(

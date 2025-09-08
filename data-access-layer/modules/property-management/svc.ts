@@ -9,7 +9,7 @@ import {
 import { IPropertyManagementRepo, PropertyManagementRepo } from "./repo";
 import { pool } from "@/data-access-layer/db/db";
 import { IIdentityClient } from "./client";
-import { ParentConditionKeys } from "@/data-access-layer/modules/shared/types/property_management";
+import { ParentConditionKeys } from "@/data-access-layer/shared/types/property_management";
 
 export interface IPropertyManagementSvc {
   getAllProperties(

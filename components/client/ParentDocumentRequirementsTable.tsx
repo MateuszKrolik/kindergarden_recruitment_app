@@ -26,7 +26,7 @@ import {
 } from "../ui/table";
 import { useCallback, useEffect, useState } from "react";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
-import { DocumentType } from "@/data-access-layer/modules/shared/types/reporting";
+import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { ParentDocumentRequirementsTableActionMenu } from "./ParentDocumentRequirementsTableActionMenu";
 import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
 

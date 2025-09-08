@@ -2,7 +2,7 @@
 
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
 import { ReportingSvc } from "@/data-access-layer/modules/reporting/svc";
-import { DocumentType } from "@/data-access-layer/modules/shared/types/reporting";
+import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { unstable_cacheTag as cacheTag } from "next/cache";
 
 const svc = new ReportingSvc();

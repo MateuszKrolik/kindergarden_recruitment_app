@@ -1,6 +1,6 @@
-import { executeQuery } from "@/data-access-layer/util/query";
+import { executeQuery } from "@/data-access-layer/shared/util/query";
 import { Pool } from "pg";
-import { ParentConditionKeys } from "../shared/types/property_management";
+import { ParentConditionKeys } from "../../shared/types/property_management";
 
 export interface IIdentityRepo {
   doesAccountExist(

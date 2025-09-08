@@ -1,4 +1,4 @@
-import { DocumentType } from "../shared/types/reporting";
+import { DocumentType } from "../../shared/types/reporting";
 
 export type Property = {
   id: string;
