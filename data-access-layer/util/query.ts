@@ -1,51 +1,60 @@
 import { Pool, QueryResult, QueryResultRow } from "pg";
-import { catchError, catchSyncError } from "./error";
+import { catchError, catchErrorSync } from "./error";
 import { RedisClientType } from "../db/redis-client";
 
-type CachingMode = "read" | "write";
-
-export async function withRedisCache<T>(
+export async function withCacheAsideRedis<T>(
   client: RedisClientType,
   cacheKey: string,
-  fetchFn: () => Promise<T | Error>,
+  fetchFn: () => Promise<{ data?: T; error?: Error }>,
   ttlSeconds = 3600 * 24,
-  mode: CachingMode = "read",
-): Promise<T | Error> {
-  if (mode === "read") {
-    const [error, cachedData] = await catchError(client.get(cacheKey));
-    if (error) console.error(`Redis GET error: ${error}`);
+): Promise<{ data?: T; error?: Error }> {
+  const [error, cachedData] = await catchError(client.get(cacheKey));
+  if (error) console.error(`Redis GET error: ${error}`);
 
-    if (cachedData) {
-      console.log("Redis was hit!");
-      const [jsonParseErr, parsedJson] = catchSyncError(() =>
-        JSON.parse(cachedData),
-      );
-      if (!jsonParseErr) {
-        return parsedJson as T;
-      }
-      console.error(jsonParseErr);
+  if (cachedData) {
+    console.log("Redis was hit!");
+    const [jsonParseErr, parsedJson] = catchErrorSync(() =>
+      JSON.parse(cachedData),
+    );
+    if (!jsonParseErr) {
+      return { data: parsedJson as T, error: undefined };
     }
+    console.error(`Redis GET parse error: ${jsonParseErr}`);
   }
 
-  const result = await fetchFn();
-  if (!(result instanceof Error) && result) {
+  return await withWriteThroughRedisCache(
+    client,
+    cacheKey,
+    fetchFn,
+    ttlSeconds,
+  );
+}
+
+export async function withWriteThroughRedisCache<T>(
+  client: RedisClientType,
+  cacheKey: string,
+  fetchFn: () => Promise<{ data?: T; error?: Error }>,
+  ttlSeconds = 3600 * 24,
+): Promise<{ data?: T; error?: Error }> {
+  const { data, error } = await fetchFn();
+  if (data && !error) {
     const [setErr] = await catchError(
-      client.set(cacheKey, JSON.stringify(result), {
+      client.set(cacheKey, JSON.stringify(data), {
         expiration: { type: "EX", value: ttlSeconds },
       }),
     );
     if (setErr) console.error(`Redis SET error: ${setErr}`);
   }
-  return result;
+  return { data: data, error: undefined };
 }
 
 export async function executeQuery<R extends QueryResultRow>(
   pool: Pool,
   sql: string,
   params?: unknown[],
-): Promise<QueryResult<R> | Error> {
+): Promise<{ data?: QueryResult<R>; error?: Error }> {
   const [error, result] = await catchError(pool.query<R>(sql, params));
-  return error || result;
+  return { data: result, error: error };
 }
 
 export function calculateOffset(pageSize: number, pageNumber: number): number {

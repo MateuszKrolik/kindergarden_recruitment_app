@@ -7,17 +7,17 @@ export interface IComplianceSvc {
   getPropertyParentDocumentApprovalRequests(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyParentDocument[] | Error>;
+  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<PropertyParentDocument | Error>;
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
   sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<PropertyParentDocument | Error>;
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
 }
 
 export class ComplianceSvc implements IComplianceSvc {
@@ -29,7 +29,7 @@ export class ComplianceSvc implements IComplianceSvc {
   async getPropertyParentDocumentApprovalRequests(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyParentDocument[] | Error> {
+  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }> {
     return this.repo.getPropertyParentDocumentApprovalRequests(
       propertyId,
       userId,
@@ -40,7 +40,7 @@ export class ComplianceSvc implements IComplianceSvc {
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<PropertyParentDocument | Error> {
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
     return this.repo.getPropertyParentDocumentApprovalRequestByDocumentId(
       propertyId,
       userId,
@@ -52,7 +52,7 @@ export class ComplianceSvc implements IComplianceSvc {
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<PropertyParentDocument | Error> {
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
     return this.repo.sendPropertyParentDocumentApprovalRequest(
       propertyId,
       userId,

@@ -9,12 +9,11 @@ export const DummyForm = () => {
     <form
       action={async (formData: FormData) => {
         const accountId = formData.get("accountId") as string;
-        const result = await doesAccountExist(accountId);
-        if (result instanceof Error) {
-          toast.error(getErrorMessage(result));
+        const { data: exists, error } = await doesAccountExist(accountId);
+        if (error) {
+          toast.error(getErrorMessage(error));
           return;
         }
-        const exists = result as boolean;
         toast(
           `Account with id: ${accountId} ${exists ? "exists!" : "does not exist!"}`,
         );

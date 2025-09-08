@@ -16,7 +16,7 @@ const svc = new PropertyManagementSvc(client);
 export async function getAllProperties(
   pageSize: number,
   pageNumber: number,
-): Promise<PagedResponse<Property> | Error> {
+): Promise<{ data?: PagedResponse<Property>; error?: Error }> {
   "use cache";
   cacheTag("properties");
   return await svc.getAllProperties(pageSize, pageNumber);
@@ -25,7 +25,7 @@ export async function getAllProperties(
 export async function getPropertyUser(
   propertyId: string,
   userId: string,
-): Promise<PropertyUser | Error> {
+): Promise<{ data?: PropertyUser; error?: Error }> {
   "use cache";
   cacheTag(`properties:${propertyId}:users:${userId}`);
   return await svc.getPropertyUser(propertyId, userId);
@@ -34,7 +34,7 @@ export async function getPropertyUser(
 export async function getPropertyParentDocumentRequirements(
   propertyId: string,
   userId: string,
-): Promise<PropertyParentDocumentRequirement[] | Error> {
+): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }> {
   "use cache";
   cacheTag(`properties:${propertyId}:parents:${userId}:requirements`);
   return await svc.getDocumentRequirementsForGivenPropertyParent(

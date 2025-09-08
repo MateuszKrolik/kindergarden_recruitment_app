@@ -10,7 +10,7 @@ export async function catchError<T>(
     });
 }
 
-export function catchSyncError<T>(
+export function catchErrorSync<T>(
   operation: () => T,
 ): [undefined, T] | [Error] {
   try {

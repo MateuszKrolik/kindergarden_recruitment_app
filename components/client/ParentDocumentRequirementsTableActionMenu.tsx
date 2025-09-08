@@ -24,17 +24,17 @@ type ParentDocumentRequirementsTableActionMenuProps = {
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<ParentDocument | Error>;
+  ): Promise<{ data?: ParentDocument; error?: Error }>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<PropertyParentDocument | Error>;
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
   sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<PropertyParentDocument | Error>;
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
   revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
     propertyId: string,
     userId: string,
@@ -64,28 +64,28 @@ export const ParentDocumentRequirementsTableActionMenu = ({
   const handleOnOpenChange = async (open: boolean) => {
     if (open) {
       setIsLoading(true);
-      const parentDocResult = await getParentDocumentByType(
+      const { data: parentDocResult, error } = await getParentDocumentByType(
         userId,
         requirement.document_type,
       );
-      if (parentDocResult instanceof Error) {
-        toast.error(getErrorMessage(parentDocResult));
+      if (error) {
+        toast.error(getErrorMessage(error));
         setIsLoading(false);
         return;
       }
-      setParentDoc(parentDocResult);
       if (!parentDocResult) {
         setIsLoading(false);
         return;
       }
-      const approvalReqResult =
+      setParentDoc(parentDocResult);
+      const { data: approvalReqResult, error: approvalReqError } =
         await getPropertyParentDocumentApprovalRequestByDocumentId(
           propertyId,
           userId,
           parentDocResult.id,
         );
-      if (approvalReqResult instanceof Error) {
-        toast.error(getErrorMessage(approvalReqResult));
+      if (approvalReqError) {
+        toast.error(getErrorMessage(approvalReqError));
         setIsLoading(false);
         return;
       }
@@ -115,13 +115,13 @@ export const ParentDocumentRequirementsTableActionMenu = ({
           <DropdownMenuItem
             disabled={disableApprovalRequest}
             onClick={async () => {
-              const result = sendPropertyParentDocumentApprovalRequest(
+              const { error } = await sendPropertyParentDocumentApprovalRequest(
                 propertyId,
                 userId,
                 parentDoc.id,
               );
-              if (result instanceof Error) {
-                toast.error(getErrorMessage(result));
+              if (error) {
+                toast.error(getErrorMessage(error));
                 return;
               }
               await revalidateGetPropertyParentDocumentApprovalRequestCacheTag(

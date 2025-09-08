@@ -7,7 +7,7 @@ export interface IReportingRepo {
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<ParentDocument | Error>;
+  ): Promise<{ data?: ParentDocument; error?: Error }>;
 }
 
 export class ReportingRepo implements IReportingRepo {
@@ -16,17 +16,17 @@ export class ReportingRepo implements IReportingRepo {
   async getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<ParentDocument | Error> {
+  ): Promise<{ data?: ParentDocument; error?: Error }> {
     const sql = `
     SELECT *
     FROM reporting.parent_documents
     WHERE user_id = $1 AND document_type = $2;
     `;
-    const result = await executeQuery<ParentDocument>(this.pool, sql, [
+    const { data, error } = await executeQuery<ParentDocument>(this.pool, sql, [
       userId,
       documentType,
     ]);
-    if (result instanceof Error) return result;
-    return result.rows[0];
+    if (error) return { data: undefined, error: error };
+    return { data: data?.rows[0], error: undefined };
   }
 }

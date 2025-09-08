@@ -31,12 +31,12 @@ export default async function PropertyParentPage({
   });
   const userId = session?.user.id || "";
   const { propertyId } = await params;
-  const result = await getPropertyUser(propertyId, userId);
-  if (result instanceof Error) {
-    console.error(getErrorMessage(result));
+  const { data, error } = await getPropertyUser(propertyId, userId);
+  if (error) {
+    console.error(getErrorMessage(error));
     return;
   }
-  if (result?.role != PropertyUserRole.Parent) {
+  if (data?.role != PropertyUserRole.Parent) {
     redirect(`/dashboard/properties/${propertyId}/parent/403`);
   }
 

@@ -32,7 +32,7 @@ type ParentDocumentApprovalsTableProps = {
   getPropertyParentDocumentApprovalRequests(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyParentDocument[] | Error>;
+  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
 };
 
 export const ParentDocumentApprovalsTable = ({
@@ -102,20 +102,18 @@ export const ParentDocumentApprovalsTable = ({
   ];
 
   const fetchData = useCallback(async () => {
-    const result = await getPropertyParentDocumentApprovalRequests(
-      propertyId,
-      userId,
-    );
+    const { data: result, error } =
+      await getPropertyParentDocumentApprovalRequests(propertyId, userId);
 
-    if (!result) {
-      toast.error(`Error: No data available!`);
+    if (error) {
+      const errMsg = getErrorMessage(error);
+      toast.error(`Error: ${errMsg}`);
+      setError(errMsg);
       return;
     }
 
-    if (result instanceof Error) {
-      const errMsg = getErrorMessage(result);
-      toast.error(`Error: ${errMsg}`);
-      setError(errMsg);
+    if (!result) {
+      toast.error(`Error: No data available!`);
       return;
     }
 

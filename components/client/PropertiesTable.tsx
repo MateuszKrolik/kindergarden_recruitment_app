@@ -47,11 +47,11 @@ interface PropertiesTableProps {
   getAllProperties(
     pageSize: number,
     pageNumber: number,
-  ): Promise<PagedResponse<Property> | Error>;
+  ): Promise<{ data?: PagedResponse<Property>; error?: Error }>;
   getPropertyUser(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyUser | Error>;
+  ): Promise<{ data?: PropertyUser; error?: Error }>;
 }
 
 export default function PropertyTable({
@@ -79,8 +79,11 @@ export default function PropertyTable({
     async (size: number, pageNumber: number) => {
       setIsLoading(true);
       try {
-        const result = await getAllProperties(size, pageNumber);
-        if (result instanceof Error) {
+        const { data: result, error } = await getAllProperties(
+          size,
+          pageNumber,
+        );
+        if (error) {
           toast.error(getErrorMessage(result));
           return;
         }

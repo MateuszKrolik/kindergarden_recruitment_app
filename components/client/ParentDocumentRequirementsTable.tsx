@@ -36,21 +36,21 @@ export type ParentDocumentRequirementsTableProps = {
   getPropertyParentDocumentRequirements(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyParentDocumentRequirement[] | Error>;
+  ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<ParentDocument | Error>;
+  ): Promise<{ data?: ParentDocument; error?: Error }>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<PropertyParentDocument | Error>;
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
   sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<PropertyParentDocument | Error>;
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
   revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
     propertyId: string,
     userId: string,
@@ -178,24 +178,24 @@ export const ParentDocumentRequirementsTable = ({
   ];
 
   const fetchData = useCallback(async () => {
-    const result = await getPropertyParentDocumentRequirements(
+    const { data, error } = await getPropertyParentDocumentRequirements(
       propertyId,
       userId,
     );
 
-    if (!result) {
-      toast.error(`Error: No data available!`);
-      return;
-    }
-
-    if (result instanceof Error) {
-      const errMsg = getErrorMessage(result);
+    if (error) {
+      const errMsg = getErrorMessage(error);
       toast.error(`Error: ${errMsg}`);
       setError(errMsg);
       return;
     }
 
-    setData(result);
+    if (!data) {
+      toast.error(`Error: No data available!`);
+      return;
+    }
+
+    setData(data);
   }, [propertyId, userId, getPropertyParentDocumentRequirements]);
 
   useEffect(() => {

@@ -8,7 +8,7 @@ const svc = new IdentitySvc();
 
 export const doesAccountExist = async (
   accountId: string,
-): Promise<boolean | Error> => {
+): Promise<{ data?: boolean; error?: Error }> => {
   "use cache";
   cacheTag(`account:${accountId}:exists`);
 

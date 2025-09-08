@@ -10,7 +10,7 @@ const svc = new ReportingSvc();
 export async function getParentDocumentByType(
   userId: string,
   documentType: DocumentType,
-): Promise<ParentDocument | Error> {
+): Promise<{ data?: ParentDocument; error?: Error }> {
   "use cache";
   cacheTag(`parents:${userId}:${documentType}`);
   return await svc.getParentDocumentByType(userId, documentType);

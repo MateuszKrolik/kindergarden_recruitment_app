@@ -13,6 +13,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { getErrorMessage } from "@/util/error";
+import { Progress } from "../ui/progress";
 
 type PropertyTableRowActionMenuContentProps = {
   propertyId: string;
@@ -20,7 +21,7 @@ type PropertyTableRowActionMenuContentProps = {
   getPropertyUser(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyUser | Error>;
+  ): Promise<{ data?: PropertyUser; error?: Error }>;
 };
 
 export const PropertyTableRowActionMenu = ({
@@ -29,16 +30,26 @@ export const PropertyTableRowActionMenu = ({
   getPropertyUser,
 }: PropertyTableRowActionMenuContentProps) => {
   const [propertyUser, setPropertyUser] = useState<PropertyUser | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleOnOpenChange = async (open: boolean) => {
     if (open) {
-      const result = await getPropertyUser(propertyId, userId);
-      if (result instanceof Error) {
+      setIsLoading(true);
+      const { data: result, error } = await getPropertyUser(propertyId, userId);
+      if (error) {
         toast.error(getErrorMessage(result));
+        setIsLoading(false);
+        return;
+      }
+      if (!result) {
+        setIsLoading(false);
         return;
       }
       console.log(result);
       setPropertyUser(result);
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
     }
   };
   return (
@@ -51,7 +62,11 @@ export const PropertyTableRowActionMenu = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        {propertyUser ? (
+        {isLoading ? (
+          <DropdownMenuItem>
+            <Progress value={33} />
+          </DropdownMenuItem>
+        ) : propertyUser ? (
           <DropdownMenuItem asChild>
             <Link
               href={`/dashboard/properties/${propertyId}/${propertyUser.role}`}

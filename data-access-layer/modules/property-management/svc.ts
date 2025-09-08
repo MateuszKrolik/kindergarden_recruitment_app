@@ -15,17 +15,17 @@ export interface IPropertyManagementSvc {
   getAllProperties(
     pageSize: number,
     pageNumber: number,
-  ): Promise<PagedResponse<Property> | Error>;
+  ): Promise<{ data?: PagedResponse<Property>; error?: Error }>;
   getPropertyUser(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyUser | Error>;
+  ): Promise<{ data?: PropertyUser; error?: Error }>;
   getDocumentRequirementsForGivenPropertyParent(
     propertyId: string,
     userId: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<PropertyParentDocumentRequirement[] | Error>;
+  ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
 }
 
 export class PropertyManagementSvc implements IPropertyManagementSvc {
@@ -39,33 +39,39 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
   async getAllProperties(
     pageSize: number,
     pageNumber: number,
-  ): Promise<PagedResponse<Property> | Error> {
+  ): Promise<{ data?: PagedResponse<Property>; error?: Error }> {
     return this.repo.getAllProperties(pageSize, pageNumber);
   }
   async getPropertyUser(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyUser | Error> {
+  ): Promise<{ data?: PropertyUser; error?: Error }> {
     return this.repo.getPropertyUser(propertyId, userId);
   }
   async getDocumentRequirementsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyParentDocumentRequirement[] | Error> {
-    const allReqResponse =
-      await this.repo.getAllPropertyParentDocumentRequirements(propertyId);
-    if (allReqResponse instanceof Error) return allReqResponse;
-    const parentConditionKeyResponse =
-      await this.identityClient.getParentConditionKeys(userId);
-    if (parentConditionKeyResponse instanceof Error)
-      return parentConditionKeyResponse;
+  ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }> {
+    const [allReqPromiseResult, conditionKeyPromiseResult] = await Promise.all([
+      this.repo.getAllPropertyParentDocumentRequirements(propertyId),
+      this.identityClient.getParentConditionKeys(userId),
+    ]);
+    if (allReqPromiseResult.error)
+      return { data: undefined, error: allReqPromiseResult.error };
+    if (conditionKeyPromiseResult.error)
+      return { data: undefined, error: conditionKeyPromiseResult.error };
     const activeReqs: PropertyParentDocumentRequirement[] = [];
-    allReqResponse.forEach((element: PropertyParentDocumentRequirement) => {
-      if (isParentRequirementActive(parentConditionKeyResponse, element)) {
-        activeReqs.push(element);
-      }
-    });
-    return activeReqs;
+    allReqPromiseResult.data?.forEach(
+      (element: PropertyParentDocumentRequirement) => {
+        if (
+          conditionKeyPromiseResult.data &&
+          isParentRequirementActive(conditionKeyPromiseResult.data, element)
+        ) {
+          activeReqs.push(element);
+        }
+      },
+    );
+    return { data: activeReqs, error: undefined };
   }
 }
 

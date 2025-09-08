@@ -7,7 +7,7 @@ export interface IReportingSvc {
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<ParentDocument | Error>;
+  ): Promise<{ data?: ParentDocument; error?: Error }>;
 }
 
 export class ReportingSvc implements IReportingSvc {
@@ -19,7 +19,7 @@ export class ReportingSvc implements IReportingSvc {
   async getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<ParentDocument | Error> {
+  ): Promise<{ data?: ParentDocument; error?: Error }> {
     return await this.repo.getParentDocumentByType(userId, documentType);
   }
 }

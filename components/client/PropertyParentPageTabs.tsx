@@ -14,25 +14,25 @@ type PropertyParentPageTabsProps = {
   getPropertyParentDocumentRequirements(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyParentDocumentRequirement[] | Error>;
+  ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<ParentDocument | Error>;
+  ): Promise<{ data?: ParentDocument; error?: Error }>;
   getPropertyParentDocumentApprovalRequests(
     propertyId: string,
     userId: string,
-  ): Promise<PropertyParentDocument[] | Error>;
+  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<PropertyParentDocument | Error>;
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
   sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<PropertyParentDocument | Error>;
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
   revalidateGetAllPropertyParentDocumentApprovalRequestsCacheTag(
     propertyId: string,
     userId: string,

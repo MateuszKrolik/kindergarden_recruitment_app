@@ -13,7 +13,7 @@ const svc = new ComplianceSvc();
 export async function getPropertyParentDocumentApprovalRequests(
   propertyId: string,
   userId: string,
-): Promise<PropertyParentDocument[] | Error> {
+): Promise<{ data?: PropertyParentDocument[]; error?: Error }> {
   "use cache";
   cacheTag(
     getAllPropertyParentDocumentApprovalRequestsCacheTag(propertyId, userId),
@@ -28,7 +28,7 @@ export async function getPropertyParentDocumentApprovalRequestByDocumentId(
   propertyId: string,
   userId: string,
   parentDocId: string,
-): Promise<PropertyParentDocument | Error> {
+): Promise<{ data?: PropertyParentDocument; error?: Error }> {
   "use cache";
   cacheTag(
     getPropertyParentDocumentApprovalRequestCacheTag(
@@ -48,7 +48,7 @@ export async function sendPropertyParentDocumentApprovalRequest(
   propertyId: string,
   userId: string,
   parentDocumentId: string,
-): Promise<PropertyParentDocument | Error> {
+): Promise<{ data?: PropertyParentDocument; error?: Error }> {
   "use cache";
   cacheTag(
     getPropertyParentDocumentApprovalRequestCacheTag(
