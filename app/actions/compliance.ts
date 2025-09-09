@@ -6,7 +6,9 @@ import { unstable_cacheTag as cacheTag, revalidateTag } from "next/cache";
 import {
   getAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
   getPropertyParentDocumentApprovalRequestCacheTag,
+  getAllDocumentApprovalRequestsForGivenPropertyCacheTag,
 } from "./cacheTag";
+import { PagedResponse } from "@/types/pagination";
 
 const svc = new ComplianceSvc();
 
@@ -64,6 +66,28 @@ export async function sendPropertyParentDocumentApprovalRequest(
     propertyId,
     userId,
     parentDocumentId,
+  );
+}
+
+export async function getAllDocumentApprovalRequestsForGivenProperty(
+  propertyId: string,
+  pageSize: number,
+  pageNumber: number,
+): Promise<{ data?: PagedResponse<PropertyParentDocument>; error?: Error }> {
+  "use cache";
+  cacheTag(getAllDocumentApprovalRequestsForGivenPropertyCacheTag(propertyId));
+  return svc.getAllDocumentApprovalRequestsForGivenProperty(
+    propertyId,
+    pageSize,
+    pageNumber,
+  );
+}
+
+export async function revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
+  propertyId: string,
+): Promise<void> {
+  revalidateTag(
+    getAllDocumentApprovalRequestsForGivenPropertyCacheTag(propertyId),
   );
 }
 

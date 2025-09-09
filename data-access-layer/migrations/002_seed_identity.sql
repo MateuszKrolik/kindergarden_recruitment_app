@@ -53,4 +53,24 @@ INSERT INTO identity.parent_user_details(
   true
 );
 
+
+INSERT INTO identity.user (id, name, email, "emailVerified")
+VALUES ('9a51a7b5-be68-4df2-aa1f-695ea1ce6aeb', 'Admin User', 'admin@test.com', true);
+
+INSERT INTO identity.account (
+  "accountId",
+  "providerId",
+  "userId",
+  password,
+  "createdAt",
+  "updatedAt"
+) VALUES (
+  '9a51a7b5-be68-4df2-aa1f-695ea1ce6aeb',           
+  'credential',                      
+  '9a51a7b5-be68-4df2-aa1f-695ea1ce6aeb', 
+  '$2b$14$kUPbDjd1VqCVzW/NCS80gu9xafFEFF0LCtBWoxVFQhgUd.6xbv6He',       
+  NOW(),
+  NOW()
+);
+
 COMMIT;

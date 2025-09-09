@@ -6,6 +6,7 @@ import {
   revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
   revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
   sendPropertyParentDocumentApprovalRequest,
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
 } from "@/app/actions/compliance";
 import {
   getPropertyParentDocumentRequirements,
@@ -62,6 +63,9 @@ export default async function PropertyParentPage({
       }
       revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
         revalidateGetPropertyParentDocumentApprovalRequestCacheTag
+      }
+      revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag={
+        revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag
       }
     />
   );

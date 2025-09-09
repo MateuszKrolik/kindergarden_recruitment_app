@@ -2,8 +2,14 @@ import { redisClient } from "@/data-access-layer/db/redis-client";
 import { PropertyParentDocument } from "./model";
 import { ComplianceRepo, IComplianceRepo } from "./repo";
 import { pool } from "@/data-access-layer/db/db";
+import { PagedResponse } from "@/types/pagination";
 
 export interface IComplianceSvc {
+  getAllDocumentApprovalRequestsForGivenProperty(
+    propertyId: string,
+    pageSize: number,
+    pageNumber: number,
+  ): Promise<{ data?: PagedResponse<PropertyParentDocument>; error?: Error }>;
   getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
@@ -57,6 +63,18 @@ export class ComplianceSvc implements IComplianceSvc {
       propertyId,
       userId,
       parentDocumentId,
+    );
+  }
+
+  async getAllDocumentApprovalRequestsForGivenProperty(
+    propertyId: string,
+    pageSize: number,
+    pageNumber: number,
+  ): Promise<{ data?: PagedResponse<PropertyParentDocument>; error?: Error }> {
+    return this.repo.getAllDocumentApprovalRequestsForGivenProperty(
+      propertyId,
+      pageSize,
+      pageNumber,
     );
   }
 }

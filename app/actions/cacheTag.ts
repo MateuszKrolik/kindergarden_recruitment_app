@@ -5,6 +5,12 @@ export function getAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
   return `properties:${propertyId}:parents:${userId}:approvals`;
 }
 
+export function getAllDocumentApprovalRequestsForGivenPropertyCacheTag(
+  propertyId: string,
+): string {
+  return `properties:${propertyId}:parents:approvals`;
+}
+
 export function getPropertyParentDocumentApprovalRequestCacheTag(
   propertyId: string,
   userId: string,

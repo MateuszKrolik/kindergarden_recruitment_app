@@ -60,6 +60,9 @@ export type ParentDocumentRequirementsTableProps = {
     userId: string,
     parentDocumentId: string,
   ): Promise<void>;
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
+    propertyId: string,
+  ): Promise<void>;
 };
 
 export const ParentDocumentRequirementsTable = ({
@@ -71,6 +74,7 @@ export const ParentDocumentRequirementsTable = ({
   sendPropertyParentDocumentApprovalRequest,
   revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
   revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
 }: ParentDocumentRequirementsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -170,6 +174,9 @@ export const ParentDocumentRequirementsTable = ({
             }
             revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
               revalidateGetPropertyParentDocumentApprovalRequestCacheTag
+            }
+            revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag={
+              revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag
             }
           />
         );

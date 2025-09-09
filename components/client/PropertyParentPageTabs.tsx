@@ -42,6 +42,9 @@ type PropertyParentPageTabsProps = {
     userId: string,
     parentDocumentId: string,
   ): Promise<void>;
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
+    propertyId: string,
+  ): Promise<void>;
 };
 
 export const PropertyParentPageTabs = ({
@@ -54,6 +57,7 @@ export const PropertyParentPageTabs = ({
   sendPropertyParentDocumentApprovalRequest,
   revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
   revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
 }: PropertyParentPageTabsProps) => {
   return (
     <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
@@ -86,6 +90,9 @@ export const PropertyParentPageTabs = ({
               }
               revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
                 revalidateGetPropertyParentDocumentApprovalRequestCacheTag
+              }
+              revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag={
+                revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag
               }
             />
           </TabsContent>
