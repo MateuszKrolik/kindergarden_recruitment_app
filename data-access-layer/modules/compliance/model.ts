@@ -8,6 +8,6 @@ export type PropertyParentDocument = {
   property_id: string;
   user_id: string;
   parent_document_id: string;
-  status: RequestStatus;
+  request_status: RequestStatus;
   approved_by?: string;
 };

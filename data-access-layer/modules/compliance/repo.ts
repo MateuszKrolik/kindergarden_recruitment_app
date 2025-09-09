@@ -1,4 +1,4 @@
-import { PropertyParentDocument } from "./model";
+import { PropertyParentDocument, RequestStatus } from "./model";
 import { Pool } from "pg";
 import {
   calculateOffset,
@@ -30,6 +30,12 @@ export interface IComplianceRepo {
     propertyId: string,
     userId: string,
     parentDocumentId: string,
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  setPropertyParentDocumentRequestStatus(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+    requestStatus: RequestStatus,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
 }
 
@@ -199,6 +205,53 @@ export class ComplianceRepo implements IComplianceRepo {
       ),
       error: undefined,
     };
+  }
+
+  async setPropertyParentDocumentRequestStatus(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+    requestStatus: RequestStatus,
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+    const cacheKey = this.getPropertyParentDocumentApprovalRequestCacheKey(
+      propertyId,
+      userId,
+      parentDocumentId,
+    );
+    const result = await withWriteThroughRedisCache(
+      this.redisClient,
+      cacheKey,
+      async () => {
+        const sql = `
+        UPDATE compliance.property_parent_documents
+        SET request_status = $1
+        WHERE property_id = $2 AND user_id = $3 AND parent_document_id = $4
+        RETURNING *;
+        `;
+        const { data, error } = await executeQuery<PropertyParentDocument>(
+          this.pool,
+          sql,
+          [requestStatus, propertyId, userId, parentDocumentId],
+        );
+        if (error) return { data: undefined, error: error };
+        return { data: data?.rows[0], error: undefined };
+      },
+    );
+
+    // TODO: append to list instead of deleting its entirety for boost in performance
+    await invalidateCache(
+      this.redisClient,
+      this.getAllDocumentApprovalRequestsForGivenPropertyParentCacheKey(
+        propertyId,
+        userId,
+      ),
+    );
+
+    await this.invalidatePagedPropertyParentDocRequestsForGivenPropertyCache(
+      propertyId,
+    );
+
+    return result;
   }
 
   private async invalidatePagedPropertyParentDocRequestsForGivenPropertyCache(

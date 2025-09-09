@@ -1,5 +1,5 @@
 import { redisClient } from "@/data-access-layer/db/redis-client";
-import { PropertyParentDocument } from "./model";
+import { PropertyParentDocument, RequestStatus } from "./model";
 import { ComplianceRepo, IComplianceRepo } from "./repo";
 import { pool } from "@/data-access-layer/db/db";
 import { PagedResponse } from "@/types/pagination";
@@ -23,6 +23,12 @@ export interface IComplianceSvc {
     propertyId: string,
     userId: string,
     parentDocumentId: string,
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  setPropertyParentDocumentRequestStatus(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+    requestStatus: RequestStatus,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
 }
 
@@ -75,6 +81,20 @@ export class ComplianceSvc implements IComplianceSvc {
       propertyId,
       pageSize,
       pageNumber,
+    );
+  }
+
+  async setPropertyParentDocumentRequestStatus(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+    requestStatus: RequestStatus,
+  ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+    return this.repo.setPropertyParentDocumentRequestStatus(
+      propertyId,
+      userId,
+      parentDocumentId,
+      requestStatus,
     );
   }
 }

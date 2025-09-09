@@ -1,6 +1,9 @@
 "use server";
 
-import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
+import {
+  PropertyParentDocument,
+  RequestStatus,
+} from "@/data-access-layer/modules/compliance/model";
 import { ComplianceSvc } from "@/data-access-layer/modules/compliance/svc";
 import { unstable_cacheTag as cacheTag, revalidateTag } from "next/cache";
 import {
@@ -62,7 +65,7 @@ export async function sendPropertyParentDocumentApprovalRequest(
       parentDocumentId,
     ),
   );
-  return svc.sendPropertyParentDocumentApprovalRequest(
+  return await svc.sendPropertyParentDocumentApprovalRequest(
     propertyId,
     userId,
     parentDocumentId,
@@ -76,10 +79,32 @@ export async function getAllDocumentApprovalRequestsForGivenProperty(
 ): Promise<{ data?: PagedResponse<PropertyParentDocument>; error?: Error }> {
   "use cache";
   cacheTag(getAllDocumentApprovalRequestsForGivenPropertyCacheTag(propertyId));
-  return svc.getAllDocumentApprovalRequestsForGivenProperty(
+  return await svc.getAllDocumentApprovalRequestsForGivenProperty(
     propertyId,
     pageSize,
     pageNumber,
+  );
+}
+
+export async function setPropertyParentDocumentApprovalRequestStatus(
+  propertyId: string,
+  userId: string,
+  parentDocumentId: string,
+  requestStatus: RequestStatus,
+): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+  "use cache";
+  cacheTag(
+    getPropertyParentDocumentApprovalRequestCacheTag(
+      propertyId,
+      userId,
+      parentDocumentId,
+    ),
+  );
+  return await svc.setPropertyParentDocumentRequestStatus(
+    propertyId,
+    userId,
+    parentDocumentId,
+    requestStatus,
   );
 }
 

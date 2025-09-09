@@ -1,6 +1,12 @@
 "use server";
 
-import { getAllDocumentApprovalRequestsForGivenProperty } from "@/app/actions/compliance";
+import {
+  getAllDocumentApprovalRequestsForGivenProperty,
+  setPropertyParentDocumentApprovalRequestStatus,
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
+  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
+  revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
+} from "@/app/actions/compliance";
 import { getPropertyUser } from "@/app/actions/property-management";
 import AdminPropertyParentDocumentTable from "@/components/client/AdminPropertyParentDocumentTable";
 import { PropertyUserRole } from "@/data-access-layer/modules/property-management/model";
@@ -35,6 +41,18 @@ export default async function PropertyAdminPage({
       propertyId={propertyId}
       getAllDocumentApprovalRequestsForGivenProperty={
         getAllDocumentApprovalRequestsForGivenProperty
+      }
+      setPropertyParentDocumentApprovalRequestStatus={
+        setPropertyParentDocumentApprovalRequestStatus
+      }
+      revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag={
+        revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag
+      }
+      revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag={
+        revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag
+      }
+      revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
+        revalidateGetPropertyParentDocumentApprovalRequestCacheTag
       }
     />
   );
