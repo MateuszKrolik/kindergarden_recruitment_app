@@ -13,9 +13,6 @@ import { ParentConditionKeys } from "@/data-access-layer/shared/types/property_m
 import identityClient from "../identity/svc";
 import EventEmitter from "events";
 import eventEmitter from "@/data-access-layer/eventEmitter";
-import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
-import { EventEnvelope } from "@/data-access-layer/shared/types/event";
-import { PropertyParentDocument } from "../compliance/model";
 
 export interface IPropertyManagementSvc {
   getAllProperties(
@@ -42,7 +39,6 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
     repo?: IPropertyManagementRepo,
   ) {
     this.repo = repo ?? new PropertyManagementRepo(pool);
-    this.registerEventHandlers();
   }
   async getAllProperties(
     pageSize: number,
@@ -60,14 +56,13 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
     propertyId: string,
     userId: string,
   ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }> {
-    const [allReqPromiseResult, conditionKeyPromiseResult] = await Promise.all([
+    const promiseResults = await Promise.all([
       this.repo.getAllPropertyParentDocumentRequirements(propertyId),
       this.identityClient.getParentConditionKeys(userId),
     ]);
-    if (allReqPromiseResult.error)
-      return { data: undefined, error: allReqPromiseResult.error };
-    if (conditionKeyPromiseResult.error)
-      return { data: undefined, error: conditionKeyPromiseResult.error };
+    const errorResult = promiseResults.find((pR) => pR.error);
+    if (errorResult) return { data: undefined, error: errorResult.error };
+    const [allReqPromiseResult, conditionKeyPromiseResult] = promiseResults;
     const activeReqs: PropertyParentDocumentRequirement[] = [];
     allReqPromiseResult.data?.forEach(
       (element: PropertyParentDocumentRequirement) => {
@@ -80,19 +75,6 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
       },
     );
     return { data: activeReqs, error: undefined };
-  }
-
-  private async registerEventHandlers() {
-    await this.handlePropertyParentDocumentRequestApprovedEvent();
-  }
-
-  private async handlePropertyParentDocumentRequestApprovedEvent() {
-    this.eventEmitter.on(
-      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
-      (event: EventEnvelope<PropertyParentDocument>) => {
-        console.log("Received event:", event);
-      },
-    );
   }
 }
 
