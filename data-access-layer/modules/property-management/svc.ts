@@ -10,6 +10,12 @@ import { IPropertyManagementRepo, PropertyManagementRepo } from "./repo";
 import { pool } from "@/data-access-layer/db/db";
 import { IIdentityClient } from "./client";
 import { ParentConditionKeys } from "@/data-access-layer/shared/types/property_management";
+import identityClient from "../identity/svc";
+import EventEmitter from "events";
+import eventEmitter from "@/data-access-layer/eventEmitter";
+import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
+import { EventEnvelope } from "@/data-access-layer/shared/types/event";
+import { PropertyParentDocument } from "../compliance/model";
 
 export interface IPropertyManagementSvc {
   getAllProperties(
@@ -28,13 +34,15 @@ export interface IPropertyManagementSvc {
   ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
 }
 
-export class PropertyManagementSvc implements IPropertyManagementSvc {
+class PropertyManagementSvc implements IPropertyManagementSvc {
   private repo: IPropertyManagementRepo;
   constructor(
+    private eventEmitter: EventEmitter,
     private identityClient: IIdentityClient,
     repo?: IPropertyManagementRepo,
   ) {
     this.repo = repo ?? new PropertyManagementRepo(pool);
+    this.registerEventHandlers();
   }
   async getAllProperties(
     pageSize: number,
@@ -73,6 +81,19 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
     );
     return { data: activeReqs, error: undefined };
   }
+
+  private async registerEventHandlers() {
+    await this.handlePropertyParentDocumentRequestApprovedEvent();
+  }
+
+  private async handlePropertyParentDocumentRequestApprovedEvent() {
+    this.eventEmitter.on(
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+      (event: EventEnvelope<PropertyParentDocument>) => {
+        console.log("Received event:", event);
+      },
+    );
+  }
 }
 
 function isParentRequirementActive(
@@ -101,3 +122,9 @@ function isParentRequirementActive(
   }
   return false;
 }
+
+const propertyManagementSvc = new PropertyManagementSvc(
+  eventEmitter,
+  identityClient,
+);
+export default propertyManagementSvc;

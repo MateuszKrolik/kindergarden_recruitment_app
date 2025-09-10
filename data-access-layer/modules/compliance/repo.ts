@@ -36,6 +36,7 @@ export interface IComplianceRepo {
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
+    adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
 }
 
@@ -212,6 +213,7 @@ export class ComplianceRepo implements IComplianceRepo {
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
+    adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
     const cacheKey = this.getPropertyParentDocumentApprovalRequestCacheKey(
       propertyId,
@@ -224,14 +226,14 @@ export class ComplianceRepo implements IComplianceRepo {
       async () => {
         const sql = `
         UPDATE compliance.property_parent_documents
-        SET request_status = $1
-        WHERE property_id = $2 AND user_id = $3 AND parent_document_id = $4
+        SET request_status = $1, approved_by = $2
+        WHERE property_id = $3 AND user_id = $4 AND parent_document_id = $5
         RETURNING *;
         `;
         const { data, error } = await executeQuery<PropertyParentDocument>(
           this.pool,
           sql,
-          [requestStatus, propertyId, userId, parentDocumentId],
+          [requestStatus, adminId, propertyId, userId, parentDocumentId],
         );
         if (error) return { data: undefined, error: error };
         return { data: data?.rows[0], error: undefined };

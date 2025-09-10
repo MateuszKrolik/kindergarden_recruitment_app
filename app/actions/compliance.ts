@@ -4,7 +4,7 @@ import {
   PropertyParentDocument,
   RequestStatus,
 } from "@/data-access-layer/modules/compliance/model";
-import { ComplianceSvc } from "@/data-access-layer/modules/compliance/svc";
+import svc from "@/data-access-layer/modules/compliance/svc";
 import { unstable_cacheTag as cacheTag, revalidateTag } from "next/cache";
 import {
   getAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
@@ -12,8 +12,6 @@ import {
   getAllDocumentApprovalRequestsForGivenPropertyCacheTag,
 } from "./cacheTag";
 import { PagedResponse } from "@/types/pagination";
-
-const svc = new ComplianceSvc();
 
 export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
   propertyId: string,
@@ -91,6 +89,7 @@ export async function setPropertyParentDocumentApprovalRequestStatus(
   userId: string,
   parentDocumentId: string,
   requestStatus: RequestStatus,
+  adminId: string,
 ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
   "use cache";
   cacheTag(
@@ -105,6 +104,7 @@ export async function setPropertyParentDocumentApprovalRequestStatus(
     userId,
     parentDocumentId,
     requestStatus,
+    adminId,
   );
 }
 

@@ -39,6 +39,7 @@ export default async function PropertyAdminPage({
   return (
     <AdminPropertyParentDocumentTable
       propertyId={propertyId}
+      adminId={userId}
       getAllDocumentApprovalRequestsForGivenProperty={
         getAllDocumentApprovalRequestsForGivenProperty
       }

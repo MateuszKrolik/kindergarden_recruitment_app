@@ -1,17 +1,13 @@
 "use server";
 
 import { unstable_cacheTag as cacheTag } from "next/cache";
-import { PropertyManagementSvc } from "@/data-access-layer/modules/property-management/svc";
+import svc from "@/data-access-layer/modules/property-management/svc";
 import { PagedResponse } from "@/types/pagination";
 import {
   Property,
   PropertyParentDocumentRequirement,
   PropertyUser,
 } from "@/data-access-layer/modules/property-management/model";
-import { IdentitySvc } from "@/data-access-layer/modules/identity/svc";
-
-const client = new IdentitySvc();
-const svc = new PropertyManagementSvc(client);
 
 export async function getAllProperties(
   pageSize: number,

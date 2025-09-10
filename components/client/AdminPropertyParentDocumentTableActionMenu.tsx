@@ -16,12 +16,14 @@ import { toast } from "sonner";
 import { getErrorMessage } from "@/util/error";
 
 type AdminPropertyParentDocumentTableActionMenuProps = {
+  adminId: string;
   request: PropertyParentDocument;
   setPropertyParentDocumentApprovalRequestStatus(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
+    adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
   revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
     propertyId: string,
@@ -38,6 +40,7 @@ type AdminPropertyParentDocumentTableActionMenuProps = {
 };
 
 export default function AdminPropertyParentDocumentTableActionMenu({
+  adminId,
   request,
   setPropertyParentDocumentApprovalRequestStatus,
   revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
@@ -55,6 +58,7 @@ export default function AdminPropertyParentDocumentTableActionMenu({
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <SetStatusDropdownMenuItem
+          adminId={adminId}
           request={request}
           setPropertyParentDocumentApprovalRequestStatus={
             setPropertyParentDocumentApprovalRequestStatus
@@ -75,12 +79,14 @@ export default function AdminPropertyParentDocumentTableActionMenu({
 }
 
 type SetStatusDropdownMenuItemProps = {
+  adminId: string;
   request: PropertyParentDocument;
   setPropertyParentDocumentApprovalRequestStatus(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
+    adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
   revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
     propertyId: string,
@@ -97,6 +103,7 @@ type SetStatusDropdownMenuItemProps = {
 };
 
 const SetStatusDropdownMenuItem = ({
+  adminId,
   request,
   setPropertyParentDocumentApprovalRequestStatus,
   revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
@@ -109,6 +116,7 @@ const SetStatusDropdownMenuItem = ({
       request.user_id,
       request.parent_document_id,
       status,
+      adminId,
     );
     if (error) {
       toast.error(getErrorMessage(error));
@@ -133,13 +141,17 @@ const SetStatusDropdownMenuItem = ({
       return (
         <>
           <DropdownMenuItem
-            onClick={() => handleStatusChange(RequestStatus.ApprovedStatus)}
+            onClick={async () =>
+              await handleStatusChange(RequestStatus.ApprovedStatus)
+            }
           >
             Approve Request
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => handleStatusChange(RequestStatus.RejectedStatus)}
+            onClick={async () =>
+              await handleStatusChange(RequestStatus.RejectedStatus)
+            }
           >
             Reject Request
           </DropdownMenuItem>
@@ -150,14 +162,18 @@ const SetStatusDropdownMenuItem = ({
         <>
           <DropdownMenuItem
             disabled
-            onClick={() => handleStatusChange(RequestStatus.ApprovedStatus)}
+            onClick={async () =>
+              await handleStatusChange(RequestStatus.ApprovedStatus)
+            }
           >
             Approve Request
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             disabled
-            onClick={() => handleStatusChange(RequestStatus.ApprovedStatus)}
+            onClick={async () =>
+              await handleStatusChange(RequestStatus.ApprovedStatus)
+            }
           >
             Reject Request
           </DropdownMenuItem>
@@ -167,22 +183,24 @@ const SetStatusDropdownMenuItem = ({
       return (
         <>
           <DropdownMenuItem
-            onClick={() => handleStatusChange(RequestStatus.ApprovedStatus)}
+            onClick={async () =>
+              await handleStatusChange(RequestStatus.ApprovedStatus)
+            }
           >
             Approve Request
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             disabled
-            onClick={() => handleStatusChange(RequestStatus.ApprovedStatus)}
+            onClick={async () =>
+              await handleStatusChange(RequestStatus.ApprovedStatus)
+            }
           >
             Reject Request
           </DropdownMenuItem>
         </>
       );
     default:
-      console.log("Request object:", request);
-      console.log("Request status:", request.request_status, RequestStatus);
-      return <h1>WTF</h1>;
+      return null;
   }
 };

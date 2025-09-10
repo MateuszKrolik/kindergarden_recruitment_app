@@ -10,7 +10,7 @@ export interface IReportingSvc {
   ): Promise<{ data?: ParentDocument; error?: Error }>;
 }
 
-export class ReportingSvc implements IReportingSvc {
+class ReportingSvc implements IReportingSvc {
   private repo: IReportingRepo;
   constructor(repo?: IReportingRepo) {
     this.repo = repo ?? new ReportingRepo(pool);
@@ -23,3 +23,6 @@ export class ReportingSvc implements IReportingSvc {
     return await this.repo.getParentDocumentByType(userId, documentType);
   }
 }
+
+const reportingSvc = new ReportingSvc();
+export default reportingSvc;

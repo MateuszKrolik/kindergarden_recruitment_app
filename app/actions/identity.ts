@@ -1,13 +1,11 @@
 "use server";
 
-import { IdentitySvc } from "@/data-access-layer/modules/identity/svc";
+import svc from "@/data-access-layer/modules/identity/svc";
 import { auth } from "@/lib/auth";
 import { signInSchema } from "@/types/schema";
 import { unstable_cacheTag as cacheTag } from "next/cache";
 import { z } from "zod";
 import { catchError } from "@/data-access-layer/shared/util/error";
-
-const svc = new IdentitySvc();
 
 export const doesAccountExist = async (
   accountId: string,

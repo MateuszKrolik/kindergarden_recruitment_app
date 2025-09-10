@@ -11,7 +11,7 @@ export interface IIdentitySvc {
   ): Promise<{ data?: ParentConditionKeys; error?: Error }>;
 }
 
-export class IdentitySvc implements IIdentitySvc {
+class IdentitySvc implements IIdentitySvc {
   private repo: IIdentityRepo;
   constructor(repo?: IIdentityRepo) {
     this.repo = repo ?? new PgIdentityRepo(pool);
@@ -29,3 +29,6 @@ export class IdentitySvc implements IIdentitySvc {
     return this.repo.getParentConditionKeys(userId);
   }
 }
+
+const identitySvc = new IdentitySvc();
+export default identitySvc;

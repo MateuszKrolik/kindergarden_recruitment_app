@@ -45,6 +45,7 @@ import AdminPropertyParentDocumentTableActionMenu from "./AdminPropertyParentDoc
 
 interface AdminPropertyParentDocumentTableProps {
   propertyId: string;
+  adminId: string;
   getAllDocumentApprovalRequestsForGivenProperty(
     propertyId: string,
     pageSize: number,
@@ -55,6 +56,7 @@ interface AdminPropertyParentDocumentTableProps {
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
+    adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
   revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
     propertyId: string,
@@ -72,6 +74,7 @@ interface AdminPropertyParentDocumentTableProps {
 
 export default function AdminPropertyParentDocumentTable({
   propertyId,
+  adminId,
   getAllDocumentApprovalRequestsForGivenProperty,
   setPropertyParentDocumentApprovalRequestStatus,
   revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
@@ -204,6 +207,7 @@ export default function AdminPropertyParentDocumentTable({
 
         return (
           <AdminPropertyParentDocumentTableActionMenu
+            adminId={adminId}
             request={request}
             setPropertyParentDocumentApprovalRequestStatus={
               setPropertyParentDocumentApprovalRequestStatus

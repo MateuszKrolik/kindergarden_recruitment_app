@@ -3,6 +3,10 @@ import { PropertyParentDocument, RequestStatus } from "./model";
 import { ComplianceRepo, IComplianceRepo } from "./repo";
 import { pool } from "@/data-access-layer/db/db";
 import { PagedResponse } from "@/types/pagination";
+import { EventEmitter } from "stream";
+import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
+import eventEmitter from "@/data-access-layer/eventEmitter";
+import { createEvent } from "@/data-access-layer/shared/types/event";
 
 export interface IComplianceSvc {
   getAllDocumentApprovalRequestsForGivenProperty(
@@ -29,12 +33,16 @@ export interface IComplianceSvc {
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
+    adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
 }
 
-export class ComplianceSvc implements IComplianceSvc {
+class ComplianceSvc implements IComplianceSvc {
   private repo: IComplianceRepo;
-  constructor(repo?: IComplianceRepo) {
+  constructor(
+    private eventEmitter: EventEmitter,
+    repo?: IComplianceRepo,
+  ) {
     this.repo = repo ?? new ComplianceRepo(pool, redisClient);
   }
 
@@ -89,12 +97,33 @@ export class ComplianceSvc implements IComplianceSvc {
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
+    adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
-    return this.repo.setPropertyParentDocumentRequestStatus(
-      propertyId,
-      userId,
-      parentDocumentId,
-      requestStatus,
-    );
+    const { data, error } =
+      await this.repo.setPropertyParentDocumentRequestStatus(
+        propertyId,
+        userId,
+        parentDocumentId,
+        requestStatus,
+        adminId,
+      );
+    if (error) return { data: undefined, error: error };
+    switch (requestStatus) {
+      case RequestStatus.ApprovedStatus:
+        this.eventEmitter.emit(
+          COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+          createEvent(
+            COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+            "compliance",
+            "1.0",
+            data,
+          ),
+        );
+      //TODO: Rejected
+    }
+    return { data: data, error: undefined };
   }
 }
+
+const complianceSvc = new ComplianceSvc(eventEmitter);
+export default complianceSvc;
