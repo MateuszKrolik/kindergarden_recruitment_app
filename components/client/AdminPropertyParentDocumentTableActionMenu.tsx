@@ -25,27 +25,12 @@ type AdminPropertyParentDocumentTableActionMenuProps = {
     requestStatus: RequestStatus,
     adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
-    propertyId: string,
-  ): Promise<void>;
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
-    propertyId: string,
-    userId: string,
-  ): Promise<void>;
-  revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
-    propertyId: string,
-    userId: string,
-    parentDocumentId: string,
-  ): Promise<void>;
 };
 
 export default function AdminPropertyParentDocumentTableActionMenu({
   adminId,
   request,
   setPropertyParentDocumentApprovalRequestStatus,
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
-  revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
 }: AdminPropertyParentDocumentTableActionMenuProps) {
   return (
     <DropdownMenu>
@@ -63,15 +48,6 @@ export default function AdminPropertyParentDocumentTableActionMenu({
           setPropertyParentDocumentApprovalRequestStatus={
             setPropertyParentDocumentApprovalRequestStatus
           }
-          revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag={
-            revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag
-          }
-          revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag={
-            revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag
-          }
-          revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
-            revalidateGetPropertyParentDocumentApprovalRequestCacheTag
-          }
         />
       </DropdownMenuContent>
     </DropdownMenu>
@@ -88,27 +64,12 @@ type SetStatusDropdownMenuItemProps = {
     requestStatus: RequestStatus,
     adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
-    propertyId: string,
-  ): Promise<void>;
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
-    propertyId: string,
-    userId: string,
-  ): Promise<void>;
-  revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
-    propertyId: string,
-    userId: string,
-    parentDocumentId: string,
-  ): Promise<void>;
 };
 
 const SetStatusDropdownMenuItem = ({
   adminId,
   request,
   setPropertyParentDocumentApprovalRequestStatus,
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
-  revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
 }: SetStatusDropdownMenuItemProps) => {
   const handleStatusChange = async (status: RequestStatus) => {
     const { error } = await setPropertyParentDocumentApprovalRequestStatus(
@@ -122,18 +83,6 @@ const SetStatusDropdownMenuItem = ({
       toast.error(getErrorMessage(error));
       return;
     }
-    await revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
-      request.property_id,
-    );
-    await revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
-      request.property_id,
-      request.user_id,
-    );
-    await revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
-      request.property_id,
-      request.user_id,
-      request.parent_document_id,
-    );
     toast.success(`Request ${status} successfuly!`);
   };
   switch (request.request_status) {

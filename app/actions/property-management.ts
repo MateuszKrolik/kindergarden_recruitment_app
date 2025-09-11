@@ -1,6 +1,5 @@
 "use server";
 
-import { unstable_cacheTag as cacheTag } from "next/cache";
 import svc from "@/data-access-layer/modules/property-management/svc";
 import { PagedResponse } from "@/types/pagination";
 import {
@@ -13,8 +12,6 @@ export async function getAllProperties(
   pageSize: number,
   pageNumber: number,
 ): Promise<{ data?: PagedResponse<Property>; error?: Error }> {
-  "use cache";
-  cacheTag("properties");
   return await svc.getAllProperties(pageSize, pageNumber);
 }
 
@@ -22,8 +19,6 @@ export async function getPropertyUser(
   propertyId: string,
   userId: string,
 ): Promise<{ data?: PropertyUser; error?: Error }> {
-  "use cache";
-  cacheTag(`properties:${propertyId}:users:${userId}`);
   return await svc.getPropertyUser(propertyId, userId);
 }
 
@@ -31,8 +26,6 @@ export async function getPropertyParentDocumentRequirements(
   propertyId: string,
   userId: string,
 ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }> {
-  "use cache";
-  cacheTag(`properties:${propertyId}:parents:${userId}:requirements`);
   return await svc.getDocumentRequirementsForGivenPropertyParent(
     propertyId,
     userId,

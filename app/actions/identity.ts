@@ -3,16 +3,12 @@
 import svc from "@/data-access-layer/modules/identity/svc";
 import { auth } from "@/lib/auth";
 import { signInSchema } from "@/types/schema";
-import { unstable_cacheTag as cacheTag } from "next/cache";
 import { z } from "zod";
 import { catchError } from "@/data-access-layer/shared/util/error";
 
 export const doesAccountExist = async (
   accountId: string,
 ): Promise<{ data?: boolean; error?: Error }> => {
-  "use cache";
-  cacheTag(`account:${accountId}:exists`);
-
   return await svc.doesAccountExist(accountId);
 };
 

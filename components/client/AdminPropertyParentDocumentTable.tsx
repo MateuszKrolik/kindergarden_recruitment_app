@@ -58,18 +58,6 @@ interface AdminPropertyParentDocumentTableProps {
     requestStatus: RequestStatus,
     adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
-    propertyId: string,
-  ): Promise<void>;
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
-    propertyId: string,
-    userId: string,
-  ): Promise<void>;
-  revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
-    propertyId: string,
-    userId: string,
-    parentDocumentId: string,
-  ): Promise<void>;
 }
 
 export default function AdminPropertyParentDocumentTable({
@@ -77,9 +65,6 @@ export default function AdminPropertyParentDocumentTable({
   adminId,
   getAllDocumentApprovalRequestsForGivenProperty,
   setPropertyParentDocumentApprovalRequestStatus,
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
-  revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
 }: AdminPropertyParentDocumentTableProps) {
   const searchParams = useSearchParams();
   const pageNumberParam = searchParams.get("pageNumber");
@@ -211,15 +196,6 @@ export default function AdminPropertyParentDocumentTable({
             request={request}
             setPropertyParentDocumentApprovalRequestStatus={
               setPropertyParentDocumentApprovalRequestStatus
-            }
-            revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag={
-              revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag
-            }
-            revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag={
-              revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag
-            }
-            revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
-              revalidateGetPropertyParentDocumentApprovalRequestCacheTag
             }
           />
         );

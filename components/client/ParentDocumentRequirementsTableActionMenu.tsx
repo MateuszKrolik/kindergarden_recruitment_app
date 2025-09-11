@@ -35,18 +35,6 @@ type ParentDocumentRequirementsTableActionMenuProps = {
     userId: string,
     parentDocumentId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
-    propertyId: string,
-    userId: string,
-  ): Promise<void>;
-  revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
-    propertyId: string,
-    userId: string,
-    parentDocumentId: string,
-  ): Promise<void>;
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
-    propertyId: string,
-  ): Promise<void>;
 };
 
 export const ParentDocumentRequirementsTableActionMenu = ({
@@ -56,9 +44,6 @@ export const ParentDocumentRequirementsTableActionMenu = ({
   getParentDocumentByType,
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
-  revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
 }: ParentDocumentRequirementsTableActionMenuProps) => {
   const [parentDoc, setParentDoc] = useState<ParentDocument | null>(null);
   const [disableApprovalRequest, setDisableApprovalRequest] =
@@ -128,18 +113,6 @@ export const ParentDocumentRequirementsTableActionMenu = ({
                 toast.error(getErrorMessage(error));
                 return;
               }
-              await revalidateGetPropertyParentDocumentApprovalRequestCacheTag(
-                propertyId,
-                userId,
-                parentDoc.id,
-              );
-              await revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag(
-                propertyId,
-                userId,
-              );
-              await revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag(
-                propertyId,
-              );
               toast.success(
                 `Successfully sent approval request for document: ${parentDoc.document_type}!`,
               );

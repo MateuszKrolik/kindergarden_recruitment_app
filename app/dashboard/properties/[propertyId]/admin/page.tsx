@@ -3,9 +3,6 @@
 import {
   getAllDocumentApprovalRequestsForGivenProperty,
   setPropertyParentDocumentApprovalRequestStatus,
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag,
-  revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag,
-  revalidateGetPropertyParentDocumentApprovalRequestCacheTag,
 } from "@/app/actions/compliance";
 import { getPropertyUser } from "@/app/actions/property-management";
 import AdminPropertyParentDocumentTable from "@/components/client/AdminPropertyParentDocumentTable";
@@ -45,15 +42,6 @@ export default async function PropertyAdminPage({
       }
       setPropertyParentDocumentApprovalRequestStatus={
         setPropertyParentDocumentApprovalRequestStatus
-      }
-      revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag={
-        revalidateGetAllDocumentApprovalRequestsForGivenPropertyCacheTag
-      }
-      revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag={
-        revalidateGetAllDocumentApprovalRequestsForGivenPropertyParentCacheTag
-      }
-      revalidateGetPropertyParentDocumentApprovalRequestCacheTag={
-        revalidateGetPropertyParentDocumentApprovalRequestCacheTag
       }
     />
   );

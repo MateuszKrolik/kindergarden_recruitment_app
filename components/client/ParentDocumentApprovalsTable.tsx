@@ -25,6 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
+import socket from "@/app/socket";
+import { EventEnvelope } from "@/data-access-layer/shared/types/event";
 
 type ParentDocumentApprovalsTableProps = {
   propertyId: string;
@@ -130,6 +133,38 @@ export const ParentDocumentApprovalsTable = ({
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+
+  useEffect(() => {
+    function onRequestApproved(event: EventEnvelope<PropertyParentDocument>) {
+      setData((prev) => {
+        const existingIndex = prev.findIndex(
+          doc => doc.parent_document_id === event.payload.parent_document_id
+        );
+        
+        if (existingIndex !== -1) {
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            request_status: event.payload.request_status,
+            approved_by: event.payload.approved_by
+          };
+          return updated;
+        }
+        
+        return prev;
+      });
+
+      toast.success(`Document: ${event.payload.parent_document_id} was just approved! 🎉`);
+    }
+
+    socket.on(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, onRequestApproved);
+
+    return () => {
+      socket.off(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, onRequestApproved);
+    };
+  }, []);
+
 
   const table = useReactTable<PropertyParentDocument>({
     data: error || data instanceof Error ? [] : data,
