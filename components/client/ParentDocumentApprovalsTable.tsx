@@ -158,10 +158,17 @@ export const ParentDocumentApprovalsTable = ({
       toast.success(`Document: ${event.payload.parent_document_id} was just approved! 🎉`);
     }
 
+    function onRequestSent(event: PropertyParentDocument) {
+      setData((prev) => [...prev, event])
+    }
+
     socket.on(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, onRequestApproved);
+
+    socket.on(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED, onRequestSent);
 
     return () => {
       socket.off(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, onRequestApproved);
+      socket.off(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED, onRequestSent);
     };
   }, []);
 

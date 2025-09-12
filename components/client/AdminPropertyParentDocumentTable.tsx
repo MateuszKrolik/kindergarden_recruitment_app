@@ -42,6 +42,9 @@ import {
   RequestStatus,
 } from "@/data-access-layer/modules/compliance/model";
 import AdminPropertyParentDocumentTableActionMenu from "./AdminPropertyParentDocumentTableActionMenu";
+import { EventEnvelope } from "@/data-access-layer/shared/types/event";
+import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
+import socket from "@/app/socket";
 
 interface AdminPropertyParentDocumentTableProps {
   propertyId: string;
@@ -224,6 +227,44 @@ export default function AdminPropertyParentDocumentTable({
   useEffect(() => {
     loadProperties(pageSize, pageNumber);
   }, [loadProperties, pageNumber, pageSize]);
+
+
+  useEffect(() => {
+    function onRequestApproved(event: EventEnvelope<PropertyParentDocument>) {
+      setResult((prev) => {
+        const existingIndex = prev.findIndex(
+          doc => doc.parent_document_id === event.payload.parent_document_id
+        );
+
+        if (existingIndex !== -1) {
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            request_status: event.payload.request_status,
+            approved_by: event.payload.approved_by
+          };
+          return updated;
+        }
+
+        return prev;
+      });
+
+      toast.success(`Document: ${event.payload.parent_document_id} was just approved! 🎉`);
+    }
+
+    function onRequestSent(event: PropertyParentDocument) {
+      setResult((prev) => [...prev, event])
+    }
+
+    socket.on(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, onRequestApproved);
+
+    socket.on(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED, onRequestSent);
+
+    return () => {
+      socket.off(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, onRequestApproved);
+      socket.off(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED, onRequestSent);
+    };
+  }, []);
 
   return (
     <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">

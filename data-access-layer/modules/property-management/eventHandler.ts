@@ -14,13 +14,6 @@ class PropertyManagementEventHandler
   implements IPropertyManagementEventHandler {
   constructor(private eventEmitter: EventEmitter, private socketServer: SocketServer | null = null) {
     this.handlePropertyParentDocumentRequestApprovedEvent();
-    this.initSocketServer()
-  }
-
-  private initSocketServer() {
-    const socketServer = getSocketServer();
-    if (!socketServer) return
-    this.socketServer = socketServer
   }
 
   async handlePropertyParentDocumentRequestApprovedEvent(): Promise<void> {
@@ -35,6 +28,12 @@ class PropertyManagementEventHandler
         this.socketServer?.emit(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, event)
       },
     );
+  }
+
+  private initSocketServer() {
+    const socketServer = getSocketServer();
+    if (!socketServer) return
+    this.socketServer = socketServer
   }
 }
 
