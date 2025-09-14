@@ -6,6 +6,7 @@ import type { IPropertyManagementSvc } from "./svc.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
 import { catchErrorSync } from "../../shared/util/error.ts";
 import type { IReportingClient } from "./client.ts";
+import { PROPERTY_MANAGEMENT_EVENTS } from "../../shared/events/property-management.ts";
 
 export interface IPropertyManagementEventHandler {
   handlePropertyParentDocumentRequestApprovedEvent(): Promise<void>;
@@ -88,7 +89,7 @@ export class PropertyManagementEventHandler
         const propertyChildren = propertyChildrenResult.data ?? [];
 
         const childrenIds = propertyChildren?.map((x) => x.child_id);
-        const { error: incrementError } =
+        const { data: incrementData, error: incrementError } =
           await this.svc.incrementPropertyChildrenPointsForGivenParent(
             event.payload.property_id,
             event.payload.user_id,
@@ -99,10 +100,15 @@ export class PropertyManagementEventHandler
           console.error(incrementError);
           return;
         }
+        console.log(incrementData);
         // Emit to socket listeners only if all above pass
         this.socketServer?.emit(
           COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
           event,
+        );
+        this.socketServer.emit(
+          PROPERTY_MANAGEMENT_EVENTS.PROPERTY_CHILDREN_UPDATED,
+          incrementData,
         );
       },
     );

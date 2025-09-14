@@ -28,6 +28,8 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import { Collapsible, CollapsibleContent } from "../ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider } from "../ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
+import socket from "@/app/socket";
+import { PROPERTY_MANAGEMENT_EVENTS } from "@/data-access-layer/shared/events/property-management";
 
 export type PropertyParentChildrenTableProps = {
   propertyId: string;
@@ -133,6 +135,29 @@ export const PropertyParentChildrenTable = ({
   useEffect(() => {
     fetchPropertyChildrenForGivenParent();
   }, [fetchPropertyChildrenForGivenParent]);
+
+  useEffect(() => {
+    const onPropertyChildrenUpdated = (updatedChildren: PropertyChild[]) => {
+      setData((prev) => {
+        const prevMap = new Map(prev.map((child) => [child.child_id, child]));
+        updatedChildren.forEach((child) => {
+          prevMap.set(child.child_id, child);
+        });
+
+        return Array.from(prevMap.values());
+      });
+    };
+    socket.on(
+      PROPERTY_MANAGEMENT_EVENTS.PROPERTY_CHILDREN_UPDATED,
+      onPropertyChildrenUpdated,
+    );
+    return () => {
+      socket.off(
+        PROPERTY_MANAGEMENT_EVENTS.PROPERTY_CHILDREN_UPDATED,
+        onPropertyChildrenUpdated,
+      );
+    };
+  });
 
   const table = useReactTable<PropertyChild>({
     data: error || data instanceof Error ? [] : data,
