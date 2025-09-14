@@ -1,3 +1,4 @@
+import { DocumentType } from "../../shared/types/reporting.ts";
 import type {
   ParentConditionKeys,
   ParentChild,
@@ -18,4 +19,10 @@ export interface IComplianceClient {
     userId: string,
     parentDocumentId: string,
   ): Promise<{ data?: boolean; error?: Error }>;
+}
+
+export interface IReportingClient {
+  getParentDocumentTypeByDocumentId(
+    parentDocumentId: string,
+  ): Promise<{ data?: DocumentType; error?: Error }>;
 }

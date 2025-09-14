@@ -4,6 +4,7 @@ import next from "next";
 import { initSocketServer } from "./socketServer.ts";
 import { PropertyManagementEventHandler } from "./data-access-layer/modules/property-management/eventHandler.ts";
 import propertyManagementSvc from "./data-access-layer/modules/property-management/svc.ts";
+import reportingClient from "./data-access-layer/modules/reporting/svc.ts";
 import { redisSubscriber } from "./data-access-layer/db/redis-client.ts";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -19,6 +20,7 @@ app.prepare().then(() => {
 
   new PropertyManagementEventHandler(
     propertyManagementSvc,
+    reportingClient,
     redisSubscriber,
     socketServer,
   );

@@ -12,11 +12,11 @@ import {
   PropertyManagementRepo,
 } from "./repo.ts";
 import { pool } from "../../db/db.ts";
-import type { IComplianceClient, IIdentityClient } from "./client.ts";
+import type { IIdentityClient } from "./client.ts";
 import type { ParentConditionKeys } from "../../shared/types/identity.ts";
 import identityClient from "../identity/svc.ts";
-import complianceClient from "../compliance/svc.ts";
 import { redisClient } from "../../db/redis-client.ts";
+import type { DocumentType } from "../../shared/types/reporting.ts";
 
 export interface IPropertyManagementSvc {
   getAllProperties(
@@ -30,8 +30,6 @@ export interface IPropertyManagementSvc {
   getDocumentRequirementsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-    pageSize: number,
-    pageNumber: number,
   ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
   getAllPropertyChildrenForGivenParent(
     propertyId: string,
@@ -49,24 +47,17 @@ export interface IPropertyManagementSvc {
     childrenIds: string[],
     pointValue: number,
   ): Promise<{ data?: PropertyChild[]; error?: Error }>;
-  isPropertyParentDocumentRequestApproved(
+  getPointValueForGivenPropertyParentDocumentByDocumentType(
     propertyId: string,
-    userId: string,
-    parentDocumentId: string,
-  ): Promise<{ data?: boolean; error?: Error }>;
+    documentType: DocumentType,
+  ): Promise<{ data?: number; error?: Error }>;
 }
 
 class PropertyManagementSvc implements IPropertyManagementSvc {
   private repo: IPropertyManagementRepo;
-  private complianceClient: IComplianceClient;
   private identityClient: IIdentityClient;
-  constructor(
-    identityClient: IIdentityClient,
-    complianceClient: IComplianceClient,
-    repo?: IPropertyManagementRepo,
-  ) {
+  constructor(identityClient: IIdentityClient, repo?: IPropertyManagementRepo) {
     this.identityClient = identityClient;
-    this.complianceClient = complianceClient;
     this.repo = repo ?? new PropertyManagementRepo(pool, redisClient);
   }
   async getAllProperties(
@@ -93,7 +84,13 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
       .map((result) => result.error)
       .filter((error) => error !== undefined);
     if (errors.length > 0)
-      return { data: undefined, error: new AggregateError(errors) };
+      return {
+        data: undefined,
+        error: new AggregateError(
+          errors,
+          `${errors.length} Errors found during fetching document requirements for parent: ${userId}!`,
+        ),
+      };
     const [allReqPromiseResult, conditionKeyPromiseResult] = promiseResults;
     const activeReqs: PropertyParentDocumentRequirement[] = [];
     allReqPromiseResult.data?.forEach(
@@ -160,15 +157,13 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
     );
   }
 
-  async isPropertyParentDocumentRequestApproved(
+  async getPointValueForGivenPropertyParentDocumentByDocumentType(
     propertyId: string,
-    userId: string,
-    parentDocumentId: string,
-  ): Promise<{ data?: boolean; error?: Error }> {
-    return this.complianceClient.isPropertyParentDocumentRequestApproved(
+    documentType: DocumentType,
+  ): Promise<{ data?: number; error?: Error }> {
+    return await this.repo.getPointValueForGivenPropertyParentDocumentByDocumentType(
       propertyId,
-      userId,
-      parentDocumentId,
+      documentType,
     );
   }
 }
@@ -200,8 +195,5 @@ function isParentRequirementActive(
   return false;
 }
 
-const propertyManagementSvc = new PropertyManagementSvc(
-  identityClient,
-  complianceClient,
-);
+const propertyManagementSvc = new PropertyManagementSvc(identityClient);
 export default propertyManagementSvc;

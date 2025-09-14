@@ -17,6 +17,7 @@ import {
   withWriteThroughRedisCache,
 } from "../../shared/util/query.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
+import type { DocumentType } from "../../shared/types/reporting.ts";
 
 export interface IPropertyManagementRepo {
   getAllProperties(
@@ -39,6 +40,10 @@ export interface IPropertyManagementRepo {
     childrenIds: string[],
     pointValue: number,
   ): Promise<{ data?: PropertyChild[]; error?: Error }>;
+  getPointValueForGivenPropertyParentDocumentByDocumentType(
+    propertyId: string,
+    documentType: DocumentType,
+  ): Promise<{ data?: number; error?: Error }>;
 }
 
 export class PropertyManagementRepo implements IPropertyManagementRepo {
@@ -163,6 +168,28 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
       this.getAllPropertyChildrenCacheKey(propertyId),
     );
     return { data: data, error: undefined };
+  }
+
+  async getPointValueForGivenPropertyParentDocumentByDocumentType(
+    propertyId: string,
+    documentType: DocumentType,
+  ): Promise<{ data?: number; error?: Error }> {
+    //TODO: invalidate (if necessary)
+    const cacheKey = `properties:${propertyId}:parents:documents:${documentType}:points`;
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+      const sql = `
+        SELECT point_value
+        FROM property_management.property_parent_document_requirements
+        WHERE property_id = $1 AND document_type = $2;
+        `;
+      const { data, error } = await executeQuery<{ point_value: number }>(
+        this.pool,
+        sql,
+        [propertyId, documentType], // TODO: SQL index on document_type
+      );
+      if (error) return { data: undefined, error };
+      return { data: data?.rows[0].point_value, error: undefined };
+    });
   }
 
   private getAllPropertyChildrenCacheKey(propertyId: string): string {
