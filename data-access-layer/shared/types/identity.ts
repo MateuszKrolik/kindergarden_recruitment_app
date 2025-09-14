@@ -5,3 +5,8 @@ export type ParentConditionKeys = {
   filed_tax_in_desired_location?: boolean;
   resides_in_desired_location?: boolean;
 };
+
+export type ParentChild = {
+  parent_id: string;
+  child_id: string;
+};

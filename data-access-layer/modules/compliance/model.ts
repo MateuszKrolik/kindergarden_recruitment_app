@@ -1,8 +1,11 @@
-export enum RequestStatus {
-  PendingStatus = "pending",
-  ApprovedStatus = "approved",
-  RejectedStatus = "rejected",
-}
+export const REQUEST_STATUS = {
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+} as const;
+
+export type RequestStatus =
+  (typeof REQUEST_STATUS)[keyof typeof REQUEST_STATUS];
 
 export type PropertyParentDocument = {
   property_id: string;

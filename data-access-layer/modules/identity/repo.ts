@@ -1,6 +1,8 @@
-import { executeQuery } from "@/data-access-layer/shared/util/query";
+import { executeQuery, withCacheAsideRedis } from "../../shared/util/query.ts";
 import { Pool } from "pg";
-import { ParentConditionKeys } from "../../shared/types/property_management";
+import type { ParentConditionKeys } from "../../shared/types/identity.ts";
+import type { ParentChild } from "../../shared/types/identity.ts";
+import type { RedisClientType } from "../../db/redis-client.ts";
 
 export interface IIdentityRepo {
   doesAccountExist(
@@ -9,10 +11,18 @@ export interface IIdentityRepo {
   getParentConditionKeys(
     userId: string,
   ): Promise<{ data?: ParentConditionKeys; error?: Error }>;
+  getAllParentChildren(
+    parentId: string,
+  ): Promise<{ data?: ParentChild[]; error?: Error }>;
 }
 
 export class PgIdentityRepo implements IIdentityRepo {
-  constructor(private pool: Pool) { }
+  private pool: Pool;
+  private redisClient: RedisClientType;
+  constructor(pool: Pool, redisClient: RedisClientType) {
+    this.pool = pool;
+    this.redisClient = redisClient;
+  }
 
   async doesAccountExist(
     accountId: string,
@@ -49,5 +59,32 @@ export class PgIdentityRepo implements IIdentityRepo {
     );
     if (error) return { data: undefined, error: error };
     return { data: data?.rows[0], error: undefined };
+  }
+
+  async getAllParentChildren(
+    parentId: string,
+  ): Promise<{ data?: ParentChild[]; error?: Error }> {
+    //TODO: invalidations on registration
+    const cacheKey = `parents:${parentId}:children`;
+    const { data, error } = await withCacheAsideRedis(
+      this.redisClient,
+      cacheKey,
+      async () => {
+        const sql = `
+        SELECT *
+        FROM identity.parent_children
+        WHERE parent_id = $1;
+        `;
+        const { data, error } = await executeQuery<ParentChild>(
+          this.pool,
+          sql,
+          [parentId],
+        );
+        if (error) return { data: undefined, error };
+        return { data: data?.rows, error: undefined };
+      },
+    );
+    if (error) return { data: undefined, error };
+    return { data, error: undefined };
   }
 }

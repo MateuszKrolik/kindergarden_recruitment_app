@@ -4,6 +4,7 @@ import svc from "@/data-access-layer/modules/property-management/svc";
 import { PagedResponse } from "@/types/pagination";
 import {
   Property,
+  PropertyChild,
   PropertyParentDocumentRequirement,
   PropertyUser,
 } from "@/data-access-layer/modules/property-management/model";
@@ -30,4 +31,14 @@ export async function getPropertyParentDocumentRequirements(
     propertyId,
     userId,
   );
+}
+
+export async function getAllPropertyChildrenForGivenParent(
+  propertyId: string,
+  parentId: string,
+): Promise<{
+  data?: PropertyChild[];
+  error?: Error;
+}> {
+  return await svc.getAllPropertyChildrenForGivenParent(propertyId, parentId);
 }

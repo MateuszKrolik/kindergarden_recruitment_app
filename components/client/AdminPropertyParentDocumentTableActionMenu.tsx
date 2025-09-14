@@ -11,6 +11,7 @@ import { MoreHorizontal } from "lucide-react";
 import {
   PropertyParentDocument,
   RequestStatus,
+  REQUEST_STATUS,
 } from "@/data-access-layer/modules/compliance/model";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/util/error";
@@ -86,12 +87,12 @@ const SetStatusDropdownMenuItem = ({
     toast.success(`Request ${status} successfuly!`);
   };
   switch (request.request_status) {
-    case RequestStatus.PendingStatus:
+    case REQUEST_STATUS.PENDING:
       return (
         <>
           <DropdownMenuItem
             onClick={async () =>
-              await handleStatusChange(RequestStatus.ApprovedStatus)
+              await handleStatusChange(REQUEST_STATUS.APPROVED)
             }
           >
             Approve Request
@@ -99,54 +100,33 @@ const SetStatusDropdownMenuItem = ({
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={async () =>
-              await handleStatusChange(RequestStatus.RejectedStatus)
+              await handleStatusChange(REQUEST_STATUS.REJECTED)
             }
           >
             Reject Request
           </DropdownMenuItem>
         </>
       );
-    case RequestStatus.ApprovedStatus:
+    case REQUEST_STATUS.APPROVED:
       return (
         <>
-          <DropdownMenuItem
-            disabled
-            onClick={async () =>
-              await handleStatusChange(RequestStatus.ApprovedStatus)
-            }
-          >
-            Approve Request
-          </DropdownMenuItem>
+          <DropdownMenuItem disabled>Approve Request</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            disabled
-            onClick={async () =>
-              await handleStatusChange(RequestStatus.ApprovedStatus)
-            }
-          >
-            Reject Request
-          </DropdownMenuItem>
+          <DropdownMenuItem disabled>Reject Request</DropdownMenuItem>
         </>
       );
-    case RequestStatus.RejectedStatus:
+    case REQUEST_STATUS.REJECTED:
       return (
         <>
           <DropdownMenuItem
             onClick={async () =>
-              await handleStatusChange(RequestStatus.ApprovedStatus)
+              await handleStatusChange(REQUEST_STATUS.APPROVED)
             }
           >
             Approve Request
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            disabled
-            onClick={async () =>
-              await handleStatusChange(RequestStatus.ApprovedStatus)
-            }
-          >
-            Reject Request
-          </DropdownMenuItem>
+          <DropdownMenuItem disabled>Reject Request</DropdownMenuItem>
         </>
       );
     default:

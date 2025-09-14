@@ -1,12 +1,13 @@
 "use client";
 
 import { PropertyParentDocumentRequirement } from "@/data-access-layer/modules/property-management/model";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { ParentDocumentRequirementsTable } from "./ParentDocumentRequirementsTable";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
-import { ParentDocumentApprovalsTable } from "./ParentDocumentApprovalsTable";
 import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
+import { PropertyParentDocumentTabs } from "./PropertyParentDocumentTabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { PropertyParentChildrenTable } from "./PropertyParentChildrenTable";
+import { getAllPropertyChildrenForGivenParent } from "@/app/actions/property-management";
 
 type PropertyParentPageTabsProps = {
   propertyId: string;
@@ -47,22 +48,23 @@ export const PropertyParentPageTabs = ({
   return (
     <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
       <div className="w-full max-w-4xl">
-        <Tabs defaultValue="document_requirements">
+        <Tabs defaultValue="my-documents">
           <TabsList className="mx-auto">
-            <TabsTrigger value="document_requirements">
-              Document Requirements
-            </TabsTrigger>
-            <TabsTrigger value="approval_requests">
-              Approval Requests
+            <TabsTrigger value="my-documents">My Documents</TabsTrigger>
+            <TabsTrigger value="children-documents">
+              Children Documents
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="document_requirements">
-            <ParentDocumentRequirementsTable
+          <TabsContent value="my-documents">
+            <PropertyParentDocumentTabs
               propertyId={propertyId}
               userId={userId}
               getParentDocumentByType={getParentDocumentByType}
               getPropertyParentDocumentRequirements={
                 getPropertyParentDocumentRequirements
+              }
+              getAllDocumentApprovalRequestsForGivenPropertyParent={
+                getAllDocumentApprovalRequestsForGivenPropertyParent
               }
               getPropertyParentDocumentApprovalRequestByDocumentId={
                 getPropertyParentDocumentApprovalRequestByDocumentId
@@ -72,12 +74,12 @@ export const PropertyParentPageTabs = ({
               }
             />
           </TabsContent>
-          <TabsContent value="approval_requests">
-            <ParentDocumentApprovalsTable
+          <TabsContent value="children-documents">
+            <PropertyParentChildrenTable
               propertyId={propertyId}
               userId={userId}
-              getAllDocumentApprovalRequestsForGivenPropertyParent={
-                getAllDocumentApprovalRequestsForGivenPropertyParent
+              getAllPropertyChildrenForGivenParent={
+                getAllPropertyChildrenForGivenParent
               }
             />
           </TabsContent>

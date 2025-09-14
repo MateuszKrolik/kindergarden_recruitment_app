@@ -1,14 +1,22 @@
-import { newPagedResponse, PagedResponse } from "@/types/pagination";
 import {
+  newPagedResponse,
+  type PagedResponse,
+} from "../../../types/pagination.ts";
+import type {
   Property,
+  PropertyChild,
   PropertyParentDocumentRequirement,
   PropertyUser,
-} from "./model";
+} from "./model.ts";
 import { Pool } from "pg";
 import {
   calculateOffset,
   executeQuery,
-} from "@/data-access-layer/shared/util/query";
+  invalidateCache,
+  withCacheAsideRedis,
+  withWriteThroughRedisCache,
+} from "../../shared/util/query.ts";
+import type { RedisClientType } from "../../db/redis-client.ts";
 
 export interface IPropertyManagementRepo {
   getAllProperties(
@@ -22,10 +30,24 @@ export interface IPropertyManagementRepo {
   getAllPropertyParentDocumentRequirements(
     propertyId: string,
   ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
+  getAllPropertyChildren(
+    propertyId: string,
+  ): Promise<{ data?: PropertyChild[]; error?: Error }>;
+  incrementPropertyChildrenPointsForGivenParent(
+    propertyId: string,
+    parentId: string,
+    childrenIds: string[],
+    pointValue: number,
+  ): Promise<{ data?: PropertyChild[]; error?: Error }>;
 }
 
 export class PropertyManagementRepo implements IPropertyManagementRepo {
-  constructor(private pool: Pool) { }
+  private pool: Pool;
+  private redisClient: RedisClientType;
+  constructor(pool: Pool, redisClient: RedisClientType) {
+    this.pool = pool;
+    this.redisClient = redisClient;
+  }
 
   async getAllProperties(
     pageSize: number,
@@ -86,5 +108,64 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
       ]);
     if (error) return { data: undefined, error: error };
     return { data: data?.rows, error: undefined };
+  }
+
+  async getAllPropertyChildren(
+    propertyId: string,
+  ): Promise<{ data?: PropertyChild[]; error?: Error }> {
+    const cacheKey = this.getAllPropertyChildrenCacheKey(propertyId);
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+      const sql = `
+        SELECT *
+        FROM property_management.property_children
+        WHERE property_id = $1;
+        `;
+      const { data, error } = await executeQuery<PropertyChild>(
+        this.pool,
+        sql,
+        [propertyId],
+      );
+      if (error) return { data: undefined, error: error };
+      return { data: data?.rows, error: undefined };
+    });
+  }
+
+  async incrementPropertyChildrenPointsForGivenParent(
+    propertyId: string,
+    parentId: string,
+    childrenIds: string[],
+    pointValue: number,
+  ): Promise<{ data?: PropertyChild[]; error?: Error }> {
+    const cacheKey = `properties:${propertyId}:parents:${parentId}:children`;
+    const { data, error } = await withWriteThroughRedisCache(
+      this.redisClient,
+      cacheKey,
+      async () => {
+        const sql = `
+          UPDATE property_management.property_children
+          SET points = points + $1
+          WHERE property_id = $2
+          AND child_id = ANY($3::uuid[])
+          RETURNING *;
+        `;
+        const { data, error } = await executeQuery<PropertyChild>(
+          this.pool,
+          sql,
+          [pointValue, propertyId, childrenIds],
+        );
+        if (error) return { data: undefined, error };
+        return { data: data?.rows, error: undefined };
+      },
+    );
+    if (error) return { data: undefined, error };
+    await invalidateCache(
+      this.redisClient,
+      this.getAllPropertyChildrenCacheKey(propertyId),
+    );
+    return { data: data, error: undefined };
+  }
+
+  private getAllPropertyChildrenCacheKey(propertyId: string): string {
+    return `properties:${propertyId}:children`;
   }
 }

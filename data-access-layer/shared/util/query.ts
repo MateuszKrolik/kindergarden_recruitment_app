@@ -1,6 +1,6 @@
-import { Pool, QueryResult, QueryResultRow } from "pg";
-import { catchError, catchErrorSync } from "./error";
-import { RedisClientType } from "../../db/redis-client";
+import { Pool, type QueryResult, type QueryResultRow } from "pg";
+import { catchError, catchErrorSync } from "./error.ts";
+import type { RedisClientType } from "../../db/redis-client.ts";
 
 export async function withCacheAsideRedis<T>(
   client: RedisClientType,

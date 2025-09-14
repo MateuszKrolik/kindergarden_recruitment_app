@@ -1,6 +1,8 @@
-import { pool } from "@/data-access-layer/db/db";
-import { IIdentityRepo, PgIdentityRepo } from "./repo";
-import { ParentConditionKeys } from "../../shared/types/property_management";
+import { pool } from "../../db/db.ts";
+import { type IIdentityRepo, PgIdentityRepo } from "./repo.ts";
+import type { ParentConditionKeys } from "../../shared/types/identity.ts";
+import type { ParentChild } from "../../shared/types/identity.ts";
+import { redisClient } from "../../db/redis-client.ts";
 
 export interface IIdentitySvc {
   doesAccountExist(
@@ -9,12 +11,15 @@ export interface IIdentitySvc {
   getParentConditionKeys(
     userId: string,
   ): Promise<{ data?: ParentConditionKeys; error?: Error }>;
+  getAllParentChildren(
+    parentId: string,
+  ): Promise<{ data?: ParentChild[]; error?: Error }>;
 }
 
 class IdentitySvc implements IIdentitySvc {
   private repo: IIdentityRepo;
   constructor(repo?: IIdentityRepo) {
-    this.repo = repo ?? new PgIdentityRepo(pool);
+    this.repo = repo ?? new PgIdentityRepo(pool, redisClient);
   }
 
   async doesAccountExist(
@@ -27,6 +32,12 @@ class IdentitySvc implements IIdentitySvc {
     userId: string,
   ): Promise<{ data?: ParentConditionKeys; error?: Error }> {
     return this.repo.getParentConditionKeys(userId);
+  }
+
+  async getAllParentChildren(
+    parentId: string,
+  ): Promise<{ data?: ParentChild[]; error?: Error }> {
+    return this.repo.getAllParentChildren(parentId);
   }
 }
 

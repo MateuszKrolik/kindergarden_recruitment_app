@@ -1,14 +1,16 @@
-import { redisClient } from "@/data-access-layer/db/redis-client";
-import { PropertyParentDocument, RequestStatus } from "./model";
-import { ComplianceRepo, IComplianceRepo } from "./repo";
-import { pool } from "@/data-access-layer/db/db";
-import { PagedResponse } from "@/types/pagination";
-import { EventEmitter } from "stream";
-import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
-import eventEmitter from "@/data-access-layer/eventEmitter";
-import { createEvent } from "@/data-access-layer/shared/types/event";
-import {Server as SocketServer} from 'socket.io'
-import { getSocketServer } from "@/socketServer";
+import { redisClient, type RedisClientType } from "../../db/redis-client.ts";
+import {
+  type PropertyParentDocument,
+  REQUEST_STATUS,
+  type RequestStatus,
+} from "./model.ts";
+import { ComplianceRepo, type IComplianceRepo } from "./repo.ts";
+import { pool } from "../../db/db.ts";
+import type { PagedResponse } from "../../../types/pagination.ts";
+import { COMPLIANCE_EVENTS } from "../../shared/events/compliance.ts";
+import { createEvent } from "../../shared/types/event.ts";
+import type { Server as SocketServer } from "socket.io";
+import { getSocketServer } from "../../../socketServer.ts";
 
 export interface IComplianceSvc {
   getAllDocumentApprovalRequestsForGivenProperty(
@@ -37,15 +39,24 @@ export interface IComplianceSvc {
     requestStatus: RequestStatus,
     adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  isPropertyParentDocumentRequestApproved(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<{ data?: boolean; error?: Error }>;
 }
 
 class ComplianceSvc implements IComplianceSvc {
+  private redisClient: RedisClientType;
+  private socketServer: SocketServer | null = null;
   private repo: IComplianceRepo;
   constructor(
-    private eventEmitter: EventEmitter,
-    private socketServer: SocketServer | null = null,
+    redisClient: RedisClientType,
+    socketServer: SocketServer | null = null,
     repo?: IComplianceRepo,
   ) {
+    this.redisClient = redisClient;
+    this.socketServer = socketServer;
     this.repo = repo ?? new ComplianceRepo(pool, redisClient);
   }
 
@@ -76,17 +87,21 @@ class ComplianceSvc implements IComplianceSvc {
     userId: string,
     parentDocumentId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
-    const {data, error} = await this.repo.sendPropertyParentDocumentApprovalRequest(
-      propertyId,
-      userId,
-      parentDocumentId,
+    const { data, error } =
+      await this.repo.sendPropertyParentDocumentApprovalRequest(
+        propertyId,
+        userId,
+        parentDocumentId,
+      );
+    if (error) return { data: undefined, error: error };
+
+    if (!this.socketServer) this.initSocketServer();
+    this.socketServer?.emit(
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
+      data,
     );
-    if (error) return {data: undefined, error: error}
 
-    if (!this.socketServer) this.initSocketServer()
-    this.socketServer?.emit(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED, data)
-
-    return {data, error: undefined}
+    return { data, error: undefined };
   }
 
   async getAllDocumentApprovalRequestsForGivenProperty(
@@ -118,14 +133,17 @@ class ComplianceSvc implements IComplianceSvc {
       );
     if (error) return { data: undefined, error: error };
     switch (requestStatus) {
-      case RequestStatus.ApprovedStatus:
-        this.eventEmitter.emit(
+      case REQUEST_STATUS.APPROVED:
+        console.log("Emitting event...");
+        this.redisClient.publish(
           COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
-          createEvent(
-            COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
-            "compliance",
-            "1.0",
-            data,
+          JSON.stringify(
+            createEvent(
+              COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+              "compliance",
+              "1.0",
+              data,
+            ),
           ),
         );
       //TODO: Rejected
@@ -133,13 +151,24 @@ class ComplianceSvc implements IComplianceSvc {
     return { data: data, error: undefined };
   }
 
+  async isPropertyParentDocumentRequestApproved(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<{ data?: boolean; error?: Error }> {
+    return await this.repo.isPropertyParentDocumentRequestApproved(
+      propertyId,
+      userId,
+      parentDocumentId,
+    );
+  }
 
   private initSocketServer() {
     const socketServer = getSocketServer();
-    if (!socketServer) return
-    this.socketServer = socketServer
+    if (!socketServer) return;
+    this.socketServer = socketServer;
   }
 }
 
-const complianceSvc = new ComplianceSvc(eventEmitter);
+const complianceSvc = new ComplianceSvc(redisClient);
 export default complianceSvc;

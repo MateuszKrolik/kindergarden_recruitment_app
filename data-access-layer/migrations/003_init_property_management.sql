@@ -39,4 +39,12 @@ CREATE TABLE IF NOT EXISTS property_management.property_parent_document_requirem
   point_value INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS property_management.property_children(
+  property_id uuid NOT NULL,
+  child_id uuid NOT NULL,
+  points INTEGER DEFAULT 0,
+  approved BOOLEAN DEFAULT false,
+  PRIMARY KEY (property_id, child_id)
+);
+
 COMMIT;

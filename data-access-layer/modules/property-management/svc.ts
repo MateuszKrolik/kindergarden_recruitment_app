@@ -1,18 +1,22 @@
-import { PagedResponse } from "@/types/pagination";
+import type { PagedResponse } from "../../../types/pagination.ts";
 import {
-  ConditionKey,
-  Property,
-  PropertyParentDocumentRequirement,
-  PropertyUser,
-  RequirementType,
-} from "./model";
-import { IPropertyManagementRepo, PropertyManagementRepo } from "./repo";
-import { pool } from "@/data-access-layer/db/db";
-import { IIdentityClient } from "./client";
-import { ParentConditionKeys } from "@/data-access-layer/shared/types/property_management";
-import identityClient from "../identity/svc";
-import EventEmitter from "events";
-import eventEmitter from "@/data-access-layer/eventEmitter";
+  type Property,
+  type PropertyChild,
+  type PropertyParentDocumentRequirement,
+  type PropertyUser,
+  CONDITION_KEY,
+  REQUIREMENT_TYPE,
+} from "./model.ts";
+import {
+  type IPropertyManagementRepo,
+  PropertyManagementRepo,
+} from "./repo.ts";
+import { pool } from "../../db/db.ts";
+import type { IComplianceClient, IIdentityClient } from "./client.ts";
+import type { ParentConditionKeys } from "../../shared/types/identity.ts";
+import identityClient from "../identity/svc.ts";
+import complianceClient from "../compliance/svc.ts";
+import { redisClient } from "../../db/redis-client.ts";
 
 export interface IPropertyManagementSvc {
   getAllProperties(
@@ -29,16 +33,41 @@ export interface IPropertyManagementSvc {
     pageSize: number,
     pageNumber: number,
   ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
+  getAllPropertyChildrenForGivenParent(
+    propertyId: string,
+    parentId: string,
+  ): Promise<{
+    data?: PropertyChild[];
+    error?: Error;
+  }>;
+  getAllPropertyChildren(
+    propertyId: string,
+  ): Promise<{ data?: PropertyChild[]; error?: Error }>;
+  incrementPropertyChildrenPointsForGivenParent(
+    propertyId: string,
+    parentId: string,
+    childrenIds: string[],
+    pointValue: number,
+  ): Promise<{ data?: PropertyChild[]; error?: Error }>;
+  isPropertyParentDocumentRequestApproved(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<{ data?: boolean; error?: Error }>;
 }
 
 class PropertyManagementSvc implements IPropertyManagementSvc {
   private repo: IPropertyManagementRepo;
+  private complianceClient: IComplianceClient;
+  private identityClient: IIdentityClient;
   constructor(
-    private eventEmitter: EventEmitter,
-    private identityClient: IIdentityClient,
+    identityClient: IIdentityClient,
+    complianceClient: IComplianceClient,
     repo?: IPropertyManagementRepo,
   ) {
-    this.repo = repo ?? new PropertyManagementRepo(pool);
+    this.identityClient = identityClient;
+    this.complianceClient = complianceClient;
+    this.repo = repo ?? new PropertyManagementRepo(pool, redisClient);
   }
   async getAllProperties(
     pageSize: number,
@@ -60,8 +89,11 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
       this.repo.getAllPropertyParentDocumentRequirements(propertyId),
       this.identityClient.getParentConditionKeys(userId),
     ]);
-    const errorResult = promiseResults.find((pR) => pR.error);
-    if (errorResult) return { data: undefined, error: errorResult.error };
+    const errors = promiseResults
+      .map((result) => result.error)
+      .filter((error) => error !== undefined);
+    if (errors.length > 0)
+      return { data: undefined, error: new AggregateError(errors) };
     const [allReqPromiseResult, conditionKeyPromiseResult] = promiseResults;
     const activeReqs: PropertyParentDocumentRequirement[] = [];
     allReqPromiseResult.data?.forEach(
@@ -76,27 +108,90 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
     );
     return { data: activeReqs, error: undefined };
   }
+
+  async getAllPropertyChildren(
+    propertyId: string,
+  ): Promise<{ data?: PropertyChild[]; error?: Error }> {
+    return await this.repo.getAllPropertyChildren(propertyId);
+  }
+
+  async getAllPropertyChildrenForGivenParent(
+    propertyId: string,
+    parentId: string,
+  ): Promise<{
+    data?: PropertyChild[];
+    error?: Error;
+  }> {
+    const taskResults = await Promise.all([
+      this.getAllPropertyChildren(propertyId),
+      this.identityClient.getAllParentChildren(parentId),
+    ]);
+    const errors = taskResults
+      .map((result) => result.error)
+      .filter((error) => error !== undefined);
+    if (errors.length > 0) {
+      const agg = new AggregateError(
+        errors,
+        `Failed to aggregate property children for parent: ${parentId}!`,
+      );
+      return { data: undefined, error: agg };
+    }
+    const [propChildrenResult, parentChildrenResult] = taskResults;
+    const propChildren = propChildrenResult.data || [];
+    const parentChildren = parentChildrenResult.data || [];
+    const parentChildIds = new Set(parentChildren.map((pc) => pc.child_id));
+    const matchingChildren = propChildren.filter((pc) =>
+      parentChildIds.has(pc.child_id),
+    );
+    return { data: matchingChildren, error: undefined };
+  }
+
+  async incrementPropertyChildrenPointsForGivenParent(
+    propertyId: string,
+    parentId: string,
+    childrenIds: string[],
+    pointValue: number,
+  ): Promise<{ data?: PropertyChild[]; error?: Error }> {
+    return await this.repo.incrementPropertyChildrenPointsForGivenParent(
+      propertyId,
+      parentId,
+      childrenIds,
+      pointValue,
+    );
+  }
+
+  async isPropertyParentDocumentRequestApproved(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<{ data?: boolean; error?: Error }> {
+    return this.complianceClient.isPropertyParentDocumentRequestApproved(
+      propertyId,
+      userId,
+      parentDocumentId,
+    );
+  }
 }
 
 function isParentRequirementActive(
   cK: ParentConditionKeys,
   r: PropertyParentDocumentRequirement,
 ): boolean {
-  if (r.requirement_type == RequirementType.Always) {
+  if (r.requirement_type == REQUIREMENT_TYPE.Always) {
     return true;
   }
 
-  if (r.requirement_type == RequirementType.Conditional) {
+  if (r.requirement_type == REQUIREMENT_TYPE.Conditional) {
     switch (r.condition_key) {
-      case ConditionKey.IsEmployed:
+      case CONDITION_KEY.IsEmployed:
         return !!cK.is_employed;
-      case ConditionKey.IsSelfEmployed:
+      case CONDITION_KEY.IsSelfEmployed:
         return !!cK.is_self_employed;
-      case ConditionKey.IsStudent:
+      case CONDITION_KEY.IsStudent:
         return !!cK.is_student;
-      case ConditionKey.FiledTaxInDesiredLocation:
+      case CONDITION_KEY.FiledTaxInDesiredLocation:
         return !!cK.filed_tax_in_desired_location;
-      case ConditionKey.ResidesInDesiredLocation:
+      case CONDITION_KEY.ResidesInDesiredLocation:
         return !!cK.resides_in_desired_location;
       default:
         return false;
@@ -106,7 +201,7 @@ function isParentRequirementActive(
 }
 
 const propertyManagementSvc = new PropertyManagementSvc(
-  eventEmitter,
   identityClient,
+  complianceClient,
 );
 export default propertyManagementSvc;

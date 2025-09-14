@@ -1,4 +1,4 @@
-import { PropertyParentDocument, RequestStatus } from "./model";
+import type { PropertyParentDocument, RequestStatus } from "./model.ts";
 import { Pool } from "pg";
 import {
   calculateOffset,
@@ -6,10 +6,13 @@ import {
   invalidateCache,
   withCacheAsideRedis,
   withWriteThroughRedisCache,
-} from "@/data-access-layer/shared/util/query";
-import { RedisClientType } from "@/data-access-layer/db/redis-client";
-import { newPagedResponse, PagedResponse } from "@/types/pagination";
-import { catchError } from "@/data-access-layer/shared/util/error";
+} from "../../shared/util/query.ts";
+import type { RedisClientType } from "../../db/redis-client.ts";
+import {
+  newPagedResponse,
+  type PagedResponse,
+} from "../../../types/pagination.ts";
+import { catchError } from "../../shared/util/error.ts";
 
 export interface IComplianceRepo {
   getAllDocumentApprovalRequestsForGivenPropertyParent(
@@ -38,13 +41,20 @@ export interface IComplianceRepo {
     requestStatus: RequestStatus,
     adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  isPropertyParentDocumentRequestApproved(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<{ data?: boolean; error?: Error }>;
 }
 
 export class ComplianceRepo implements IComplianceRepo {
-  constructor(
-    private pool: Pool,
-    private redisClient: RedisClientType,
-  ) { }
+  private pool: Pool;
+  private redisClient: RedisClientType;
+  constructor(pool: Pool, redisClient: RedisClientType) {
+    this.pool = pool;
+    this.redisClient = redisClient;
+  }
   async getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
@@ -208,6 +218,32 @@ export class ComplianceRepo implements IComplianceRepo {
     };
   }
 
+  async isPropertyParentDocumentRequestApproved(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<{ data?: boolean; error?: Error }> {
+    const cacheKey = this.getIsPropertyParentDocumentRequestApprovedCacheKey(
+      propertyId,
+      userId,
+      parentDocumentId,
+    );
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+      const sql = `
+        SELECT request_status = 'approved' AS is_approved
+        FROM compliance.property_parent_documents
+        WHERE property_id = $1 AND user_id = $2 AND parent_document_id = $3;
+        `;
+      const { data, error } = await executeQuery<{ is_approved: boolean }>(
+        this.pool,
+        sql,
+        [propertyId, userId, parentDocumentId],
+      );
+      if (error) return { data: undefined, error };
+      return { data: data?.rows[0].is_approved, error };
+    });
+  }
+
   async setPropertyParentDocumentRequestStatus(
     propertyId: string,
     userId: string,
@@ -251,6 +287,15 @@ export class ComplianceRepo implements IComplianceRepo {
 
     await this.invalidatePagedPropertyParentDocRequestsForGivenPropertyCache(
       propertyId,
+    );
+
+    await invalidateCache(
+      this.redisClient,
+      this.getIsPropertyParentDocumentRequestApprovedCacheKey(
+        propertyId,
+        userId,
+        parentDocumentId,
+      ),
     );
 
     return result;
@@ -310,5 +355,13 @@ export class ComplianceRepo implements IComplianceRepo {
     parentDocumentId: string,
   ): string {
     return `properties:${propertyId}:parents:${userId}:requests:${parentDocumentId}`;
+  }
+
+  private getIsPropertyParentDocumentRequestApprovedCacheKey(
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): string {
+    return `properties:${propertyId}:parents:${userId}:reqeusts${parentDocumentId}:approved`;
   }
 }

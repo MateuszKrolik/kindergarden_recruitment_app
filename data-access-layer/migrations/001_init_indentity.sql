@@ -56,4 +56,16 @@ CREATE TABLE IF NOT EXISTS identity.parent_user_details(
   resides_in_desired_location BOOLEAN
 );
 
+
+CREATE TABLE IF NOT EXISTS identity.children(
+  id uuid DEFAULT gen_random_uuid() primary key,
+  has_disability BOOLEAN
+);
+
+CREATE TABLE IF NOT EXISTS identity.parent_children(
+  parent_id uuid NOT NULL,
+  child_id uuid NOT NULL,
+  PRIMARY KEY (parent_id, child_id)
+);
+
 COMMIT;

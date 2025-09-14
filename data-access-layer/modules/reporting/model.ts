@@ -1,4 +1,4 @@
-import { DocumentType } from "../shared/types/reporting";
+import { DocumentType } from "../../shared/types/reporting.ts";
 
 export type ParentDocument = {
   id: string;

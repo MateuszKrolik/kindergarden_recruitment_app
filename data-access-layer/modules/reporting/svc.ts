@@ -1,7 +1,7 @@
-import { pool } from "@/data-access-layer/db/db";
-import { ParentDocument } from "./model";
-import { IReportingRepo, ReportingRepo } from "./repo";
-import { DocumentType } from "../../shared/types/reporting";
+import { pool } from "../../db/db.ts";
+import type { ParentDocument } from "./model.ts";
+import { type IReportingRepo, ReportingRepo } from "./repo.ts";
+import type { DocumentType } from "../../shared/types/reporting.ts";
 
 export interface IReportingSvc {
   getParentDocumentByType(

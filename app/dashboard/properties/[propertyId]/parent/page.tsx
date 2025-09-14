@@ -11,7 +11,7 @@ import {
 } from "@/app/actions/property-management";
 import { getParentDocumentByType } from "@/app/actions/reporting";
 import { PropertyParentPageTabs } from "@/components/client/PropertyParentPageTabs";
-import { PropertyUserRole } from "@/data-access-layer/modules/property-management/model";
+import { PROPERTY_USER_ROLE } from "@/data-access-layer/modules/property-management/model";
 import { auth } from "@/lib/auth";
 import { getErrorMessage } from "@/util/error";
 import { headers } from "next/headers";
@@ -34,7 +34,7 @@ export default async function PropertyParentPage({
     console.error(getErrorMessage(error));
     return;
   }
-  if (data?.role != PropertyUserRole.Parent) {
+  if (data?.role != PROPERTY_USER_ROLE.Parent) {
     redirect(`/dashboard/properties/${propertyId}/parent/403`);
   }
 

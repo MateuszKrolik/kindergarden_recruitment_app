@@ -1,7 +1,7 @@
 import { Pool } from "pg";
-import { DocumentType } from "../../shared/types/reporting";
-import { ParentDocument } from "./model";
-import { executeQuery } from "@/data-access-layer/shared/util/query";
+import { DocumentType } from "../../shared/types/reporting.ts";
+import { ParentDocument } from "./model.ts";
+import { executeQuery } from "../../shared/util/query.ts";
 
 export interface IReportingRepo {
   getParentDocumentByType(

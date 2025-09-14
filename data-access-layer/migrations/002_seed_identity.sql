@@ -73,4 +73,37 @@ INSERT INTO identity.account (
   NOW()
 );
 
+
+INSERT INTO identity.children(
+  id,
+  has_disability
+) VALUES (
+  '9e4f732a-3f0d-4348-8ade-b83e1e9a6346',
+  true
+);
+
+INSERT INTO identity.parent_children(
+  parent_id,
+  child_id
+) VALUES (
+  '6ceaa734-b828-41ba-8351-a0198f64c089',
+  '9e4f732a-3f0d-4348-8ade-b83e1e9a6346'
+);
+
+INSERT INTO identity.children(
+  id,
+  has_disability
+) VALUES (
+  'd6b6c283-fdaa-4379-b7fd-b431fd668656',
+  true
+);
+
+INSERT INTO identity.parent_children(
+  parent_id,
+  child_id
+) VALUES (
+  '6ceaa734-b828-41ba-8351-a0198f64c089',
+  'd6b6c283-fdaa-4379-b7fd-b431fd668656'
+);
+
 COMMIT;

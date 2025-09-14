@@ -1,9 +1,13 @@
 import { createClient } from "redis";
 
-export const redisClient = createClient({
-  url: process.env.REDIS_URL,
-});
+const redisURL = process.env.REDIS_URL;
 
+export const redisClient = createClient({
+  url: redisURL,
+});
 await redisClient.connect();
+
+export const redisSubscriber = redisClient.duplicate();
+await redisSubscriber.connect();
 
 export type RedisClientType = typeof redisClient;
