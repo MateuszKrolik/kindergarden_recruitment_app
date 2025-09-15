@@ -51,6 +51,11 @@ export type ParentDocumentRequirementsTableProps = {
     userId: string,
     parentDocumentId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  saveParentDocument(
+    userId: string,
+    documentType: DocumentType,
+    file: File,
+  ): Promise<{ data?: ParentDocument; error?: Error }>;
 };
 
 export const ParentDocumentRequirementsTable = ({
@@ -60,6 +65,7 @@ export const ParentDocumentRequirementsTable = ({
   getParentDocumentByType,
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
+  saveParentDocument,
 }: ParentDocumentRequirementsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -154,6 +160,7 @@ export const ParentDocumentRequirementsTable = ({
             sendPropertyParentDocumentApprovalRequest={
               sendPropertyParentDocumentApprovalRequest
             }
+            saveParentDocument={saveParentDocument}
           />
         );
       },

@@ -10,3 +10,11 @@ export async function getParentDocumentByType(
 ): Promise<{ data?: ParentDocument; error?: Error }> {
   return await svc.getParentDocumentByType(userId, documentType);
 }
+
+export async function saveParentDocument(
+  userId: string,
+  documentType: DocumentType,
+  file: File,
+): Promise<{ data?: ParentDocument; error?: Error }> {
+  return await svc.saveParentDocument(userId, documentType, file);
+}

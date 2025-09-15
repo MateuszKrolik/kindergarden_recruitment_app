@@ -1,8 +1,14 @@
 import { Pool } from "pg";
 import type { DocumentType } from "../../shared/types/reporting.ts";
 import type { ParentDocument } from "./model.ts";
-import { executeQuery, withCacheAsideRedis } from "../../shared/util/query.ts";
+import {
+  executeQuery,
+  withCacheAsideRedis,
+  withWriteThroughRedisCache,
+} from "../../shared/util/query.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { catchError } from "../../shared/util/error.ts";
 
 export interface IReportingRepo {
   getParentDocumentByType(
@@ -12,6 +18,11 @@ export interface IReportingRepo {
   getParentDocumentTypeByDocumentId(
     parentDocumentId: string,
   ): Promise<{ data?: DocumentType; error?: Error }>;
+  saveParentDocument(
+    userId: string,
+    documentType: DocumentType,
+    filePath: string,
+  ): Promise<{ data?: ParentDocument; error?: Error }>;
 }
 
 export class ReportingRepo implements IReportingRepo {
@@ -56,5 +67,80 @@ export class ReportingRepo implements IReportingRepo {
       if (error) return { data: undefined, error: error };
       return { data: data?.rows[0].document_type, error: undefined };
     });
+  }
+
+  async saveParentDocument(
+    userId: string,
+    documentType: DocumentType,
+    filePath: string,
+  ): Promise<{ data?: ParentDocument; error?: Error }> {
+    const cacheKey = `parents:${userId}:parent_documents:${documentType}`;
+    return await withWriteThroughRedisCache(
+      this.redisClient,
+      cacheKey,
+      async () => {
+        const sql = `
+        INSERT INTO reporting.parent_documents(
+          user_id,
+          document_type,
+          file_path)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+        `;
+        const { data, error } = await executeQuery<ParentDocument>(
+          this.pool,
+          sql,
+          [userId, documentType, filePath],
+        );
+        if (error) return { data: undefined, error };
+        return { data: data?.rows[0], error: undefined };
+      },
+    );
+  }
+}
+
+export interface IS3Repository {
+  uploadFile(
+    bucket: string,
+    key: string,
+    file: File,
+  ): Promise<{ data?: string; error?: Error }>;
+}
+
+export class S3Repository implements IS3Repository {
+  private client: S3Client;
+
+  constructor() {
+    this.client = new S3Client({
+      region: "us-east-1", // dummy MinIO region
+      endpoint: "http://localhost:9000",
+      forcePathStyle: true, // required for MinIO
+      credentials: {
+        accessKeyId: "minioadmin",
+        secretAccessKey: "minioadmin",
+      },
+    });
+  }
+
+  async uploadFile(
+    bucket: string,
+    key: string,
+    file: File,
+  ): Promise<{ data?: string; error?: Error }> {
+    const arrayBuffer = await file.arrayBuffer();
+
+    const { error } = await catchError(
+      this.client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: Buffer.from(arrayBuffer),
+          ContentType: file.type,
+        }),
+      ),
+    );
+    if (error) return { data: undefined, error };
+
+    return { data: `/${bucket}/${key}`, error: undefined };
   }
 }

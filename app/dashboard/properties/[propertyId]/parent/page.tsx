@@ -9,7 +9,10 @@ import {
   getPropertyParentDocumentRequirements,
   getPropertyUser,
 } from "@/app/actions/property-management";
-import { getParentDocumentByType } from "@/app/actions/reporting";
+import {
+  getParentDocumentByType,
+  saveParentDocument,
+} from "@/app/actions/reporting";
 import { PropertyParentPageTabs } from "@/components/client/PropertyParentPageTabs";
 import { PROPERTY_USER_ROLE } from "@/data-access-layer/modules/property-management/model";
 import { auth } from "@/lib/auth";
@@ -55,6 +58,7 @@ export default async function PropertyParentPage({
       sendPropertyParentDocumentApprovalRequest={
         sendPropertyParentDocumentApprovalRequest
       }
+      saveParentDocument={saveParentDocument}
     />
   );
 }
