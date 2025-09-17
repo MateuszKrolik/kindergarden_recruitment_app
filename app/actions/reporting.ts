@@ -18,3 +18,17 @@ export async function saveParentDocument(
 ): Promise<{ data?: ParentDocument; error?: Error }> {
   return await svc.saveParentDocument(userId, documentType, file);
 }
+
+export async function getDocumentURLByFilePath(
+  key: string,
+  bucket: string = "mybucket",
+  expiresIn: number = 3600,
+): Promise<{ data?: string; error?: Error }> {
+  return await svc.getDocumentURLByFilePath(bucket, key, expiresIn);
+}
+
+export async function getParentDocumentURLByDocumentID(
+  docId: string,
+): Promise<{ data?: string; error?: Error }> {
+  return await svc.getParentDocumentURLByDocumentID(docId);
+}

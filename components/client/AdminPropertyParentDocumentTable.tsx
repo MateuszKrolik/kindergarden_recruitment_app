@@ -61,6 +61,9 @@ interface AdminPropertyParentDocumentTableProps {
     requestStatus: RequestStatus,
     adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  getParentDocumentURLByDocumentID(
+    docId: string,
+  ): Promise<{ data?: string; error?: Error }>;
 }
 
 export default function AdminPropertyParentDocumentTable({
@@ -68,6 +71,7 @@ export default function AdminPropertyParentDocumentTable({
   adminId,
   getAllDocumentApprovalRequestsForGivenProperty,
   setPropertyParentDocumentApprovalRequestStatus,
+  getParentDocumentURLByDocumentID,
 }: AdminPropertyParentDocumentTableProps) {
   const searchParams = useSearchParams();
   const pageNumberParam = searchParams.get("pageNumber");
@@ -200,6 +204,7 @@ export default function AdminPropertyParentDocumentTable({
             setPropertyParentDocumentApprovalRequestStatus={
               setPropertyParentDocumentApprovalRequestStatus
             }
+            getParentDocumentURLByDocumentID={getParentDocumentURLByDocumentID}
           />
         );
       },
@@ -228,12 +233,11 @@ export default function AdminPropertyParentDocumentTable({
     loadProperties(pageSize, pageNumber);
   }, [loadProperties, pageNumber, pageSize]);
 
-
   useEffect(() => {
     function onRequestApproved(event: EventEnvelope<PropertyParentDocument>) {
       setResult((prev) => {
         const existingIndex = prev.findIndex(
-          doc => doc.parent_document_id === event.payload.parent_document_id
+          (doc) => doc.parent_document_id === event.payload.parent_document_id,
         );
 
         if (existingIndex !== -1) {
@@ -241,7 +245,7 @@ export default function AdminPropertyParentDocumentTable({
           updated[existingIndex] = {
             ...updated[existingIndex],
             request_status: event.payload.request_status,
-            approved_by: event.payload.approved_by
+            approved_by: event.payload.approved_by,
           };
           return updated;
         }
@@ -249,20 +253,34 @@ export default function AdminPropertyParentDocumentTable({
         return prev;
       });
 
-      toast.success(`Document: ${event.payload.parent_document_id} was just approved! 🎉`);
+      toast.success(
+        `Document: ${event.payload.parent_document_id} was just approved! 🎉`,
+      );
     }
 
     function onRequestSent(event: PropertyParentDocument) {
-      setResult((prev) => [...prev, event])
+      setResult((prev) => [...prev, event]);
     }
 
-    socket.on(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, onRequestApproved);
+    socket.on(
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+      onRequestApproved,
+    );
 
-    socket.on(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED, onRequestSent);
+    socket.on(
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
+      onRequestSent,
+    );
 
     return () => {
-      socket.off(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, onRequestApproved);
-      socket.off(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED, onRequestSent);
+      socket.off(
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+        onRequestApproved,
+      );
+      socket.off(
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
+        onRequestSent,
+      );
     };
   }, []);
 

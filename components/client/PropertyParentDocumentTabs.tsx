@@ -38,6 +38,11 @@ type PropertyParentDocumentTabsProps = {
     documentType: DocumentType,
     file: File,
   ): Promise<{ data?: ParentDocument; error?: Error }>;
+  getDocumentURLByFilePath(
+    bucket: string,
+    key: string,
+    expiresIn: number,
+  ): Promise<{ data?: string; error?: Error }>;
 };
 
 export const PropertyParentDocumentTabs = ({
@@ -49,6 +54,7 @@ export const PropertyParentDocumentTabs = ({
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
   saveParentDocument,
+  getDocumentURLByFilePath,
 }: PropertyParentDocumentTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
@@ -74,6 +80,7 @@ export const PropertyParentDocumentTabs = ({
               sendPropertyParentDocumentApprovalRequest
             }
             saveParentDocument={saveParentDocument}
+            getDocumentURLByFilePath={getDocumentURLByFilePath}
           />
         </TabsContent>
         <TabsContent value="approval_requests">

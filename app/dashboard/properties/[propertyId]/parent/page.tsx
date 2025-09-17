@@ -10,6 +10,7 @@ import {
   getPropertyUser,
 } from "@/app/actions/property-management";
 import {
+  getDocumentURLByFilePath,
   getParentDocumentByType,
   saveParentDocument,
 } from "@/app/actions/reporting";
@@ -59,6 +60,7 @@ export default async function PropertyParentPage({
         sendPropertyParentDocumentApprovalRequest
       }
       saveParentDocument={saveParentDocument}
+      getDocumentURLByFilePath={getDocumentURLByFilePath}
     />
   );
 }

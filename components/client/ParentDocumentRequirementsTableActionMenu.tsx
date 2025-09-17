@@ -40,6 +40,11 @@ type ParentDocumentRequirementsTableActionMenuProps = {
     documentType: DocumentType,
     file: File,
   ): Promise<{ data?: ParentDocument; error?: Error }>;
+  getDocumentURLByFilePath(
+    bucket: string,
+    key?: string,
+    expiresIn?: number,
+  ): Promise<{ data?: string; error?: Error }>;
 };
 
 export const ParentDocumentRequirementsTableActionMenu = ({
@@ -50,6 +55,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
   saveParentDocument,
+  getDocumentURLByFilePath,
 }: ParentDocumentRequirementsTableActionMenuProps) => {
   const [parentDoc, setParentDoc] = useState<ParentDocument | null>(null);
   const [disableApprovalRequest, setDisableApprovalRequest] =
@@ -112,26 +118,43 @@ export const ParentDocumentRequirementsTableActionMenu = ({
               <Progress value={33} />
             </DropdownMenuItem>
           ) : parentDoc ? (
-            <DropdownMenuItem
-              disabled={disableApprovalRequest}
-              onClick={async () => {
-                const { error } =
-                  await sendPropertyParentDocumentApprovalRequest(
-                    propertyId,
-                    userId,
-                    parentDoc.id,
+            <>
+              <DropdownMenuItem
+                disabled={disableApprovalRequest}
+                onClick={async () => {
+                  const { error } =
+                    await sendPropertyParentDocumentApprovalRequest(
+                      propertyId,
+                      userId,
+                      parentDoc.id,
+                    );
+                  if (error) {
+                    toast.error(getErrorMessage(error));
+                    return;
+                  }
+                  toast.success(
+                    `Successfully sent approval request for document: ${parentDoc.document_type}!`,
                   );
-                if (error) {
-                  toast.error(getErrorMessage(error));
-                  return;
-                }
-                toast.success(
-                  `Successfully sent approval request for document: ${parentDoc.document_type}!`,
-                );
-              }}
-            >
-              Request approval
-            </DropdownMenuItem>
+                }}
+              >
+                Request approval
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={async () => {
+                  const { data, error } = await getDocumentURLByFilePath(
+                    parentDoc.file_path,
+                  );
+                  if (error) {
+                    toast.error(getErrorMessage(error));
+                    return;
+                  }
+                  window.open(data, "_blank");
+                }}
+              >
+                View document
+              </DropdownMenuItem>
+            </>
           ) : (
             <DropdownMenuItem asChild>
               <button
@@ -144,8 +167,6 @@ export const ParentDocumentRequirementsTableActionMenu = ({
               </button>
             </DropdownMenuItem>
           )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>TODO</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <input

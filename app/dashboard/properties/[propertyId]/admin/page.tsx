@@ -5,6 +5,7 @@ import {
   setPropertyParentDocumentApprovalRequestStatus,
 } from "@/app/actions/compliance";
 import { getPropertyUser } from "@/app/actions/property-management";
+import { getParentDocumentURLByDocumentID } from "@/app/actions/reporting";
 import AdminPropertyParentDocumentTable from "@/components/client/AdminPropertyParentDocumentTable";
 import { PROPERTY_USER_ROLE } from "@/data-access-layer/modules/property-management/model";
 import { auth } from "@/lib/auth";
@@ -43,6 +44,7 @@ export default async function PropertyAdminPage({
       setPropertyParentDocumentApprovalRequestStatus={
         setPropertyParentDocumentApprovalRequestStatus
       }
+      getParentDocumentURLByDocumentID={getParentDocumentURLByDocumentID}
     />
   );
 }

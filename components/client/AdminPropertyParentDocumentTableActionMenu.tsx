@@ -26,12 +26,16 @@ type AdminPropertyParentDocumentTableActionMenuProps = {
     requestStatus: RequestStatus,
     adminId: string,
   ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  getParentDocumentURLByDocumentID(
+    docId: string,
+  ): Promise<{ data?: string; error?: Error }>;
 };
 
 export default function AdminPropertyParentDocumentTableActionMenu({
   adminId,
   request,
   setPropertyParentDocumentApprovalRequestStatus,
+  getParentDocumentURLByDocumentID,
 }: AdminPropertyParentDocumentTableActionMenuProps) {
   return (
     <DropdownMenu>
@@ -50,6 +54,21 @@ export default function AdminPropertyParentDocumentTableActionMenu({
             setPropertyParentDocumentApprovalRequestStatus
           }
         />
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={async () => {
+            const { data, error } = await getParentDocumentURLByDocumentID(
+              request.parent_document_id,
+            );
+            if (error) {
+              toast.error(getErrorMessage(error));
+              return;
+            }
+            window.open(data, "_blank");
+          }}
+        >
+          View document
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

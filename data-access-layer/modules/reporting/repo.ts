@@ -7,7 +7,12 @@ import {
   withWriteThroughRedisCache,
 } from "../../shared/util/query.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { catchError } from "../../shared/util/error.ts";
 
 export interface IReportingRepo {
@@ -23,6 +28,9 @@ export interface IReportingRepo {
     documentType: DocumentType,
     filePath: string,
   ): Promise<{ data?: ParentDocument; error?: Error }>;
+  getParentDocumentFilePathByDocumentID(
+    docId: string,
+  ): Promise<{ data?: string; error?: Error }>;
 }
 
 export class ReportingRepo implements IReportingRepo {
@@ -97,6 +105,27 @@ export class ReportingRepo implements IReportingRepo {
       },
     );
   }
+
+  async getParentDocumentFilePathByDocumentID(
+    docId: string,
+  ): Promise<{ data?: string; error?: Error }> {
+    //TODO:invalidate on mutations
+    const cacheKey = `parent_documents:${docId}`;
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+      const sql = `
+        SELECT file_path
+        FROM reporting.parent_documents
+        WHERE id = $1;
+        `;
+      const { data, error } = await executeQuery<{ file_path: string }>(
+        this.pool,
+        sql,
+        [docId],
+      );
+      if (error) return { data: undefined, error };
+      return { data: data?.rows[0].file_path, error: undefined };
+    });
+  }
 }
 
 export interface IS3Repository {
@@ -104,6 +133,11 @@ export interface IS3Repository {
     bucket: string,
     key: string,
     file: File,
+  ): Promise<{ data?: string; error?: Error }>;
+  getDocumentURLByFilePath(
+    key?: string,
+    bucket?: string,
+    expiresIn?: number,
   ): Promise<{ data?: string; error?: Error }>;
 }
 
@@ -142,5 +176,26 @@ export class S3Repository implements IS3Repository {
     if (error) return { data: undefined, error };
 
     return { data: `/${bucket}/${key}`, error: undefined };
+  }
+
+  async getDocumentURLByFilePath(
+    key: string,
+    bucket: string = "mybucket",
+    expiresIn: number = 3600,
+  ): Promise<{ data?: string; error?: Error }> {
+    const { data, error } = await catchError(
+      getSignedUrl(
+        this.client,
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: key,
+        }),
+        {
+          expiresIn,
+        },
+      ),
+    );
+    if (error) return { data: undefined, error };
+    return { data, error: undefined };
   }
 }

@@ -39,6 +39,11 @@ type PropertyParentPageTabsProps = {
     documentType: DocumentType,
     file: File,
   ): Promise<{ data?: ParentDocument; error?: Error }>;
+  getDocumentURLByFilePath(
+    bucket: string,
+    key: string,
+    expiresIn: number,
+  ): Promise<{ data?: string; error?: Error }>;
 };
 
 export const PropertyParentPageTabs = ({
@@ -50,6 +55,7 @@ export const PropertyParentPageTabs = ({
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
   saveParentDocument,
+  getDocumentURLByFilePath,
 }: PropertyParentPageTabsProps) => {
   return (
     <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
@@ -79,6 +85,7 @@ export const PropertyParentPageTabs = ({
                 sendPropertyParentDocumentApprovalRequest
               }
               saveParentDocument={saveParentDocument}
+              getDocumentURLByFilePath={getDocumentURLByFilePath}
             />
           </TabsContent>
           <TabsContent value="children-documents">

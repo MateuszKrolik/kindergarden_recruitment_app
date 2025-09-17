@@ -56,6 +56,11 @@ export type ParentDocumentRequirementsTableProps = {
     documentType: DocumentType,
     file: File,
   ): Promise<{ data?: ParentDocument; error?: Error }>;
+  getDocumentURLByFilePath(
+    bucket: string,
+    key: string,
+    expiresIn: number,
+  ): Promise<{ data?: string; error?: Error }>;
 };
 
 export const ParentDocumentRequirementsTable = ({
@@ -66,6 +71,7 @@ export const ParentDocumentRequirementsTable = ({
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
   saveParentDocument,
+  getDocumentURLByFilePath,
 }: ParentDocumentRequirementsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -161,6 +167,7 @@ export const ParentDocumentRequirementsTable = ({
               sendPropertyParentDocumentApprovalRequest
             }
             saveParentDocument={saveParentDocument}
+            getDocumentURLByFilePath={getDocumentURLByFilePath}
           />
         );
       },
