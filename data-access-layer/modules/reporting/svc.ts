@@ -72,11 +72,11 @@ class ReportingSvc implements IReportingSvc {
   }
 
   async getDocumentURLByFilePath(
-    bucket: string,
     key: string,
+    bucket: string = "mybucket",
     expiresIn: number = 3600,
   ): Promise<{ data?: string; error?: Error }> {
-    return await this.s3Repo.getDocumentURLByFilePath(bucket, key, expiresIn);
+    return await this.s3Repo.getDocumentURLByFilePath(key, bucket, expiresIn);
   }
 
   async getParentDocumentURLByDocumentID(

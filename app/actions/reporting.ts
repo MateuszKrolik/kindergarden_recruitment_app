@@ -24,7 +24,7 @@ export async function getDocumentURLByFilePath(
   bucket: string = "mybucket",
   expiresIn: number = 3600,
 ): Promise<{ data?: string; error?: Error }> {
-  return await svc.getDocumentURLByFilePath(bucket, key, expiresIn);
+  return await svc.getDocumentURLByFilePath(key, bucket, expiresIn);
 }
 
 export async function getParentDocumentURLByDocumentID(

@@ -41,8 +41,8 @@ type ParentDocumentRequirementsTableActionMenuProps = {
     file: File,
   ): Promise<{ data?: ParentDocument; error?: Error }>;
   getDocumentURLByFilePath(
-    bucket: string,
     key?: string,
+    bucket?: string,
     expiresIn?: number,
   ): Promise<{ data?: string; error?: Error }>;
 };

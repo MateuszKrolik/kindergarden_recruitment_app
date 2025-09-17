@@ -39,9 +39,9 @@ type PropertyParentDocumentTabsProps = {
     file: File,
   ): Promise<{ data?: ParentDocument; error?: Error }>;
   getDocumentURLByFilePath(
-    bucket: string,
-    key: string,
-    expiresIn: number,
+    key?: string,
+    bucket?: string,
+    expiresIn?: number,
   ): Promise<{ data?: string; error?: Error }>;
 };
 
