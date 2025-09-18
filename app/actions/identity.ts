@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth";
 import { signInSchema } from "@/types/schema";
 import { z } from "zod";
 import { catchError } from "@/data-access-layer/shared/util/error";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export const doesAccountExist = async (
   accountId: string,
@@ -14,12 +16,12 @@ export const doesAccountExist = async (
 
 export async function signIn(
   unsafeData: z.infer<typeof signInSchema>,
-): Promise<{ headers?: Headers; error?: Error }> {
+): Promise<{ error?: Error } | void> {
   const { success, data, error } = signInSchema.safeParse(unsafeData);
 
-  if (!success) return { headers: undefined, error: error };
+  if (!success) return { error: error };
 
-  const { data: signInData, error: signInError } = await catchError(
+  const { error: signInError } = await catchError(
     auth.api.signInEmail({
       body: {
         email: data.email,
@@ -29,12 +31,10 @@ export async function signIn(
     }),
   );
 
-  if (signInError) return { headers: undefined, error: signInError };
+  if (signInError) return { error: signInError };
 
-  return {
-    headers: signInData?.headers,
-    error: undefined,
-  };
+  revalidatePath("/"); // ensure that server components are re-rendered on success
+  redirect(data.callbackUrl || "/dashboard/properties");
 }
 
 export const signUp = async () => {

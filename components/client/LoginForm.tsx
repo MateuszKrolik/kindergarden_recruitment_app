@@ -7,24 +7,24 @@ import { useRef } from "react";
 import LoginSubmitButton from "./LoginSubmitButton";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/util/error";
+import { useSearchParams } from "next/navigation";
 
 export const LoginForm = () => {
   const ref = useRef<HTMLFormElement>(null);
+  const searchParams = useSearchParams();
+  const callbackUrl =
+    searchParams.get("callbackUrl") || "/dashboard/properties";
   return (
     <form
       className="w-full"
       ref={ref}
       action={async (formData) => {
-        const { headers, error } = await signIn({
+        const result = await signIn({
           email: formData.get("email") as string,
           password: formData.get("password") as string,
+          callbackUrl,
         });
-        if (error) {
-          toast.error(getErrorMessage(error));
-          return;
-        }
-        console.log(headers);
-        toast.success("Login successful!");
+        if (result && result.error) toast.error(getErrorMessage(result.error));
       }}
     >
       <div className="grid gap-4">

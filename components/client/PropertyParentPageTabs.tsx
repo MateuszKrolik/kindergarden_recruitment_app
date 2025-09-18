@@ -58,47 +58,45 @@ export const PropertyParentPageTabs = ({
   getDocumentURLByFilePath,
 }: PropertyParentPageTabsProps) => {
   return (
-    <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
-      <div className="w-full max-w-4xl">
-        <Tabs defaultValue="my-documents">
-          <TabsList className="mx-auto">
-            <TabsTrigger value="my-documents">My Documents</TabsTrigger>
-            <TabsTrigger value="children-documents">
-              Children Documents
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="my-documents">
-            <PropertyParentDocumentTabs
-              propertyId={propertyId}
-              userId={userId}
-              getParentDocumentByType={getParentDocumentByType}
-              getPropertyParentDocumentRequirements={
-                getPropertyParentDocumentRequirements
-              }
-              getAllDocumentApprovalRequestsForGivenPropertyParent={
-                getAllDocumentApprovalRequestsForGivenPropertyParent
-              }
-              getPropertyParentDocumentApprovalRequestByDocumentId={
-                getPropertyParentDocumentApprovalRequestByDocumentId
-              }
-              sendPropertyParentDocumentApprovalRequest={
-                sendPropertyParentDocumentApprovalRequest
-              }
-              saveParentDocument={saveParentDocument}
-              getDocumentURLByFilePath={getDocumentURLByFilePath}
-            />
-          </TabsContent>
-          <TabsContent value="children-documents">
-            <PropertyParentChildrenTable
-              propertyId={propertyId}
-              userId={userId}
-              getAllPropertyChildrenForGivenParent={
-                getAllPropertyChildrenForGivenParent
-              }
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+    <div className="w-full max-w-4xl">
+      <Tabs defaultValue="my-documents">
+        <TabsList className="mx-auto">
+          <TabsTrigger value="my-documents">My Documents</TabsTrigger>
+          <TabsTrigger value="children-documents">
+            Children Documents
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="my-documents">
+          <PropertyParentDocumentTabs
+            propertyId={propertyId}
+            userId={userId}
+            getParentDocumentByType={getParentDocumentByType}
+            getPropertyParentDocumentRequirements={
+              getPropertyParentDocumentRequirements
+            }
+            getAllDocumentApprovalRequestsForGivenPropertyParent={
+              getAllDocumentApprovalRequestsForGivenPropertyParent
+            }
+            getPropertyParentDocumentApprovalRequestByDocumentId={
+              getPropertyParentDocumentApprovalRequestByDocumentId
+            }
+            sendPropertyParentDocumentApprovalRequest={
+              sendPropertyParentDocumentApprovalRequest
+            }
+            saveParentDocument={saveParentDocument}
+            getDocumentURLByFilePath={getDocumentURLByFilePath}
+          />
+        </TabsContent>
+        <TabsContent value="children-documents">
+          <PropertyParentChildrenTable
+            propertyId={propertyId}
+            userId={userId}
+            getAllPropertyChildrenForGivenParent={
+              getAllPropertyChildrenForGivenParent
+            }
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

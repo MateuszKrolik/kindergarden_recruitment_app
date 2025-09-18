@@ -285,117 +285,115 @@ export default function AdminPropertyParentDocumentTable({
   }, []);
 
   return (
-    <div className="min-h-[calc(90vh-80px)] flex items-center justify-center">
-      <div className="w-full max-w-4xl">
-        <div className="flex items-center py-4"></div>
-        <div className="overflow-hidden rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length}>Loading...</TableCell>
-                </TableRow>
-              ) : table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
+    <div className="w-full max-w-4xl">
+      <div className="flex items-center py-4"></div>
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
                         )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length}>Loading...</TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="text-muted-foreground flex-1 text-sm">
+          Page {pageNumber} of {totalPages} • {totalCount} total items
         </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="text-muted-foreground flex-1 text-sm">
-            Page {pageNumber} of {totalPages} • {totalCount} total items
-          </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                Page size: {pageSize} <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Rows per page</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {[1, 2].map((size) => (
-                <DropdownMenuItem key={size} asChild>
-                  <Link key={size} href={formPageResizeUrl(size)}>
-                    {size}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              Page size: {pageSize} <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Rows per page</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {[1, 2].map((size) => (
+              <DropdownMenuItem key={size} asChild>
+                <Link key={size} href={formPageResizeUrl(size)}>
+                  {size}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!hasPreviousPage || isLoading}
-              asChild={hasPreviousPage && !isLoading}
-            >
-              {hasPreviousPage && !isLoading ? (
-                <Link href={formTargetPageUrl(pageNumber - 1, pageSize)}>
-                  Previous
-                </Link>
-              ) : (
-                <span>Previous</span>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!hasNextPage || isLoading}
-              asChild={hasNextPage && !isLoading}
-            >
-              {hasNextPage && !isLoading ? (
-                <Link href={formTargetPageUrl(pageNumber + 1, pageSize)}>
-                  Next
-                </Link>
-              ) : (
-                <span>Next</span>
-              )}
-            </Button>
-          </div>
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!hasPreviousPage || isLoading}
+            asChild={hasPreviousPage && !isLoading}
+          >
+            {hasPreviousPage && !isLoading ? (
+              <Link href={formTargetPageUrl(pageNumber - 1, pageSize)}>
+                Previous
+              </Link>
+            ) : (
+              <span>Previous</span>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!hasNextPage || isLoading}
+            asChild={hasNextPage && !isLoading}
+          >
+            {hasNextPage && !isLoading ? (
+              <Link href={formTargetPageUrl(pageNumber + 1, pageSize)}>
+                Next
+              </Link>
+            ) : (
+              <span>Next</span>
+            )}
+          </Button>
         </div>
       </div>
     </div>
