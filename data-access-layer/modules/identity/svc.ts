@@ -1,6 +1,9 @@
 import { pool } from "../../db/db.ts";
 import { type IIdentityRepo, PgIdentityRepo } from "./repo.ts";
-import type { ParentConditionKeys } from "../../shared/types/identity.ts";
+import type {
+  ParentConditionKeys,
+  ChildConditionKeys,
+} from "../../shared/types/identity.ts";
 import type { ParentChild } from "../../shared/types/identity.ts";
 import { redisClient } from "../../db/redis-client.ts";
 
@@ -11,6 +14,9 @@ export interface IIdentitySvc {
   getParentConditionKeys(
     userId: string,
   ): Promise<{ data?: ParentConditionKeys; error?: Error }>;
+  getChildConditionKeys(
+    childId: string,
+  ): Promise<{ data?: ChildConditionKeys; error?: Error }>;
   getAllParentChildren(
     parentId: string,
   ): Promise<{ data?: ParentChild[]; error?: Error }>;
@@ -25,19 +31,25 @@ class IdentitySvc implements IIdentitySvc {
   async doesAccountExist(
     accountId: string,
   ): Promise<{ data?: boolean; error?: Error }> {
-    return this.repo.doesAccountExist(accountId);
+    return await this.repo.doesAccountExist(accountId);
   }
 
   async getParentConditionKeys(
     userId: string,
   ): Promise<{ data?: ParentConditionKeys; error?: Error }> {
-    return this.repo.getParentConditionKeys(userId);
+    return await this.repo.getParentConditionKeys(userId);
   }
 
   async getAllParentChildren(
     parentId: string,
   ): Promise<{ data?: ParentChild[]; error?: Error }> {
-    return this.repo.getAllParentChildren(parentId);
+    return await this.repo.getAllParentChildren(parentId);
+  }
+
+  async getChildConditionKeys(
+    childId: string,
+  ): Promise<{ data?: ChildConditionKeys; error?: Error }> {
+    return await this.repo.getChildConditionKeys(childId);
   }
 }
 

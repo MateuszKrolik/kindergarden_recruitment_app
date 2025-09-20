@@ -6,6 +6,7 @@ import {
   Property,
   PropertyChild,
   PropertyParentDocumentRequirement,
+  PropertyChildDocumentRequirement,
   PropertyUser,
 } from "@/data-access-layer/modules/property-management/model";
 
@@ -41,4 +42,14 @@ export async function getAllPropertyChildrenForGivenParent(
   error?: Error;
 }> {
   return await svc.getAllPropertyChildrenForGivenParent(propertyId, parentId);
+}
+
+export async function getDocumentRequirementsForGivenPropertyChild(
+  propertyId: string,
+  childId: string,
+): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }> {
+  return await svc.getDocumentRequirementsForGivenPropertyChild(
+    propertyId,
+    childId,
+  );
 }

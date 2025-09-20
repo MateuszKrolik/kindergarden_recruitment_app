@@ -7,3 +7,10 @@ export const DOCUMENT_TYPE = {
 } as const;
 
 export type DocumentType = (typeof DOCUMENT_TYPE)[keyof typeof DOCUMENT_TYPE];
+
+export const CHILD_DOCUMENT_TYPE = {
+  DisabilityProof: "disability_proof",
+} as const;
+
+export type ChildDocumentType =
+  (typeof CHILD_DOCUMENT_TYPE)[keyof typeof CHILD_DOCUMENT_TYPE];

@@ -5,7 +5,9 @@ import {
   type PropertyParentDocumentRequirement,
   type PropertyUser,
   CONDITION_KEY,
+  type PropertyChildDocumentRequirement,
   REQUIREMENT_TYPE,
+  CHILD_CONDITION_KEY,
 } from "./model.ts";
 import {
   type IPropertyManagementRepo,
@@ -13,7 +15,10 @@ import {
 } from "./repo.ts";
 import { pool } from "../../db/db.ts";
 import type { IIdentityClient } from "./client.ts";
-import type { ParentConditionKeys } from "../../shared/types/identity.ts";
+import type {
+  ParentConditionKeys,
+  ChildConditionKeys,
+} from "../../shared/types/identity.ts";
 import identityClient from "../identity/svc.ts";
 import { redisClient } from "../../db/redis-client.ts";
 import type { DocumentType } from "../../shared/types/reporting.ts";
@@ -31,6 +36,10 @@ export interface IPropertyManagementSvc {
     propertyId: string,
     userId: string,
   ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
+  getDocumentRequirementsForGivenPropertyChild(
+    propertyId: string,
+    childId: string,
+  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }>;
   getAllPropertyChildrenForGivenParent(
     propertyId: string,
     parentId: string,
@@ -86,10 +95,12 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
     if (errors.length > 0)
       return {
         data: undefined,
-        error: new AggregateError(
-          errors,
-          `${errors.length} Errors found during fetching document requirements for parent: ${userId}!`,
-        ),
+        error:
+          errors.length == 1
+            ? errors[0]
+            : new Error(
+              `2 Errors occured: 1. ${errors[0].message}; 2. ${errors[1].message};`,
+            ),
       };
     const [allReqPromiseResult, conditionKeyPromiseResult] = promiseResults;
     const activeReqs: PropertyParentDocumentRequirement[] = [];
@@ -126,13 +137,16 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
     const errors = taskResults
       .map((result) => result.error)
       .filter((error) => error !== undefined);
-    if (errors.length > 0) {
-      const agg = new AggregateError(
-        errors,
-        `Failed to aggregate property children for parent: ${parentId}!`,
-      );
-      return { data: undefined, error: agg };
-    }
+    if (errors.length > 0)
+      return {
+        data: undefined,
+        error:
+          errors.length == 1
+            ? errors[0]
+            : new Error(
+              `2 Errors occured: 1. ${errors[0].message}; 2. ${errors[1].message};`,
+            ),
+      };
     const [propChildrenResult, parentChildrenResult] = taskResults;
     const propChildren = propChildrenResult.data || [];
     const parentChildren = parentChildrenResult.data || [];
@@ -166,6 +180,62 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
       documentType,
     );
   }
+
+  async getDocumentRequirementsForGivenPropertyChild(
+    propertyId: string,
+    childId: string,
+  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }> {
+    const promiseResults = await Promise.all([
+      this.repo.getAllPropertyChildrenDocumentRequirements(propertyId),
+      this.identityClient.getChildConditionKeys(childId),
+    ]);
+    const errors = promiseResults
+      .map((result) => result.error)
+      .filter((error) => error !== undefined);
+    if (errors.length > 0)
+      return {
+        data: undefined,
+        error:
+          errors.length == 1
+            ? errors[0]
+            : new Error(
+              `2 Errors occured: 1. ${errors[0].message}; 2. ${errors[1].message};`,
+            ),
+      };
+    const [allReqPromiseResult, conditionKeyPromiseResult] = promiseResults;
+    const activeReqs: PropertyChildDocumentRequirement[] = [];
+    allReqPromiseResult.data?.forEach(
+      (element: PropertyChildDocumentRequirement) => {
+        if (
+          conditionKeyPromiseResult.data &&
+          isChildRequirementActive(conditionKeyPromiseResult.data, element)
+        ) {
+          activeReqs.push(element);
+        }
+      },
+    );
+    return { data: activeReqs, error: undefined };
+  }
+}
+
+function isChildRequirementActive(
+  cK: ChildConditionKeys,
+  r: PropertyChildDocumentRequirement,
+): boolean {
+  if (r.requirement_type == REQUIREMENT_TYPE.Always) {
+    return true;
+  }
+
+  if (r.requirement_type == REQUIREMENT_TYPE.Conditional) {
+    switch (r.condition_key) {
+      case CHILD_CONDITION_KEY.HasDisability:
+        return !!cK.has_disability;
+      // TODO
+      default:
+        return false;
+    }
+  }
+  return false;
 }
 
 function isParentRequirementActive(

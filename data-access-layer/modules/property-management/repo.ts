@@ -6,6 +6,7 @@ import type {
   Property,
   PropertyChild,
   PropertyParentDocumentRequirement,
+  PropertyChildDocumentRequirement,
   PropertyUser,
 } from "./model.ts";
 import { Pool } from "pg";
@@ -31,6 +32,9 @@ export interface IPropertyManagementRepo {
   getAllPropertyParentDocumentRequirements(
     propertyId: string,
   ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
+  getAllPropertyChildrenDocumentRequirements(
+    propertyId: string,
+  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }>;
   getAllPropertyChildren(
     propertyId: string,
   ): Promise<{ data?: PropertyChild[]; error?: Error }>;
@@ -102,17 +106,20 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
   async getAllPropertyParentDocumentRequirements(
     propertyId: string,
   ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }> {
-    const sql = `
-    SELECT *
-    FROM property_management.property_parent_document_requirements
-    WHERE property_id = $1;
-    `;
-    const { data, error } =
-      await executeQuery<PropertyParentDocumentRequirement>(this.pool, sql, [
-        propertyId,
-      ]);
-    if (error) return { data: undefined, error: error };
-    return { data: data?.rows, error: undefined };
+    const cacheKey = `properties:${propertyId}:parent_requirements`;
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+      const sql = `
+      SELECT *
+      FROM property_management.property_parent_document_requirements
+      WHERE property_id = $1;
+      `;
+      const { data, error } =
+        await executeQuery<PropertyParentDocumentRequirement>(this.pool, sql, [
+          propertyId,
+        ]);
+      if (error) return { data: undefined, error: error };
+      return { data: data?.rows, error: undefined };
+    });
   }
 
   async getAllPropertyChildren(
@@ -189,6 +196,25 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
       );
       if (error) return { data: undefined, error };
       return { data: data?.rows[0].point_value, error: undefined };
+    });
+  }
+
+  async getAllPropertyChildrenDocumentRequirements(
+    propertyId: string,
+  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }> {
+    const cacheKey = `properties:${propertyId}:child_requirements`;
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+      const sql = `
+      SELECT *
+      FROM property_management.property_children_document_requirements
+      WHERE property_id = $1;
+      `;
+      const { data, error } =
+        await executeQuery<PropertyChildDocumentRequirement>(this.pool, sql, [
+          propertyId,
+        ]);
+      if (error) return { data: undefined, error: error };
+      return { data: data?.rows, error: undefined };
     });
   }
 

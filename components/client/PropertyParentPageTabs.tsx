@@ -1,6 +1,9 @@
 "use client";
 
-import { PropertyParentDocumentRequirement } from "@/data-access-layer/modules/property-management/model";
+import {
+  PropertyChildDocumentRequirement,
+  PropertyParentDocumentRequirement,
+} from "@/data-access-layer/modules/property-management/model";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
@@ -44,6 +47,10 @@ type PropertyParentPageTabsProps = {
     key: string,
     expiresIn: number,
   ): Promise<{ data?: string; error?: Error }>;
+  getPropertyChildDocumentRequirements(
+    propertyId: string,
+    childId: string,
+  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }>;
 };
 
 export const PropertyParentPageTabs = ({
@@ -56,6 +63,7 @@ export const PropertyParentPageTabs = ({
   sendPropertyParentDocumentApprovalRequest,
   saveParentDocument,
   getDocumentURLByFilePath,
+  getPropertyChildDocumentRequirements,
 }: PropertyParentPageTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
@@ -93,6 +101,9 @@ export const PropertyParentPageTabs = ({
             userId={userId}
             getAllPropertyChildrenForGivenParent={
               getAllPropertyChildrenForGivenParent
+            }
+            getPropertyChildDocumentRequirements={
+              getPropertyChildDocumentRequirements
             }
           />
         </TabsContent>

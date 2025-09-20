@@ -1,4 +1,7 @@
-import type { DocumentType } from "../../shared/types/reporting.ts";
+import type {
+  ChildDocumentType,
+  DocumentType,
+} from "../../shared/types/reporting.ts";
 
 export type Property = {
   id: string;
@@ -38,6 +41,13 @@ export const CONDITION_KEY = {
 
 export type ConditionKey = (typeof CONDITION_KEY)[keyof typeof CONDITION_KEY];
 
+export const CHILD_CONDITION_KEY = {
+  HasDisability: "has_disability",
+} as const;
+
+export type ChildConditionKey =
+  (typeof CHILD_CONDITION_KEY)[keyof typeof CHILD_CONDITION_KEY];
+
 export type PropertyParentDocumentRequirement = {
   property_id: string;
   document_type: DocumentType;
@@ -51,4 +61,12 @@ export type PropertyChild = {
   child_id: string;
   points: number;
   approved: boolean;
+};
+
+export type PropertyChildDocumentRequirement = {
+  property_id: string;
+  document_type: ChildDocumentType;
+  requirement_type: RequirementType;
+  condition_key: ChildConditionKey;
+  point_value: number;
 };

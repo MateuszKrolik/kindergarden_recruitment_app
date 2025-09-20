@@ -6,6 +6,10 @@ export type ParentConditionKeys = {
   resides_in_desired_location?: boolean;
 };
 
+export type ChildConditionKeys = {
+  has_disability?: boolean;
+};
+
 export type ParentChild = {
   parent_id: string;
   child_id: string;

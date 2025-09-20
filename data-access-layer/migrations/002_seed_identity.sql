@@ -95,7 +95,7 @@ INSERT INTO identity.children(
   has_disability
 ) VALUES (
   'd6b6c283-fdaa-4379-b7fd-b431fd668656',
-  true
+  false
 );
 
 INSERT INTO identity.parent_children(

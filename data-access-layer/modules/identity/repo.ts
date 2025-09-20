@@ -1,6 +1,9 @@
 import { executeQuery, withCacheAsideRedis } from "../../shared/util/query.ts";
 import { Pool } from "pg";
-import type { ParentConditionKeys } from "../../shared/types/identity.ts";
+import type {
+  ParentConditionKeys,
+  ChildConditionKeys,
+} from "../../shared/types/identity.ts";
 import type { ParentChild } from "../../shared/types/identity.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
 
@@ -11,6 +14,9 @@ export interface IIdentityRepo {
   getParentConditionKeys(
     userId: string,
   ): Promise<{ data?: ParentConditionKeys; error?: Error }>;
+  getChildConditionKeys(
+    childId: string,
+  ): Promise<{ data?: ChildConditionKeys; error?: Error }>;
   getAllParentChildren(
     parentId: string,
   ): Promise<{ data?: ParentChild[]; error?: Error }>;
@@ -86,5 +92,27 @@ export class PgIdentityRepo implements IIdentityRepo {
     );
     if (error) return { data: undefined, error };
     return { data, error: undefined };
+  }
+
+  async getChildConditionKeys(
+    childId: string,
+  ): Promise<{ data?: ChildConditionKeys; error?: Error }> {
+    const cacheKey = `children:${childId}:condition_keys`;
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+      const sql = `
+    SELECT
+      has_disability
+      -- TODO
+    FROM identity.children
+    WHERE id = $1;
+    `;
+      const { data, error } = await executeQuery<ChildConditionKeys>(
+        this.pool,
+        sql,
+        [childId],
+      );
+      if (error) return { data: undefined, error: error };
+      return { data: data?.rows[0], error: undefined };
+    });
   }
 }

@@ -1,6 +1,9 @@
 "use client";
 
-import { PropertyChild } from "@/data-access-layer/modules/property-management/model";
+import {
+  PropertyChild,
+  PropertyChildDocumentRequirement,
+} from "@/data-access-layer/modules/property-management/model";
 import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -30,6 +33,7 @@ import { Tooltip, TooltipContent, TooltipProvider } from "../ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import socket from "@/app/socket";
 import { PROPERTY_MANAGEMENT_EVENTS } from "@/data-access-layer/shared/events/property-management";
+import { ChildrenDocumentRequirementsTable } from "./ChildrenDocumentRequirementsTable";
 
 export type PropertyParentChildrenTableProps = {
   propertyId: string;
@@ -41,12 +45,17 @@ export type PropertyParentChildrenTableProps = {
     data?: PropertyChild[];
     error?: Error;
   }>;
+  getPropertyChildDocumentRequirements(
+    propertyId: string,
+    childId: string,
+  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }>;
 };
 
 export const PropertyParentChildrenTable = ({
   propertyId,
   userId,
   getAllPropertyChildrenForGivenParent,
+  getPropertyChildDocumentRequirements,
 }: PropertyParentChildrenTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -263,7 +272,13 @@ export const PropertyParentChildrenTable = ({
                           }
                         >
                           <CollapsibleContent className="p-4 bg-gray-100">
-                            <p>TODO: Expanded content for {row.id}</p>
+                            <ChildrenDocumentRequirementsTable
+                              propertyId={propertyId}
+                              childId={row.original.child_id}
+                              getPropertyChildDocumentRequirements={
+                                getPropertyChildDocumentRequirements
+                              }
+                            />
                           </CollapsibleContent>
                         </Collapsible>
                       </TableCell>

@@ -39,6 +39,23 @@ CREATE TABLE IF NOT EXISTS property_management.property_parent_document_requirem
   point_value INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS property_management.property_children_document_requirements(
+  property_id uuid DEFAULT gen_random_uuid(),
+  document_type TEXT CHECK (document_type IN (
+    'disability_proof'
+    -- TODO
+  )),
+  requirement_type TEXT CHECK (requirement_type IN (
+    'always',
+    'conditional'
+  )),
+  condition_key TEXT CHECK (condition_key IN (
+    'has_disability'
+    -- TODO
+  )),
+  point_value INTEGER NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS property_management.property_children(
   property_id uuid NOT NULL,
   child_id uuid NOT NULL,

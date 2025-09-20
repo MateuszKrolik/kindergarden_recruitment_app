@@ -2,6 +2,7 @@ import { DocumentType } from "../../shared/types/reporting.ts";
 import type {
   ParentConditionKeys,
   ParentChild,
+  ChildConditionKeys,
 } from "../../shared/types/identity.ts";
 
 export interface IIdentityClient {
@@ -11,6 +12,9 @@ export interface IIdentityClient {
   getAllParentChildren(
     parentId: string,
   ): Promise<{ data?: ParentChild[]; error?: Error }>;
+  getChildConditionKeys(
+    childId: string,
+  ): Promise<{ data?: ChildConditionKeys; error?: Error }>;
 }
 
 export interface IComplianceClient {

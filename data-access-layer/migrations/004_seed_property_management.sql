@@ -129,4 +129,18 @@ INSERT INTO property_management.property_children(
   'd6b6c283-fdaa-4379-b7fd-b431fd668656'
 );
 
+INSERT INTO property_management.property_children_document_requirements(
+  property_id,
+  document_type,
+  requirement_type,
+  condition_key, 
+  point_value
+) VALUES (
+  'b2979118-9963-4b97-aa56-c9d25a8b4acf',
+  'disability_proof',
+  'conditional',
+  'has_disability',
+  11
+);
+
 COMMIT;
