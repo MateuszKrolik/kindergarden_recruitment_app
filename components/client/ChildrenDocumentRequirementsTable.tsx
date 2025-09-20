@@ -34,6 +34,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
+const EMPTY_REQUIREMENTS: PropertyChildDocumentRequirement[] = [];
+
 export type ChildrenDocumentRequirementsTableProps = {
   propertyId: string;
   childId: string;
@@ -156,23 +158,15 @@ export const ChildrenDocumentRequirementsTable = ({
   ];
 
   const fetchData = useCallback(async () => {
-    const { data, error } = await getPropertyChildDocumentRequirements(
-      propertyId,
-      childId,
-    );
+    setError(null);
+    const { data, error: fetchErr } =
+      await getPropertyChildDocumentRequirements(propertyId, childId);
 
-    if (error) {
-      if ("errors" in error) {
-        const errMsg = `${error.message}: ${error.errors}`;
-        toast.error(errMsg);
-        setError(errMsg);
-        console.error(errMsg);
-        return;
-      }
-      const errMsg = getErrorMessage(error);
-      toast.error(`Error: ${errMsg}`);
+    if (fetchErr) {
+      const errMsg = getErrorMessage(fetchErr);
+      toast.error(errMsg);
       setError(errMsg);
-      console.error(error);
+      console.error(fetchErr);
       return;
     }
 
@@ -182,6 +176,7 @@ export const ChildrenDocumentRequirementsTable = ({
     }
 
     setData(data);
+    setError(null);
   }, [propertyId, childId, getPropertyChildDocumentRequirements]);
 
   useEffect(() => {
@@ -189,7 +184,7 @@ export const ChildrenDocumentRequirementsTable = ({
   }, [fetchData]);
 
   const table = useReactTable<PropertyChildDocumentRequirement>({
-    data: error || data instanceof Error ? [] : data,
+    data: error ? EMPTY_REQUIREMENTS : data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

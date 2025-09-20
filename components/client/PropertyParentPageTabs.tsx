@@ -11,6 +11,7 @@ import { PropertyParentDocumentTabs } from "./PropertyParentDocumentTabs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { PropertyParentChildrenTable } from "./PropertyParentChildrenTable";
 import { getAllPropertyChildrenForGivenParent } from "@/app/actions/property-management";
+import ErrorBoundary from "./ErrorBoundary";
 
 type PropertyParentPageTabsProps = {
   propertyId: string;

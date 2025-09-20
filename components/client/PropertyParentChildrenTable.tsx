@@ -35,6 +35,8 @@ import socket from "@/app/socket";
 import { PROPERTY_MANAGEMENT_EVENTS } from "@/data-access-layer/shared/events/property-management";
 import { ChildrenDocumentRequirementsTable } from "./ChildrenDocumentRequirementsTable";
 
+const EMPTY_CHILDREN: PropertyChild[] = [];
+
 export type PropertyParentChildrenTableProps = {
   propertyId: string;
   userId: string;
@@ -121,13 +123,12 @@ export const PropertyParentChildrenTable = ({
   ];
 
   const fetchPropertyChildrenForGivenParent = useCallback(async () => {
-    const { data, error } = await getAllPropertyChildrenForGivenParent(
-      propertyId,
-      userId,
-    );
+    setError(null);
+    const { data, error: fetchErr } =
+      await getAllPropertyChildrenForGivenParent(propertyId, userId);
 
-    if (error) {
-      const errMsg = getErrorMessage(error);
+    if (fetchErr) {
+      const errMsg = getErrorMessage(fetchErr);
       toast.error(`Error: ${errMsg}`);
       setError(errMsg);
       return;
@@ -139,6 +140,7 @@ export const PropertyParentChildrenTable = ({
     }
 
     setData(data);
+    setError(null);
   }, [propertyId, userId, getAllPropertyChildrenForGivenParent]);
 
   useEffect(() => {
@@ -169,7 +171,7 @@ export const PropertyParentChildrenTable = ({
   });
 
   const table = useReactTable<PropertyChild>({
-    data: error || data instanceof Error ? [] : data,
+    data: error ? EMPTY_CHILDREN : data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -267,18 +269,21 @@ export const PropertyParentChildrenTable = ({
                       <TableCell colSpan={columns.length + 1} className="p-0">
                         <Collapsible
                           open={isOpen}
-                          onOpenChange={() =>
-                            setExpandedRow(isOpen ? null : row.id)
+                          onOpenChange={(open) =>
+                            setExpandedRow(open ? row.id : null)
                           }
                         >
                           <CollapsibleContent className="p-4 bg-gray-100">
-                            <ChildrenDocumentRequirementsTable
-                              propertyId={propertyId}
-                              childId={row.original.child_id}
-                              getPropertyChildDocumentRequirements={
-                                getPropertyChildDocumentRequirements
-                              }
-                            />
+                            {isOpen && (
+                              <ChildrenDocumentRequirementsTable
+                                propertyId={propertyId}
+                                childId={row.original.child_id}
+                                getPropertyChildDocumentRequirements={
+                                  getPropertyChildDocumentRequirements
+                                }
+                                key={row.original.child_id}
+                              />
+                            )}
                           </CollapsibleContent>
                         </Collapsible>
                       </TableCell>
