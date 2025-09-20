@@ -4,7 +4,10 @@ import type { PropertyParentDocument } from "../compliance/model.ts";
 import type { Server as SocketServer } from "socket.io";
 import type { IPropertyManagementSvc } from "./svc.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
-import { catchErrorSync } from "../../shared/util/error.ts";
+import {
+  catchErrorSync,
+  formatAggregateError,
+} from "../../shared/util/error.ts";
 import type { IReportingClient } from "./client.ts";
 import { PROPERTY_MANAGEMENT_EVENTS } from "../../shared/events/property-management.ts";
 
@@ -76,12 +79,7 @@ export class PropertyManagementEventHandler
           .map((result) => result.error)
           .filter((error) => error !== undefined);
         if (errors.length > 0) {
-          console.error(
-            new AggregateError(
-              errors,
-              `${errors.length} Errors found during fetching point value and property children for user: ${event.payload.user_id}!`,
-            ),
-          );
+          console.error(formatAggregateError(errors));
           return;
         }
         const [pointValueResult, propertyChildrenResult] = promiseResults;

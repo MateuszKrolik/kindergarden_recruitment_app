@@ -24,3 +24,15 @@ export function catchErrorSync<T>(operation: () => T): {
     };
   }
 }
+
+export function formatAggregateError(errors: Error[]): Error {
+  if (errors.length === 1) {
+    return errors[0];
+  }
+
+  const errorMessages = errors
+    .map((error, index) => `${index + 1}. ${error.message}`)
+    .join("\n    ");
+
+  return new Error(`${errors.length} Errors occurred:\n    ${errorMessages}`);
+}

@@ -22,6 +22,7 @@ import type {
 import identityClient from "../identity/svc.ts";
 import { redisClient } from "../../db/redis-client.ts";
 import type { DocumentType } from "../../shared/types/reporting.ts";
+import { formatAggregateError } from "../../shared/util/error.ts";
 
 export interface IPropertyManagementSvc {
   getAllProperties(
@@ -95,12 +96,7 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
     if (errors.length > 0)
       return {
         data: undefined,
-        error:
-          errors.length == 1
-            ? errors[0]
-            : new Error(
-              `2 Errors occured: 1. ${errors[0].message}; 2. ${errors[1].message};`,
-            ),
+        error: formatAggregateError(errors),
       };
     const [allReqPromiseResult, conditionKeyPromiseResult] = promiseResults;
     const activeReqs: PropertyParentDocumentRequirement[] = [];
@@ -140,12 +136,7 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
     if (errors.length > 0)
       return {
         data: undefined,
-        error:
-          errors.length == 1
-            ? errors[0]
-            : new Error(
-              `2 Errors occured: 1. ${errors[0].message}; 2. ${errors[1].message};`,
-            ),
+        error: formatAggregateError(errors),
       };
     const [propChildrenResult, parentChildrenResult] = taskResults;
     const propChildren = propChildrenResult.data || [];
@@ -195,12 +186,7 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
     if (errors.length > 0)
       return {
         data: undefined,
-        error:
-          errors.length == 1
-            ? errors[0]
-            : new Error(
-              `2 Errors occured: 1. ${errors[0].message}; 2. ${errors[1].message};`,
-            ),
+        error: formatAggregateError(errors),
       };
     const [allReqPromiseResult, conditionKeyPromiseResult] = promiseResults;
     const activeReqs: PropertyChildDocumentRequirement[] = [];
