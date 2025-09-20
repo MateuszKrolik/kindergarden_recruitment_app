@@ -19,35 +19,37 @@ import {
 } from "../../shared/util/query.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
 import type { DocumentType } from "../../shared/types/reporting.ts";
+import type { AsyncResponseType } from "../../shared/types/response.ts";
+import { NOT_FOUND_ERROR } from "../../shared/errors.ts";
 
 export interface IPropertyManagementRepo {
   getAllProperties(
     pageSize: number,
     pageNumber: number,
-  ): Promise<{ data?: PagedResponse<Property>; error?: Error }>;
+  ): AsyncResponseType<PagedResponse<Property>>;
   getPropertyUser(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyUser; error?: Error }>;
+  ): AsyncResponseType<PropertyUser>;
   getAllPropertyParentDocumentRequirements(
     propertyId: string,
-  ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocumentRequirement[]>;
   getAllPropertyChildrenDocumentRequirements(
     propertyId: string,
-  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }>;
+  ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
   getAllPropertyChildren(
     propertyId: string,
-  ): Promise<{ data?: PropertyChild[]; error?: Error }>;
+  ): AsyncResponseType<PropertyChild[]>;
   incrementPropertyChildrenPointsForGivenParent(
     propertyId: string,
     parentId: string,
     childrenIds: string[],
     pointValue: number,
-  ): Promise<{ data?: PropertyChild[]; error?: Error }>;
+  ): AsyncResponseType<PropertyChild[]>;
   getPointValueForGivenPropertyParentDocumentByDocumentType(
     propertyId: string,
     documentType: DocumentType,
-  ): Promise<{ data?: number; error?: Error }>;
+  ): AsyncResponseType<number>;
 }
 
 export class PropertyManagementRepo implements IPropertyManagementRepo {
@@ -61,7 +63,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
   async getAllProperties(
     pageSize: number,
     pageNumber: number,
-  ): Promise<{ data?: PagedResponse<Property>; error?: Error }> {
+  ): AsyncResponseType<PagedResponse<Property>> {
     const sql = `
     SELECT 
       *,
@@ -74,14 +76,14 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
       Property & { total_count: number }
     >(this.pool, sql, [pageSize, calculateOffset(pageSize, pageNumber)]);
     if (error) return { data: undefined, error: error };
-    const total_count = data?.rows[0].total_count;
+    if (data.rows.length === 0)
+      return {
+        data: newPagedResponse([], 0, pageNumber, pageSize),
+        error: undefined,
+      };
+    const total_count = data.rows[0].total_count;
     return {
-      data: newPagedResponse(
-        data?.rows || [],
-        total_count || 0,
-        pageNumber,
-        pageSize,
-      ),
+      data: newPagedResponse(data.rows, total_count, pageNumber, pageSize),
       error: undefined,
     };
   }
@@ -89,7 +91,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
   async getPropertyUser(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyUser; error?: Error }> {
+  ): AsyncResponseType<PropertyUser> {
     const sql = `
     SELECT *
     FROM property_management.property_users
@@ -100,12 +102,14 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
       userId,
     ]);
     if (error) return { data: undefined, error: error };
-    return { data: data?.rows[0], error: undefined };
+    if (data.rows.length === 0)
+      return { data: undefined, error: NOT_FOUND_ERROR };
+    return { data: data.rows[0], error: undefined };
   }
 
   async getAllPropertyParentDocumentRequirements(
     propertyId: string,
-  ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }> {
+  ): AsyncResponseType<PropertyParentDocumentRequirement[]> {
     const cacheKey = `properties:${propertyId}:parent_requirements`;
     return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
       const sql = `
@@ -118,13 +122,13 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
           propertyId,
         ]);
       if (error) return { data: undefined, error: error };
-      return { data: data?.rows, error: undefined };
+      return { data: data.rows, error: undefined };
     });
   }
 
   async getAllPropertyChildren(
     propertyId: string,
-  ): Promise<{ data?: PropertyChild[]; error?: Error }> {
+  ): AsyncResponseType<PropertyChild[]> {
     const cacheKey = this.getAllPropertyChildrenCacheKey(propertyId);
     return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
       const sql = `
@@ -138,7 +142,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
         [propertyId],
       );
       if (error) return { data: undefined, error: error };
-      return { data: data?.rows, error: undefined };
+      return { data: data.rows, error: undefined };
     });
   }
 
@@ -147,7 +151,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
     parentId: string,
     childrenIds: string[],
     pointValue: number,
-  ): Promise<{ data?: PropertyChild[]; error?: Error }> {
+  ): AsyncResponseType<PropertyChild[]> {
     const cacheKey = `properties:${propertyId}:parents:${parentId}:children`;
     const { data, error } = await withWriteThroughRedisCache(
       this.redisClient,
@@ -166,7 +170,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
           [pointValue, propertyId, childrenIds],
         );
         if (error) return { data: undefined, error };
-        return { data: data?.rows, error: undefined };
+        return { data: data.rows, error: undefined };
       },
     );
     if (error) return { data: undefined, error };
@@ -180,7 +184,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
   async getPointValueForGivenPropertyParentDocumentByDocumentType(
     propertyId: string,
     documentType: DocumentType,
-  ): Promise<{ data?: number; error?: Error }> {
+  ): AsyncResponseType<number> {
     //TODO: invalidate (if necessary)
     const cacheKey = `properties:${propertyId}:parents:documents:${documentType}:points`;
     return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
@@ -195,13 +199,15 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
         [propertyId, documentType], // TODO: SQL index on document_type
       );
       if (error) return { data: undefined, error };
-      return { data: data?.rows[0].point_value, error: undefined };
+      if (data.rows.length === 0)
+        return { data: undefined, error: NOT_FOUND_ERROR };
+      return { data: data.rows[0].point_value, error: undefined };
     });
   }
 
   async getAllPropertyChildrenDocumentRequirements(
     propertyId: string,
-  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }> {
+  ): AsyncResponseType<PropertyChildDocumentRequirement[]> {
     const cacheKey = `properties:${propertyId}:child_requirements`;
     return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
       const sql = `
@@ -214,7 +220,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
           propertyId,
         ]);
       if (error) return { data: undefined, error: error };
-      return { data: data?.rows, error: undefined };
+      return { data: data.rows, error: undefined };
     });
   }
 

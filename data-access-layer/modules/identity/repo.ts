@@ -6,20 +6,16 @@ import type {
 } from "../../shared/types/identity.ts";
 import type { ParentChild } from "../../shared/types/identity.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
+import type { AsyncResponseType } from "../../shared/types/response.ts";
+import { NOT_FOUND_ERROR } from "../../shared/errors.ts";
 
 export interface IIdentityRepo {
-  doesAccountExist(
-    accountId: string,
-  ): Promise<{ data?: boolean; error?: Error }>;
+  doesAccountExist(accountId: string): AsyncResponseType<boolean>;
   getParentConditionKeys(
     userId: string,
-  ): Promise<{ data?: ParentConditionKeys; error?: Error }>;
-  getChildConditionKeys(
-    childId: string,
-  ): Promise<{ data?: ChildConditionKeys; error?: Error }>;
-  getAllParentChildren(
-    parentId: string,
-  ): Promise<{ data?: ParentChild[]; error?: Error }>;
+  ): AsyncResponseType<ParentConditionKeys>;
+  getChildConditionKeys(childId: string): AsyncResponseType<ChildConditionKeys>;
+  getAllParentChildren(parentId: string): AsyncResponseType<ParentChild[]>;
 }
 
 export class PgIdentityRepo implements IIdentityRepo {
@@ -30,9 +26,7 @@ export class PgIdentityRepo implements IIdentityRepo {
     this.redisClient = redisClient;
   }
 
-  async doesAccountExist(
-    accountId: string,
-  ): Promise<{ data?: boolean; error?: Error }> {
+  async doesAccountExist(accountId: string): AsyncResponseType<boolean> {
     const sql = `
     SELECT EXISTS(SELECT 1 FROM account WHERE id = $1) AS exists;
     `;
@@ -42,12 +36,14 @@ export class PgIdentityRepo implements IIdentityRepo {
       [accountId],
     );
     if (error) return { data: undefined, error: error };
-    return { data: data?.rows[0].exists, error: undefined };
+    if (data.rows.length === 0)
+      return { data: undefined, error: NOT_FOUND_ERROR };
+    return { data: data.rows[0].exists, error: undefined };
   }
 
   async getParentConditionKeys(
     userId: string,
-  ): Promise<{ data?: ParentConditionKeys; error?: Error }> {
+  ): AsyncResponseType<ParentConditionKeys> {
     const sql = `
     SELECT
       is_employed,
@@ -64,12 +60,14 @@ export class PgIdentityRepo implements IIdentityRepo {
       [userId],
     );
     if (error) return { data: undefined, error: error };
-    return { data: data?.rows[0], error: undefined };
+    if (data.rows.length === 0)
+      return { data: undefined, error: NOT_FOUND_ERROR };
+    return { data: data.rows[0], error: undefined };
   }
 
   async getAllParentChildren(
     parentId: string,
-  ): Promise<{ data?: ParentChild[]; error?: Error }> {
+  ): AsyncResponseType<ParentChild[]> {
     //TODO: invalidations on registration
     const cacheKey = `parents:${parentId}:children`;
     const { data, error } = await withCacheAsideRedis(
@@ -87,7 +85,7 @@ export class PgIdentityRepo implements IIdentityRepo {
           [parentId],
         );
         if (error) return { data: undefined, error };
-        return { data: data?.rows, error: undefined };
+        return { data: data.rows, error: undefined };
       },
     );
     if (error) return { data: undefined, error };
@@ -96,7 +94,7 @@ export class PgIdentityRepo implements IIdentityRepo {
 
   async getChildConditionKeys(
     childId: string,
-  ): Promise<{ data?: ChildConditionKeys; error?: Error }> {
+  ): AsyncResponseType<ChildConditionKeys> {
     const cacheKey = `children:${childId}:condition_keys`;
     return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
       const sql = `
@@ -112,7 +110,9 @@ export class PgIdentityRepo implements IIdentityRepo {
         [childId],
       );
       if (error) return { data: undefined, error: error };
-      return { data: data?.rows[0], error: undefined };
+      if (data.rows.length === 0)
+        return { data: undefined, error: NOT_FOUND_ERROR };
+      return { data: data.rows[0], error: undefined };
     });
   }
 }

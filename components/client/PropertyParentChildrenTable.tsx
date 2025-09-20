@@ -34,6 +34,7 @@ import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import socket from "@/app/socket";
 import { PROPERTY_MANAGEMENT_EVENTS } from "@/data-access-layer/shared/events/property-management";
 import { ChildrenDocumentRequirementsTable } from "./ChildrenDocumentRequirementsTable";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 const EMPTY_CHILDREN: PropertyChild[] = [];
 
@@ -43,14 +44,11 @@ export type PropertyParentChildrenTableProps = {
   getAllPropertyChildrenForGivenParent(
     propertyId: string,
     parentId: string,
-  ): Promise<{
-    data?: PropertyChild[];
-    error?: Error;
-  }>;
+  ): AsyncResponseType<PropertyChild[]>;
   getPropertyChildDocumentRequirements(
     propertyId: string,
     childId: string,
-  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }>;
+  ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
 };
 
 export const PropertyParentChildrenTable = ({

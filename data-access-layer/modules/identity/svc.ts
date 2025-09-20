@@ -6,20 +6,15 @@ import type {
 } from "../../shared/types/identity.ts";
 import type { ParentChild } from "../../shared/types/identity.ts";
 import { redisClient } from "../../db/redis-client.ts";
+import type { AsyncResponseType } from "../../shared/types/response.ts";
 
 export interface IIdentitySvc {
-  doesAccountExist(
-    accountId: string,
-  ): Promise<{ data?: boolean; error?: Error }>;
+  doesAccountExist(accountId: string): AsyncResponseType<boolean>;
   getParentConditionKeys(
     userId: string,
-  ): Promise<{ data?: ParentConditionKeys; error?: Error }>;
-  getChildConditionKeys(
-    childId: string,
-  ): Promise<{ data?: ChildConditionKeys; error?: Error }>;
-  getAllParentChildren(
-    parentId: string,
-  ): Promise<{ data?: ParentChild[]; error?: Error }>;
+  ): AsyncResponseType<ParentConditionKeys>;
+  getChildConditionKeys(childId: string): AsyncResponseType<ChildConditionKeys>;
+  getAllParentChildren(parentId: string): AsyncResponseType<ParentChild[]>;
 }
 
 class IdentitySvc implements IIdentitySvc {
@@ -28,27 +23,25 @@ class IdentitySvc implements IIdentitySvc {
     this.repo = repo ?? new PgIdentityRepo(pool, redisClient);
   }
 
-  async doesAccountExist(
-    accountId: string,
-  ): Promise<{ data?: boolean; error?: Error }> {
+  async doesAccountExist(accountId: string): AsyncResponseType<boolean> {
     return await this.repo.doesAccountExist(accountId);
   }
 
   async getParentConditionKeys(
     userId: string,
-  ): Promise<{ data?: ParentConditionKeys; error?: Error }> {
+  ): AsyncResponseType<ParentConditionKeys> {
     return await this.repo.getParentConditionKeys(userId);
   }
 
   async getAllParentChildren(
     parentId: string,
-  ): Promise<{ data?: ParentChild[]; error?: Error }> {
+  ): AsyncResponseType<ParentChild[]> {
     return await this.repo.getAllParentChildren(parentId);
   }
 
   async getChildConditionKeys(
     childId: string,
-  ): Promise<{ data?: ChildConditionKeys; error?: Error }> {
+  ): AsyncResponseType<ChildConditionKeys> {
     return await this.repo.getChildConditionKeys(childId);
   }
 }

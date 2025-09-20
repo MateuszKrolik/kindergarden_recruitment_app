@@ -9,28 +9,27 @@ import {
 import type { DocumentType } from "../../shared/types/reporting.ts";
 import { redisClient } from "../../db/redis-client.ts";
 import { extname } from "path";
+import type { AsyncResponseType } from "../../shared/types/response.ts";
 
 export interface IReportingSvc {
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<{ data?: ParentDocument; error?: Error }>;
+  ): AsyncResponseType<ParentDocument>;
   getParentDocumentTypeByDocumentId(
     parentDocumentId: string,
-  ): Promise<{ data?: DocumentType; error?: Error }>;
+  ): AsyncResponseType<DocumentType>;
   saveParentDocument(
     userId: string,
     documentType: DocumentType,
     file: File,
-  ): Promise<{ data?: ParentDocument; error?: Error }>;
+  ): AsyncResponseType<ParentDocument>;
   getDocumentURLByFilePath(
     bucket: string,
     key: string,
     expiresIn: number,
-  ): Promise<{ data?: string; error?: Error }>;
-  getParentDocumentURLByDocumentID(
-    docId: string,
-  ): Promise<{ data?: string; error?: Error }>;
+  ): AsyncResponseType<string>;
+  getParentDocumentURLByDocumentID(docId: string): AsyncResponseType<string>;
 }
 
 class ReportingSvc implements IReportingSvc {
@@ -44,13 +43,13 @@ class ReportingSvc implements IReportingSvc {
   async getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<{ data?: ParentDocument; error?: Error }> {
+  ): AsyncResponseType<ParentDocument> {
     return await this.repo.getParentDocumentByType(userId, documentType);
   }
 
   async getParentDocumentTypeByDocumentId(
     parentDocumentId: string,
-  ): Promise<{ data?: DocumentType; error?: Error }> {
+  ): AsyncResponseType<DocumentType> {
     return await this.repo.getParentDocumentTypeByDocumentId(parentDocumentId);
   }
 
@@ -58,7 +57,7 @@ class ReportingSvc implements IReportingSvc {
     userId: string,
     documentType: DocumentType,
     file: File,
-  ): Promise<{ data?: ParentDocument; error?: Error }> {
+  ): AsyncResponseType<ParentDocument> {
     const filePath = `parents/${userId}/documents/${documentType}${extname(file.name)}`;
     const { error } = await this.s3Repo.uploadFile("mybucket", filePath, file);
     if (error) return { data: undefined, error };
@@ -75,13 +74,13 @@ class ReportingSvc implements IReportingSvc {
     key: string,
     bucket: string = "mybucket",
     expiresIn: number = 3600,
-  ): Promise<{ data?: string; error?: Error }> {
+  ): AsyncResponseType<string> {
     return await this.s3Repo.getDocumentURLByFilePath(key, bucket, expiresIn);
   }
 
   async getParentDocumentURLByDocumentID(
     docId: string,
-  ): Promise<{ data?: string; error?: Error }> {
+  ): AsyncResponseType<string> {
     const { data, error } =
       await this.repo.getParentDocumentFilePathByDocumentID(docId);
     if (error) return { data: undefined, error };

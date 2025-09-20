@@ -4,17 +4,14 @@ import type {
   ParentChild,
   ChildConditionKeys,
 } from "../../shared/types/identity.ts";
+import type { AsyncResponseType } from "../../shared/types/response.ts";
 
 export interface IIdentityClient {
   getParentConditionKeys(
     userId: string,
-  ): Promise<{ data?: ParentConditionKeys; error?: Error }>;
-  getAllParentChildren(
-    parentId: string,
-  ): Promise<{ data?: ParentChild[]; error?: Error }>;
-  getChildConditionKeys(
-    childId: string,
-  ): Promise<{ data?: ChildConditionKeys; error?: Error }>;
+  ): AsyncResponseType<ParentConditionKeys>;
+  getAllParentChildren(parentId: string): AsyncResponseType<ParentChild[]>;
+  getChildConditionKeys(childId: string): AsyncResponseType<ChildConditionKeys>;
 }
 
 export interface IComplianceClient {
@@ -22,11 +19,11 @@ export interface IComplianceClient {
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: boolean; error?: Error }>;
+  ): AsyncResponseType<boolean>;
 }
 
 export interface IReportingClient {
   getParentDocumentTypeByDocumentId(
     parentDocumentId: string,
-  ): Promise<{ data?: DocumentType; error?: Error }>;
+  ): AsyncResponseType<DocumentType>;
 }

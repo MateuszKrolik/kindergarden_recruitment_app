@@ -41,17 +41,18 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
 import { PropertyTableRowActionMenu } from "./PropertyTableRowActionMenu";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 interface PropertiesTableProps {
   userId: string;
   getAllProperties(
     pageSize: number,
     pageNumber: number,
-  ): Promise<{ data?: PagedResponse<Property>; error?: Error }>;
+  ): AsyncResponseType<PagedResponse<Property>>;
   getPropertyUser(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyUser; error?: Error }>;
+  ): AsyncResponseType<PropertyUser>;
 }
 
 export default function PropertyTable({

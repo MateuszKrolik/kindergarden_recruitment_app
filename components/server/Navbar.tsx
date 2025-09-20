@@ -10,7 +10,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import LogoutNavbarButton from "../client/LogoutNavbarButton";
-import { logoutAction } from "@/app/actions/auth/logout";
+import { logoutAction } from "@/app/actions/auth";
 
 export async function Navbar() {
   const session = await auth.api.getSession({

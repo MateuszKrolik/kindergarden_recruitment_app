@@ -28,6 +28,7 @@ import {
 import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
 import socket from "@/app/socket";
 import { EventEnvelope } from "@/data-access-layer/shared/types/event";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 type ParentDocumentApprovalsTableProps = {
   propertyId: string;
@@ -35,7 +36,7 @@ type ParentDocumentApprovalsTableProps = {
   getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument[]>;
 };
 
 export const ParentDocumentApprovalsTable = ({
@@ -134,44 +135,56 @@ export const ParentDocumentApprovalsTable = ({
     fetchData();
   }, [fetchData]);
 
-
   useEffect(() => {
     function onRequestApproved(event: EventEnvelope<PropertyParentDocument>) {
       setData((prev) => {
         const existingIndex = prev.findIndex(
-          doc => doc.parent_document_id === event.payload.parent_document_id
+          (doc) => doc.parent_document_id === event.payload.parent_document_id,
         );
-        
+
         if (existingIndex !== -1) {
           const updated = [...prev];
           updated[existingIndex] = {
             ...updated[existingIndex],
             request_status: event.payload.request_status,
-            approved_by: event.payload.approved_by
+            approved_by: event.payload.approved_by,
           };
           return updated;
         }
-        
+
         return prev;
       });
 
-      toast.success(`Document: ${event.payload.parent_document_id} was just approved! 🎉`);
+      toast.success(
+        `Document: ${event.payload.parent_document_id} was just approved! 🎉`,
+      );
     }
 
     function onRequestSent(event: PropertyParentDocument) {
-      setData((prev) => [...prev, event])
+      setData((prev) => [...prev, event]);
     }
 
-    socket.on(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, onRequestApproved);
+    socket.on(
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+      onRequestApproved,
+    );
 
-    socket.on(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED, onRequestSent);
+    socket.on(
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
+      onRequestSent,
+    );
 
     return () => {
-      socket.off(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED, onRequestApproved);
-      socket.off(COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED, onRequestSent);
+      socket.off(
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+        onRequestApproved,
+      );
+      socket.off(
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
+        onRequestSent,
+      );
     };
   }, []);
-
 
   const table = useReactTable<PropertyParentDocument>({
     data: error || data instanceof Error ? [] : data,

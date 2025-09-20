@@ -33,6 +33,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 const EMPTY_REQUIREMENTS: PropertyChildDocumentRequirement[] = [];
 
@@ -42,7 +43,7 @@ export type ChildrenDocumentRequirementsTableProps = {
   getPropertyChildDocumentRequirements(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }>;
+  ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
 };
 
 export const ChildrenDocumentRequirementsTable = ({

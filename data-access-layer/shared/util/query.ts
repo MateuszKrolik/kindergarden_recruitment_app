@@ -1,13 +1,14 @@
 import { Pool, type QueryResult, type QueryResultRow } from "pg";
 import { catchError, catchErrorSync } from "./error.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
+import type { AsyncResponseType } from "../types/response.ts";
 
 export async function withCacheAsideRedis<T>(
   client: RedisClientType,
   cacheKey: string,
-  fetchFn: () => Promise<{ data?: T; error?: Error }>,
+  fetchFn: () => AsyncResponseType<T>,
   ttlSeconds = 3600 * 24,
-): Promise<{ data?: T; error?: Error }> {
+): AsyncResponseType<T> {
   const { data: cachedData, error } = await catchError(client.get(cacheKey));
   if (error) console.error(`Redis GET error: ${error}`);
 
@@ -36,9 +37,9 @@ export async function withCacheAsideRedis<T>(
 export async function withWriteThroughRedisCache<T>(
   client: RedisClientType,
   cacheKey: string,
-  fetchFn: () => Promise<{ data?: T; error?: Error }>,
+  fetchFn: () => AsyncResponseType<T>,
   ttlSeconds = 3600 * 24,
-): Promise<{ data?: T; error?: Error }> {
+): AsyncResponseType<T> {
   const { data, error } = await fetchFn();
   if (error) return { data: undefined, error: error };
   if (data) {
@@ -56,7 +57,7 @@ export async function executeQuery<R extends QueryResultRow>(
   pool: Pool,
   sql: string,
   params?: unknown[],
-): Promise<{ data?: QueryResult<R>; error?: Error }> {
+): AsyncResponseType<QueryResult<R>> {
   return await catchError(pool.query<R>(sql, params));
 }
 

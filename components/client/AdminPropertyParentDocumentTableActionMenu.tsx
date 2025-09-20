@@ -15,6 +15,7 @@ import {
 } from "@/data-access-layer/modules/compliance/model";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/util/error";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 type AdminPropertyParentDocumentTableActionMenuProps = {
   adminId: string;
@@ -25,10 +26,8 @@ type AdminPropertyParentDocumentTableActionMenuProps = {
     parentDocumentId: string,
     requestStatus: RequestStatus,
     adminId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
-  getParentDocumentURLByDocumentID(
-    docId: string,
-  ): Promise<{ data?: string; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
+  getParentDocumentURLByDocumentID(docId: string): AsyncResponseType<string>;
 };
 
 export default function AdminPropertyParentDocumentTableActionMenu({
@@ -83,7 +82,7 @@ type SetStatusDropdownMenuItemProps = {
     parentDocumentId: string,
     requestStatus: RequestStatus,
     adminId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
 };
 
 const SetStatusDropdownMenuItem = ({

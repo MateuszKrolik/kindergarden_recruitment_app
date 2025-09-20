@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { getErrorMessage } from "@/util/error";
 import { Progress } from "../ui/progress";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 type PropertyTableRowActionMenuContentProps = {
   propertyId: string;
@@ -21,7 +22,7 @@ type PropertyTableRowActionMenuContentProps = {
   getPropertyUser(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyUser; error?: Error }>;
+  ): AsyncResponseType<PropertyUser>;
 };
 
 export const PropertyTableRowActionMenu = ({

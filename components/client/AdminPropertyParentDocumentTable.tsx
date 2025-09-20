@@ -45,6 +45,7 @@ import AdminPropertyParentDocumentTableActionMenu from "./AdminPropertyParentDoc
 import { EventEnvelope } from "@/data-access-layer/shared/types/event";
 import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
 import socket from "@/app/socket";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 interface AdminPropertyParentDocumentTableProps {
   propertyId: string;
@@ -53,17 +54,15 @@ interface AdminPropertyParentDocumentTableProps {
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<{ data?: PagedResponse<PropertyParentDocument>; error?: Error }>;
+  ): AsyncResponseType<PagedResponse<PropertyParentDocument>>;
   setPropertyParentDocumentApprovalRequestStatus(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
     adminId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
-  getParentDocumentURLByDocumentID(
-    docId: string,
-  ): Promise<{ data?: string; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
+  getParentDocumentURLByDocumentID(docId: string): AsyncResponseType<string>;
 }
 
 export default function AdminPropertyParentDocumentTable({

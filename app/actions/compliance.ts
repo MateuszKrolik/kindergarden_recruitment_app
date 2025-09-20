@@ -5,12 +5,13 @@ import {
   RequestStatus,
 } from "@/data-access-layer/modules/compliance/model";
 import svc from "@/data-access-layer/modules/compliance/svc";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 import { PagedResponse } from "@/types/pagination";
 
 export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
   propertyId: string,
   userId: string,
-): Promise<{ data?: PropertyParentDocument[]; error?: Error }> {
+): AsyncResponseType<PropertyParentDocument[]> {
   return await svc.getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId,
     userId,
@@ -21,7 +22,7 @@ export async function getPropertyParentDocumentApprovalRequestByDocumentId(
   propertyId: string,
   userId: string,
   parentDocId: string,
-): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+): AsyncResponseType<PropertyParentDocument> {
   return await svc.getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId,
     userId,
@@ -33,7 +34,7 @@ export async function sendPropertyParentDocumentApprovalRequest(
   propertyId: string,
   userId: string,
   parentDocumentId: string,
-): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+): AsyncResponseType<PropertyParentDocument> {
   return await svc.sendPropertyParentDocumentApprovalRequest(
     propertyId,
     userId,
@@ -45,7 +46,7 @@ export async function getAllDocumentApprovalRequestsForGivenProperty(
   propertyId: string,
   pageSize: number,
   pageNumber: number,
-): Promise<{ data?: PagedResponse<PropertyParentDocument>; error?: Error }> {
+): AsyncResponseType<PagedResponse<PropertyParentDocument>> {
   return await svc.getAllDocumentApprovalRequestsForGivenProperty(
     propertyId,
     pageSize,
@@ -59,7 +60,7 @@ export async function setPropertyParentDocumentApprovalRequestStatus(
   parentDocumentId: string,
   requestStatus: RequestStatus,
   adminId: string,
-): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+): AsyncResponseType<PropertyParentDocument> {
   return await svc.setPropertyParentDocumentRequestStatus(
     propertyId,
     userId,

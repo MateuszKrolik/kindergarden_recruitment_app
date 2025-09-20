@@ -11,7 +11,7 @@ import { PropertyParentDocumentTabs } from "./PropertyParentDocumentTabs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { PropertyParentChildrenTable } from "./PropertyParentChildrenTable";
 import { getAllPropertyChildrenForGivenParent } from "@/app/actions/property-management";
-import ErrorBoundary from "./ErrorBoundary";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 type PropertyParentPageTabsProps = {
   propertyId: string;
@@ -19,39 +19,39 @@ type PropertyParentPageTabsProps = {
   getPropertyParentDocumentRequirements(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocumentRequirement[]>;
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<{ data?: ParentDocument; error?: Error }>;
+  ): AsyncResponseType<ParentDocument>;
   getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument[]>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   saveParentDocument(
     userId: string,
     documentType: DocumentType,
     file: File,
-  ): Promise<{ data?: ParentDocument; error?: Error }>;
+  ): AsyncResponseType<ParentDocument>;
   getDocumentURLByFilePath(
     bucket: string,
     key: string,
     expiresIn: number,
-  ): Promise<{ data?: string; error?: Error }>;
+  ): AsyncResponseType<string>;
   getPropertyChildDocumentRequirements(
     propertyId: string,
     childId: string,
-  ): Promise<{ data?: PropertyChildDocumentRequirement[]; error?: Error }>;
+  ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
 };
 
 export const PropertyParentPageTabs = ({

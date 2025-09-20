@@ -14,23 +14,25 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { catchError } from "../../shared/util/error.ts";
+import type { AsyncResponseType } from "../../shared/types/response.ts";
+import { NOT_FOUND_ERROR } from "../../shared/errors.ts";
 
 export interface IReportingRepo {
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<{ data?: ParentDocument; error?: Error }>;
+  ): AsyncResponseType<ParentDocument>;
   getParentDocumentTypeByDocumentId(
     parentDocumentId: string,
-  ): Promise<{ data?: DocumentType; error?: Error }>;
+  ): AsyncResponseType<DocumentType>;
   saveParentDocument(
     userId: string,
     documentType: DocumentType,
     filePath: string,
-  ): Promise<{ data?: ParentDocument; error?: Error }>;
+  ): AsyncResponseType<ParentDocument>;
   getParentDocumentFilePathByDocumentID(
     docId: string,
-  ): Promise<{ data?: string; error?: Error }>;
+  ): AsyncResponseType<string>;
 }
 
 export class ReportingRepo implements IReportingRepo {
@@ -44,23 +46,30 @@ export class ReportingRepo implements IReportingRepo {
   async getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<{ data?: ParentDocument; error?: Error }> {
-    const sql = `
-    SELECT *
-    FROM reporting.parent_documents
-    WHERE user_id = $1 AND document_type = $2;
-    `;
-    const { data, error } = await executeQuery<ParentDocument>(this.pool, sql, [
-      userId,
-      documentType,
-    ]);
-    if (error) return { data: undefined, error: error };
-    return { data: data?.rows[0], error: undefined };
+  ): AsyncResponseType<ParentDocument> {
+    //TODO: invalidate if necessary
+    const cacheKey = `parents:${userId}:documents:${documentType}`;
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+      const sql = `
+      SELECT *
+      FROM reporting.parent_documents
+      WHERE user_id = $1 AND document_type = $2;
+      `;
+      const { data, error } = await executeQuery<ParentDocument>(
+        this.pool,
+        sql,
+        [userId, documentType],
+      );
+      if (error) return { data: undefined, error: error };
+      if (data.rows.length === 0)
+        return { data: undefined, error: NOT_FOUND_ERROR };
+      return { data: data.rows[0], error: undefined };
+    });
   }
 
   async getParentDocumentTypeByDocumentId(
     parentDocumentId: string,
-  ): Promise<{ data?: DocumentType; error?: Error }> {
+  ): AsyncResponseType<DocumentType> {
     //TODO: invalidate if necessary
     const cacheKey = `parent_documents:${parentDocumentId}:type`;
     return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
@@ -81,7 +90,7 @@ export class ReportingRepo implements IReportingRepo {
     userId: string,
     documentType: DocumentType,
     filePath: string,
-  ): Promise<{ data?: ParentDocument; error?: Error }> {
+  ): AsyncResponseType<ParentDocument> {
     const cacheKey = `parents:${userId}:parent_documents:${documentType}`;
     return await withWriteThroughRedisCache(
       this.redisClient,
@@ -101,14 +110,16 @@ export class ReportingRepo implements IReportingRepo {
           [userId, documentType, filePath],
         );
         if (error) return { data: undefined, error };
-        return { data: data?.rows[0], error: undefined };
+        if (data.rows.length === 0)
+          return { data: undefined, error: NOT_FOUND_ERROR };
+        return { data: data.rows[0], error: undefined };
       },
     );
   }
 
   async getParentDocumentFilePathByDocumentID(
     docId: string,
-  ): Promise<{ data?: string; error?: Error }> {
+  ): AsyncResponseType<string> {
     //TODO:invalidate on mutations
     const cacheKey = `parent_documents:${docId}`;
     return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
@@ -123,7 +134,9 @@ export class ReportingRepo implements IReportingRepo {
         [docId],
       );
       if (error) return { data: undefined, error };
-      return { data: data?.rows[0].file_path, error: undefined };
+      if (data.rows.length === 0)
+        return { data: undefined, error: NOT_FOUND_ERROR };
+      return { data: data.rows[0].file_path, error: undefined };
     });
   }
 }
@@ -133,12 +146,12 @@ export interface IS3Repository {
     bucket: string,
     key: string,
     file: File,
-  ): Promise<{ data?: string; error?: Error }>;
+  ): AsyncResponseType<string>;
   getDocumentURLByFilePath(
     key?: string,
     bucket?: string,
     expiresIn?: number,
-  ): Promise<{ data?: string; error?: Error }>;
+  ): AsyncResponseType<string>;
 }
 
 export class S3Repository implements IS3Repository {
@@ -160,7 +173,7 @@ export class S3Repository implements IS3Repository {
     bucket: string,
     key: string,
     file: File,
-  ): Promise<{ data?: string; error?: Error }> {
+  ): AsyncResponseType<string> {
     const arrayBuffer = await file.arrayBuffer();
 
     const { error } = await catchError(
@@ -182,7 +195,7 @@ export class S3Repository implements IS3Repository {
     key: string,
     bucket: string = "mybucket",
     expiresIn: number = 3600,
-  ): Promise<{ data?: string; error?: Error }> {
+  ): AsyncResponseType<string> {
     const { data, error } = await catchError(
       getSignedUrl(
         this.client,

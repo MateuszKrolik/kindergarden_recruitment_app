@@ -1,18 +1,12 @@
 "use server";
 
-import svc from "@/data-access-layer/modules/identity/svc";
+import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { signInSchema } from "@/types/schema";
 import { z } from "zod";
 import { catchError } from "@/data-access-layer/shared/util/error";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
-export const doesAccountExist = async (
-  accountId: string,
-): Promise<{ data?: boolean; error?: Error }> => {
-  return await svc.doesAccountExist(accountId);
-};
 
 export async function signIn(
   unsafeData: z.infer<typeof signInSchema>,
@@ -37,12 +31,12 @@ export async function signIn(
   redirect(data.callbackUrl || "/dashboard/properties");
 }
 
-export const signUp = async () => {
-  await auth.api.signUpEmail({
-    body: {
-      email: "test@test.com",
-      password: "password",
-      name: "Test User",
-    },
-  });
-};
+export async function logoutAction() {
+  const cookieJar = await cookies();
+  const sessionToken = cookieJar.get("better-auth.session_token");
+
+  if (!sessionToken) return;
+
+  cookieJar.delete(sessionToken);
+  redirect("/");
+}

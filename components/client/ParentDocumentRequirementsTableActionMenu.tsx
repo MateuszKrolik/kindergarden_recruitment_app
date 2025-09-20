@@ -16,6 +16,8 @@ import { toast } from "sonner";
 import { getErrorMessage } from "@/util/error";
 import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
 import { Progress } from "../ui/progress";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { NOT_FOUND_ERROR } from "@/data-access-layer/shared/errors";
 
 type ParentDocumentRequirementsTableActionMenuProps = {
   propertyId: string;
@@ -24,27 +26,27 @@ type ParentDocumentRequirementsTableActionMenuProps = {
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<{ data?: ParentDocument; error?: Error }>;
+  ): AsyncResponseType<ParentDocument>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   saveParentDocument(
     userId: string,
     documentType: DocumentType,
     file: File,
-  ): Promise<{ data?: ParentDocument; error?: Error }>;
+  ): AsyncResponseType<ParentDocument>;
   getDocumentURLByFilePath(
     key?: string,
     bucket?: string,
     expiresIn?: number,
-  ): Promise<{ data?: string; error?: Error }>;
+  ): AsyncResponseType<string>;
 };
 
 export const ParentDocumentRequirementsTableActionMenu = ({
@@ -73,28 +75,30 @@ export const ParentDocumentRequirementsTableActionMenu = ({
         requirement.document_type,
       );
       if (error) {
+        if (error.message === NOT_FOUND_ERROR.message) {
+          setIsLoading(false);
+          return;
+        }
         toast.error(getErrorMessage(error));
         setIsLoading(false);
         return;
       }
-      if (!parentDocResult) {
-        setIsLoading(false);
-        return;
-      }
       setParentDoc(parentDocResult);
-      const { data: approvalReqResult, error: approvalReqError } =
+      const { error: approvalReqError } =
         await getPropertyParentDocumentApprovalRequestByDocumentId(
           propertyId,
           userId,
           parentDocResult.id,
         );
       if (approvalReqError) {
+        if (approvalReqError.message === NOT_FOUND_ERROR.message) {
+          setDisableApprovalRequest(false);
+          setIsLoading(false);
+          return;
+        }
         toast.error(getErrorMessage(approvalReqError));
         setIsLoading(false);
         return;
-      }
-      if (!approvalReqResult) {
-        setDisableApprovalRequest(false);
       }
       setIsLoading(false);
     } else {

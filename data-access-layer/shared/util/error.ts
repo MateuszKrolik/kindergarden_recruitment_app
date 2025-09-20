@@ -1,6 +1,6 @@
-export async function catchError<T>(
-  promise: Promise<T>,
-): Promise<{ data?: T; error?: Error }> {
+import type { AsyncResponseType, SyncResponseType } from "../types/response.ts";
+
+export async function catchError<T>(promise: Promise<T>): AsyncResponseType<T> {
   return promise
     .then((data) => {
       return { data: data, error: undefined };
@@ -10,10 +10,7 @@ export async function catchError<T>(
     });
 }
 
-export function catchErrorSync<T>(operation: () => T): {
-  data?: T;
-  error?: Error;
-} {
+export function catchErrorSync<T>(operation: () => T): SyncResponseType<T> {
   try {
     const result = operation();
     return { data: result, error: undefined };

@@ -13,39 +13,41 @@ import {
   type PagedResponse,
 } from "../../../types/pagination.ts";
 import { catchError } from "../../shared/util/error.ts";
+import type { AsyncResponseType } from "../../shared/types/response.ts";
+import { NOT_FOUND_ERROR } from "../../shared/errors.ts";
 
 export interface IComplianceRepo {
   getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument[]>;
   getAllDocumentApprovalRequestsForGivenProperty(
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<{ data?: PagedResponse<PropertyParentDocument>; error?: Error }>;
+  ): AsyncResponseType<PagedResponse<PropertyParentDocument>>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   setPropertyParentDocumentRequestStatus(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
     adminId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   isPropertyParentDocumentRequestApproved(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: boolean; error?: Error }>;
+  ): AsyncResponseType<boolean>;
 }
 
 export class ComplianceRepo implements IComplianceRepo {
@@ -58,7 +60,7 @@ export class ComplianceRepo implements IComplianceRepo {
   async getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }> {
+  ): AsyncResponseType<PropertyParentDocument[]> {
     const cacheKey =
       this.getAllDocumentApprovalRequestsForGivenPropertyParentCacheKey(
         propertyId,
@@ -76,7 +78,7 @@ export class ComplianceRepo implements IComplianceRepo {
         [propertyId, userId],
       );
       if (error) return { data: undefined, error: error };
-      return { data: data?.rows, error: undefined };
+      return { data: data.rows, error: undefined };
     });
   }
 
@@ -84,7 +86,7 @@ export class ComplianceRepo implements IComplianceRepo {
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+  ): AsyncResponseType<PropertyParentDocument> {
     const cacheKey = this.getPropertyParentDocumentApprovalRequestCacheKey(
       propertyId,
       userId,
@@ -102,14 +104,16 @@ export class ComplianceRepo implements IComplianceRepo {
         [propertyId, userId, parentDocId],
       );
       if (error) return { data: undefined, error: error };
-      return { data: data?.rows[0], error: undefined };
+      if (data.rows.length === 0)
+        return { data: undefined, error: NOT_FOUND_ERROR };
+      return { data: data.rows[0], error: undefined };
     });
   }
   async sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+  ): AsyncResponseType<PropertyParentDocument> {
     const cacheKey = this.getPropertyParentDocumentApprovalRequestCacheKey(
       propertyId,
       userId,
@@ -136,7 +140,9 @@ export class ComplianceRepo implements IComplianceRepo {
           [propertyId, userId, parentDocumentId],
         );
         if (error) return { data: undefined, error: error };
-        return { data: data?.rows[0], error: undefined };
+        if (data.rows.length === 0)
+          return { data: undefined, error: NOT_FOUND_ERROR };
+        return { data: data.rows[0], error: undefined };
       },
     );
 
@@ -160,7 +166,7 @@ export class ComplianceRepo implements IComplianceRepo {
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<{ data?: PagedResponse<PropertyParentDocument>; error?: Error }> {
+  ): AsyncResponseType<PagedResponse<PropertyParentDocument>> {
     const cacheKey =
       this.getAllDocumentApprovalRequestsForGivenPropertyCacheKey(
         propertyId,
@@ -206,14 +212,16 @@ export class ComplianceRepo implements IComplianceRepo {
         `Error while adding key '${cacheKey}' to set '${pagedSetKey}': ${setAddError}`,
       );
 
+    if (data.rows.length === 0) {
+      return {
+        data: newPagedResponse([], 0, pageNumber, pageSize),
+        error: undefined,
+      };
+    }
+
     const total_count = data?.rows[0].total_count;
     return {
-      data: newPagedResponse(
-        data?.rows || [],
-        total_count || 0,
-        pageNumber,
-        pageSize,
-      ),
+      data: newPagedResponse(data.rows, total_count, pageNumber, pageSize),
       error: undefined,
     };
   }
@@ -222,7 +230,7 @@ export class ComplianceRepo implements IComplianceRepo {
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: boolean; error?: Error }> {
+  ): AsyncResponseType<boolean> {
     const cacheKey = this.getIsPropertyParentDocumentRequestApprovedCacheKey(
       propertyId,
       userId,
@@ -240,6 +248,8 @@ export class ComplianceRepo implements IComplianceRepo {
         [propertyId, userId, parentDocumentId],
       );
       if (error) return { data: undefined, error };
+      if (data.rows.length === 0)
+        return { data: undefined, error: NOT_FOUND_ERROR };
       return { data: data?.rows[0].is_approved, error };
     });
   }
@@ -250,7 +260,7 @@ export class ComplianceRepo implements IComplianceRepo {
     parentDocumentId: string,
     requestStatus: RequestStatus,
     adminId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+  ): AsyncResponseType<PropertyParentDocument> {
     const cacheKey = this.getPropertyParentDocumentApprovalRequestCacheKey(
       propertyId,
       userId,
@@ -272,6 +282,8 @@ export class ComplianceRepo implements IComplianceRepo {
           [requestStatus, adminId, propertyId, userId, parentDocumentId],
         );
         if (error) return { data: undefined, error: error };
+        if (data.rows.length === 0)
+          return { data: undefined, error: NOT_FOUND_ERROR };
         return { data: data?.rows[0], error: undefined };
       },
     );

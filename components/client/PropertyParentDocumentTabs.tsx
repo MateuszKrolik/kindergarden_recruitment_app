@@ -7,6 +7,7 @@ import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { ParentDocumentApprovalsTable } from "./ParentDocumentApprovalsTable";
 import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 type PropertyParentDocumentTabsProps = {
   propertyId: string;
@@ -14,35 +15,35 @@ type PropertyParentDocumentTabsProps = {
   getPropertyParentDocumentRequirements(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyParentDocumentRequirement[]; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocumentRequirement[]>;
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): Promise<{ data?: ParentDocument; error?: Error }>;
+  ): AsyncResponseType<ParentDocument>;
   getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument[]>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   saveParentDocument(
     userId: string,
     documentType: DocumentType,
     file: File,
-  ): Promise<{ data?: ParentDocument; error?: Error }>;
+  ): AsyncResponseType<ParentDocument>;
   getDocumentURLByFilePath(
     key?: string,
     bucket?: string,
     expiresIn?: number,
-  ): Promise<{ data?: string; error?: Error }>;
+  ): AsyncResponseType<string>;
 };
 
 export const PropertyParentDocumentTabs = ({

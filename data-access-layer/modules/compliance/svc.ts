@@ -11,39 +11,40 @@ import { COMPLIANCE_EVENTS } from "../../shared/events/compliance.ts";
 import { createEvent } from "../../shared/types/event.ts";
 import type { Server as SocketServer } from "socket.io";
 import { getSocketServer } from "../../../socketServer.ts";
+import type { AsyncResponseType } from "../../shared/types/response.ts";
 
 export interface IComplianceSvc {
   getAllDocumentApprovalRequestsForGivenProperty(
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<{ data?: PagedResponse<PropertyParentDocument>; error?: Error }>;
+  ): AsyncResponseType<PagedResponse<PropertyParentDocument>>;
   getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument[]>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   setPropertyParentDocumentRequestStatus(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
     adminId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }>;
+  ): AsyncResponseType<PropertyParentDocument>;
   isPropertyParentDocumentRequestApproved(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: boolean; error?: Error }>;
+  ): AsyncResponseType<boolean>;
 }
 
 class ComplianceSvc implements IComplianceSvc {
@@ -63,8 +64,8 @@ class ComplianceSvc implements IComplianceSvc {
   async getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): Promise<{ data?: PropertyParentDocument[]; error?: Error }> {
-    return this.repo.getAllDocumentApprovalRequestsForGivenPropertyParent(
+  ): AsyncResponseType<PropertyParentDocument[]> {
+    return await this.repo.getAllDocumentApprovalRequestsForGivenPropertyParent(
       propertyId,
       userId,
     );
@@ -74,8 +75,8 @@ class ComplianceSvc implements IComplianceSvc {
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
-    return this.repo.getPropertyParentDocumentApprovalRequestByDocumentId(
+  ): AsyncResponseType<PropertyParentDocument> {
+    return await this.repo.getPropertyParentDocumentApprovalRequestByDocumentId(
       propertyId,
       userId,
       parentDocId,
@@ -86,7 +87,7 @@ class ComplianceSvc implements IComplianceSvc {
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+  ): AsyncResponseType<PropertyParentDocument> {
     const { data, error } =
       await this.repo.sendPropertyParentDocumentApprovalRequest(
         propertyId,
@@ -108,8 +109,8 @@ class ComplianceSvc implements IComplianceSvc {
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<{ data?: PagedResponse<PropertyParentDocument>; error?: Error }> {
-    return this.repo.getAllDocumentApprovalRequestsForGivenProperty(
+  ): AsyncResponseType<PagedResponse<PropertyParentDocument>> {
+    return await this.repo.getAllDocumentApprovalRequestsForGivenProperty(
       propertyId,
       pageSize,
       pageNumber,
@@ -122,7 +123,7 @@ class ComplianceSvc implements IComplianceSvc {
     parentDocumentId: string,
     requestStatus: RequestStatus,
     adminId: string,
-  ): Promise<{ data?: PropertyParentDocument; error?: Error }> {
+  ): AsyncResponseType<PropertyParentDocument> {
     const { data, error } =
       await this.repo.setPropertyParentDocumentRequestStatus(
         propertyId,
@@ -155,7 +156,7 @@ class ComplianceSvc implements IComplianceSvc {
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<{ data?: boolean; error?: Error }> {
+  ): AsyncResponseType<boolean> {
     return await this.repo.isPropertyParentDocumentRequestApproved(
       propertyId,
       userId,
