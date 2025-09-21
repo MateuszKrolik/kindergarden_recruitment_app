@@ -51,3 +51,15 @@ export async function getDocumentRequirementsForGivenPropertyChild(
     childId,
   );
 }
+
+export async function getAllPropertyChildrenPaged(
+  propertyId: string,
+  pageSize: number,
+  pageNumber: number,
+): AsyncResponseType<PagedResponse<PropertyChild>> {
+  return await svc.getAllPropertyChildrenPaged(
+    propertyId,
+    pageSize,
+    pageNumber,
+  );
+}

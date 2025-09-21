@@ -1,12 +1,10 @@
 "use server";
 
 import {
-  getAllDocumentApprovalRequestsForGivenProperty,
-  setPropertyParentDocumentApprovalRequestStatus,
-} from "@/app/actions/compliance";
-import { getPropertyUser } from "@/app/actions/property-management";
-import { getParentDocumentURLByDocumentID } from "@/app/actions/reporting";
-import AdminPropertyParentDocumentTable from "@/components/client/AdminPropertyParentDocumentTable";
+  getAllPropertyChildrenPaged,
+  getPropertyUser,
+} from "@/app/actions/property-management";
+import { AdminPropertyChildrenTable } from "@/components/client/AdminPropertyChildrenTable";
 import { PROPERTY_USER_ROLE } from "@/data-access-layer/modules/property-management/model";
 import { auth } from "@/lib/auth";
 import { getErrorMessage } from "@/util/error";
@@ -35,16 +33,9 @@ export default async function PropertyAdminPage({
   }
 
   return (
-    <AdminPropertyParentDocumentTable
+    <AdminPropertyChildrenTable
       propertyId={propertyId}
-      adminId={userId}
-      getAllDocumentApprovalRequestsForGivenProperty={
-        getAllDocumentApprovalRequestsForGivenProperty
-      }
-      setPropertyParentDocumentApprovalRequestStatus={
-        setPropertyParentDocumentApprovalRequestStatus
-      }
-      getParentDocumentURLByDocumentID={getParentDocumentURLByDocumentID}
+      getAllPropertyChildrenPaged={getAllPropertyChildrenPaged}
     />
   );
 }

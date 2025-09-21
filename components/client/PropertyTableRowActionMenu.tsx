@@ -15,6 +15,7 @@ import Link from "next/link";
 import { getErrorMessage } from "@/util/error";
 import { Progress } from "../ui/progress";
 import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { NOT_FOUND_ERROR } from "@/data-access-layer/shared/errors";
 
 type PropertyTableRowActionMenuContentProps = {
   propertyId: string;
@@ -36,18 +37,17 @@ export const PropertyTableRowActionMenu = ({
   const handleOnOpenChange = async (open: boolean) => {
     if (open) {
       setIsLoading(true);
-      const { data: result, error } = await getPropertyUser(propertyId, userId);
+      const { data, error } = await getPropertyUser(propertyId, userId);
       if (error) {
-        toast.error(getErrorMessage(result));
+        if (error.message == NOT_FOUND_ERROR.message) {
+          setIsLoading(false);
+          return;
+        }
+        toast.error(getErrorMessage(error));
         setIsLoading(false);
         return;
       }
-      if (!result) {
-        setIsLoading(false);
-        return;
-      }
-      console.log(result);
-      setPropertyUser(result);
+      setPropertyUser(data);
       setIsLoading(false);
     } else {
       setIsLoading(false);

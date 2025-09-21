@@ -1,8 +1,9 @@
 "use client";
-import {
-  Property,
-  PropertyUser,
-} from "@/data-access-layer/modules/property-management/model";
+
+import { PropertyChild } from "@/data-access-layer/modules/property-management/model";
+import { getErrorMessage } from "@/util/error";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -14,17 +15,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -32,56 +23,151 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { PagedResponse } from "@/types/pagination";
-import { toast } from "sonner";
-import { getErrorMessage } from "@/util/error";
+} from "../ui/table";
 import { useCallback, useEffect, useState } from "react";
+import socket from "@/app/socket";
+import { PROPERTY_MANAGEMENT_EVENTS } from "@/data-access-layer/shared/events/property-management";
+import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { PagedResponse } from "@/types/pagination";
+import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
-import { PropertyTableRowActionMenu } from "./PropertyTableRowActionMenu";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
-interface PropertiesTableProps {
-  userId: string;
-  getAllProperties(
+const EMPTY_CHILDREN: PropertyChild[] = [];
+
+export type AdminPropertyChildrenTableProps = {
+  propertyId: string;
+  getAllPropertyChildrenPaged(
+    propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): AsyncResponseType<PagedResponse<Property>>;
-  getPropertyUser(
-    propertyId: string,
-    userId: string,
-  ): AsyncResponseType<PropertyUser>;
-}
+  ): AsyncResponseType<PagedResponse<PropertyChild>>;
+};
 
-export default function PropertyTable({
-  userId,
-  getAllProperties,
-  getPropertyUser,
-}: PropertiesTableProps) {
+export const AdminPropertyChildrenTable = ({
+  propertyId,
+  getAllPropertyChildrenPaged,
+}: AdminPropertyChildrenTableProps) => {
   const searchParams = useSearchParams();
   const pageNumberParam = searchParams.get("pageNumber");
   const pageNumber = parseInt(pageNumberParam || "1");
   const pageSizeParam = searchParams.get("pageSize");
   const pageSize = parseInt(pageSizeParam || "1");
-  const [result, setResult] = useState<Property[]>([]);
+  const [result, setResult] = useState<PropertyChild[]>([]);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const loadProperties = useCallback(
-    async (size: number, pageNumber: number) => {
+  const columns: ColumnDef<PropertyChild>[] = [
+    {
+      accessorKey: "child_id",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Child ID
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("child_id")}</div>
+      ),
+    },
+    {
+      accessorKey: "points",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Current Points
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("points")}</div>
+      ),
+    },
+    {
+      accessorKey: "approved",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Is Approved?
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => {
+        const value = row.getValue("approved") as boolean;
+        return <div className="lowercase">{value ? "Yes" : "No"}</div>;
+      },
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const propertyChild = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/dashboard/properties/${propertyId}/admin/children/${propertyChild.child_id}`}
+                >
+                  View Child Details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>TODO</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
+  const fetchAllPagedPropertyChildren = useCallback(
+    async (propertyId: string, size: number, pNum: number) => {
+      setError(null);
       setIsLoading(true);
-      const { data: result, error } = await getAllProperties(size, pageNumber);
-      if (error) {
-        toast.error(getErrorMessage(result));
+      const { data: result, error: fetchErr } =
+        await getAllPropertyChildrenPaged(propertyId, size, pNum);
+
+      if (fetchErr) {
+        const errMsg = getErrorMessage(fetchErr);
+        toast.error(errMsg);
+        setError(errMsg);
         setIsLoading(false);
         return;
       }
@@ -91,51 +177,41 @@ export default function PropertyTable({
       setHasNextPage(result.has_next_page);
       setHasPreviousPage(result.has_previous_page);
       setTotalPages(result.total_pages);
+      setError(null);
       setIsLoading(false);
     },
-    [getAllProperties],
+    [getAllPropertyChildrenPaged],
   );
 
   useEffect(() => {
-    loadProperties(pageSize, pageNumber);
-  }, [loadProperties, pageNumber, pageSize]);
+    fetchAllPagedPropertyChildren(propertyId, pageSize, pageNumber);
+  }, [fetchAllPagedPropertyChildren, propertyId, pageSize, pageNumber]);
 
-  const columns: ColumnDef<Property>[] = [
-    {
-      accessorKey: "name",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Name
-            <ArrowUpDown />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("name")}</div>
-      ),
-    },
-    {
-      id: "actions",
-      enableHiding: false,
-      cell: ({ row }) => {
-        const property = row.original;
-        return (
-          <PropertyTableRowActionMenu
-            getPropertyUser={getPropertyUser}
-            propertyId={property.id}
-            userId={userId}
-          />
-        );
-      },
-    },
-  ];
+  useEffect(() => {
+    const onPropertyChildrenUpdated = (updatedChildren: PropertyChild[]) => {
+      setResult((prev) => {
+        const prevMap = new Map(prev.map((child) => [child.child_id, child]));
+        updatedChildren.forEach((child) => {
+          prevMap.set(child.child_id, child);
+        });
 
-  const table = useReactTable<Property>({
-    data: result,
+        return Array.from(prevMap.values());
+      });
+    };
+    socket.on(
+      PROPERTY_MANAGEMENT_EVENTS.PROPERTY_CHILDREN_UPDATED,
+      onPropertyChildrenUpdated,
+    );
+    return () => {
+      socket.off(
+        PROPERTY_MANAGEMENT_EVENTS.PROPERTY_CHILDREN_UPDATED,
+        onPropertyChildrenUpdated,
+      );
+    };
+  }, []);
+
+  const table = useReactTable<PropertyChild>({
+    data: error ? EMPTY_CHILDREN : result,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -176,11 +252,7 @@ export default function PropertyTable({
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length}>Loading...</TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -266,4 +338,4 @@ export default function PropertyTable({
       </div>
     </div>
   );
-}
+};

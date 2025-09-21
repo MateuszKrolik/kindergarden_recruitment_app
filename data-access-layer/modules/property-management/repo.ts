@@ -21,6 +21,7 @@ import type { RedisClientType } from "../../db/redis-client.ts";
 import type { DocumentType } from "../../shared/types/reporting.ts";
 import type { AsyncResponseType } from "../../shared/types/response.ts";
 import { NOT_FOUND_ERROR } from "../../shared/errors.ts";
+import { catchError } from "../../shared/util/error.ts";
 
 export interface IPropertyManagementRepo {
   getAllProperties(
@@ -50,6 +51,11 @@ export interface IPropertyManagementRepo {
     propertyId: string,
     documentType: DocumentType,
   ): AsyncResponseType<number>;
+  getAllPropertyChildrenPaged(
+    propertyId: string,
+    pageSize: number,
+    pageNumber: number,
+  ): AsyncResponseType<PagedResponse<PropertyChild>>;
 }
 
 export class PropertyManagementRepo implements IPropertyManagementRepo {
@@ -130,20 +136,27 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
     propertyId: string,
   ): AsyncResponseType<PropertyChild[]> {
     const cacheKey = this.getAllPropertyChildrenCacheKey(propertyId);
-    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
-      const sql = `
+    const result = await withCacheAsideRedis(
+      this.redisClient,
+      cacheKey,
+      async () => {
+        const sql = `
         SELECT *
         FROM property_management.property_children
         WHERE property_id = $1;
         `;
-      const { data, error } = await executeQuery<PropertyChild>(
-        this.pool,
-        sql,
-        [propertyId],
-      );
-      if (error) return { data: undefined, error: error };
-      return { data: data.rows, error: undefined };
-    });
+        const { data, error } = await executeQuery<PropertyChild>(
+          this.pool,
+          sql,
+          [propertyId],
+        );
+        if (error) return { data: undefined, error: error };
+        return { data: data.rows, error: undefined };
+      },
+    );
+    if (result.error) return result;
+    await this.invalidateGetAllPropertyChildrenPagedSetKey(propertyId);
+    return result;
   }
 
   async incrementPropertyChildrenPointsForGivenParent(
@@ -178,6 +191,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
       this.redisClient,
       this.getAllPropertyChildrenCacheKey(propertyId),
     );
+    await this.invalidateGetAllPropertyChildrenPagedSetKey(propertyId);
     return { data: data, error: undefined };
   }
 
@@ -224,7 +238,99 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
     });
   }
 
+  async getAllPropertyChildrenPaged(
+    propertyId: string,
+    pageSize: number,
+    pageNumber: number,
+  ): AsyncResponseType<PagedResponse<PropertyChild>> {
+    const cacheKey = this.getAllPropertyChildrenPagedCacheKey(
+      propertyId,
+      pageSize,
+      pageNumber,
+    );
+    const { data, error } = await withCacheAsideRedis(
+      this.redisClient,
+      cacheKey,
+      async () => {
+        const sql = `
+        SELECT 
+          *,
+          COUNT(*) OVER() as total_count
+        FROM property_management.property_children
+        WHERE property_id = $1
+        LIMIT $2
+        OFFSET $3;
+        `;
+        const { data, error } = await executeQuery<
+          PropertyChild & { total_count: number }
+        >(this.pool, sql, [
+          propertyId,
+          pageSize,
+          calculateOffset(pageSize, pageNumber),
+        ]);
+        if (error) return { data: undefined, error: error };
+        return { data: data.rows, error: undefined };
+      },
+    );
+    if (error) return { data: undefined, error: error };
+
+    const pagedSetKey = this.getAllPropertyChildrenPagedSetKey(propertyId);
+    const { error: setAddError } = await catchError(
+      this.redisClient.sAdd(pagedSetKey, cacheKey),
+    );
+    if (setAddError)
+      console.error(
+        `Error while adding key '${cacheKey}' to set '${pagedSetKey}': ${setAddError}`,
+      );
+
+    if (data.length === 0)
+      return {
+        data: newPagedResponse([], 0, pageNumber, pageSize),
+        error: undefined,
+      };
+    return {
+      data: newPagedResponse(data, data[0].total_count, pageNumber, pageSize),
+      error: undefined,
+    };
+  }
+
   private getAllPropertyChildrenCacheKey(propertyId: string): string {
     return `properties:${propertyId}:children`;
+  }
+
+  private async invalidateGetAllPropertyChildrenPagedSetKey(
+    propertyId: string,
+  ) {
+    const setKey = this.getAllPropertyChildrenPagedSetKey(propertyId);
+    const { data: sMembers, error } = await catchError(
+      this.redisClient.sMembers(setKey),
+    );
+    if (error)
+      console.error(`Redis GET error for key set '${setKey}': ${error}`);
+    if (sMembers && sMembers.length > 0) {
+      const { error: setDelError } = await catchError(
+        this.redisClient.del(sMembers),
+      );
+      if (setDelError)
+        console.error(
+          `Redis DEL error for set members '${setKey}': ${setDelError}`,
+        );
+    }
+    const { error: delError } = await catchError(this.redisClient.del(setKey));
+    if (delError) {
+      console.error(`Redis DEL error for set '${setKey}': ${delError}`);
+    }
+  }
+
+  private getAllPropertyChildrenPagedSetKey(propertyId: string) {
+    return `properties:${propertyId}:property_children:pages`;
+  }
+
+  private getAllPropertyChildrenPagedCacheKey(
+    propertyId: string,
+    pageSize: number,
+    pageNumber: number,
+  ): string {
+    return `properties:${propertyId}:property_children:page_size:${pageSize}:page_number${pageNumber}`;
   }
 }

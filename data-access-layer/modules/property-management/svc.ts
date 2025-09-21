@@ -59,6 +59,11 @@ export interface IPropertyManagementSvc {
     propertyId: string,
     documentType: DocumentType,
   ): AsyncResponseType<number>;
+  getAllPropertyChildrenPaged(
+    propertyId: string,
+    pageSize: number,
+    pageNumber: number,
+  ): AsyncResponseType<PagedResponse<PropertyChild>>;
 }
 
 class PropertyManagementSvc implements IPropertyManagementSvc {
@@ -196,6 +201,18 @@ class PropertyManagementSvc implements IPropertyManagementSvc {
       },
     );
     return { data: activeReqs, error: undefined };
+  }
+
+  async getAllPropertyChildrenPaged(
+    propertyId: string,
+    pageSize: number,
+    pageNumber: number,
+  ): AsyncResponseType<PagedResponse<PropertyChild>> {
+    return await this.repo.getAllPropertyChildrenPaged(
+      propertyId,
+      pageSize,
+      pageNumber,
+    );
   }
 }
 
