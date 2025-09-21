@@ -104,50 +104,24 @@ const SetStatusDropdownMenuItem = ({
     }
     toast.success(`Request ${status} successfuly!`);
   };
-  switch (request.request_status) {
-    case REQUEST_STATUS.PENDING:
-      return (
-        <>
-          <DropdownMenuItem
-            onClick={async () =>
-              await handleStatusChange(REQUEST_STATUS.APPROVED)
-            }
-          >
-            Approve Request
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={async () =>
-              await handleStatusChange(REQUEST_STATUS.REJECTED)
-            }
-          >
-            Reject Request
-          </DropdownMenuItem>
-        </>
-      );
-    case REQUEST_STATUS.APPROVED:
-      return (
-        <>
-          <DropdownMenuItem disabled>Approve Request</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem disabled>Reject Request</DropdownMenuItem>
-        </>
-      );
-    case REQUEST_STATUS.REJECTED:
-      return (
-        <>
-          <DropdownMenuItem
-            onClick={async () =>
-              await handleStatusChange(REQUEST_STATUS.APPROVED)
-            }
-          >
-            Approve Request
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem disabled>Reject Request</DropdownMenuItem>
-        </>
-      );
-    default:
-      return null;
-  }
+  return (
+    <>
+      <DropdownMenuItem
+        disabled={request.request_status === REQUEST_STATUS.APPROVED}
+        onClick={async () => await handleStatusChange(REQUEST_STATUS.APPROVED)}
+      >
+        Approve Request
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        disabled={
+          request.request_status === REQUEST_STATUS.REJECTED ||
+          request.request_status === REQUEST_STATUS.APPROVED
+        }
+        onClick={async () => await handleStatusChange(REQUEST_STATUS.REJECTED)}
+      >
+        Reject Request
+      </DropdownMenuItem>
+    </>
+  );
 };
