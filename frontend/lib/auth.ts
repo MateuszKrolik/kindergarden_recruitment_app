@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { pool } from "@/data-access-layer/db/db";
 import { nextCookies } from "better-auth/next-js";
 import { redisClient } from "@/data-access-layer/db/redis-client";
+import { jwt } from "better-auth/plugins";
 import bcrypt from "bcryptjs";
 
 export const auth = betterAuth({
@@ -19,7 +20,7 @@ export const auth = betterAuth({
       generateId: false,
     },
   },
-  plugins: [nextCookies()],
+  plugins: [nextCookies(), jwt()],
   secondaryStorage: {
     get: async (key) => {
       return await redisClient.get(key);

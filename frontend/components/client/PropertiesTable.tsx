@@ -44,8 +44,10 @@ import { PropertyTableRowActionMenu } from "./PropertyTableRowActionMenu";
 import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 interface PropertiesTableProps {
+  jwt: string;
   userId: string;
   getAllProperties(
+    jwt: string,
     pageSize: number,
     pageNumber: number,
   ): AsyncResponseType<PagedResponse<Property>>;
@@ -56,6 +58,7 @@ interface PropertiesTableProps {
 }
 
 export default function PropertyTable({
+  jwt,
   userId,
   getAllProperties,
   getPropertyUser,
@@ -79,7 +82,11 @@ export default function PropertyTable({
   const loadProperties = useCallback(
     async (size: number, pageNumber: number) => {
       setIsLoading(true);
-      const { data: result, error } = await getAllProperties(size, pageNumber);
+      const { data: result, error } = await getAllProperties(
+        jwt,
+        size,
+        pageNumber,
+      );
       if (error) {
         toast.error(getErrorMessage(result));
         setIsLoading(false);
@@ -93,7 +100,7 @@ export default function PropertyTable({
       setTotalPages(result.total_pages);
       setIsLoading(false);
     },
-    [getAllProperties],
+    [jwt, getAllProperties],
   );
 
   useEffect(() => {

@@ -1,6 +1,13 @@
 BEGIN;
 
-CREATE SCHEMA IF NOT EXISTS identity; 
+CREATE SCHEMA IF NOT EXISTS identity;
+
+create table identity."jwks" (
+  "id" uuid DEFAULT gen_random_uuid() primary key,
+  "publicKey" text not null,
+  "privateKey" text not null,
+  "createdAt" timestamptz not null
+);
 
 create table identity."user" (
   "id" uuid DEFAULT gen_random_uuid() primary key,

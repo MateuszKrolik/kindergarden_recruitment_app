@@ -11,11 +11,23 @@ import {
 } from "@/data-access-layer/modules/property-management/model";
 import type { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
+const BASE_URL = "http://localhost:3001";
+
 export async function getAllProperties(
+  jwt: string,
   pageSize: number,
   pageNumber: number,
 ): AsyncResponseType<PagedResponse<Property>> {
-  return await svc.getAllProperties(pageSize, pageNumber);
+  const response = await fetch(
+    `${BASE_URL}/properties?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+    {
+      headers: {
+        Authorization: jwt,
+      },
+      method: "GET",
+    },
+  );
+  return await response.json();
 }
 
 export async function getPropertyUser(

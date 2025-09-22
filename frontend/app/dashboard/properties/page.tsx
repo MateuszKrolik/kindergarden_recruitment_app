@@ -9,12 +9,19 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
 export default async function PropertySelectionPage() {
-  const session = await auth.api.getSession({
+  const sessionResponse = await auth.api.getSession({
     headers: await headers(),
+    asResponse: true,
   });
-  const userId = session?.user.id || "";
+  const session = await sessionResponse.json();
+  const userId = session["user"]["id"];
+  console.log(userId);
+  console.log(session);
+  const jwt = sessionResponse.headers.get("set-auth-jwt") || "";
+  console.log(jwt);
   return (
     <PropertyTable
+      jwt={jwt}
       userId={userId}
       getPropertyUser={getPropertyUser}
       getAllProperties={getAllProperties}
