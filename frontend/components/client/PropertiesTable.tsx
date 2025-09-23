@@ -2,7 +2,7 @@
 import {
   Property,
   PropertyUser,
-} from "@/data-access-layer/modules/property-management/model";
+} from "@/data-access-layer/shared/types/property-management";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -52,6 +52,7 @@ interface PropertiesTableProps {
     pageNumber: number,
   ): AsyncResponseType<PagedResponse<Property>>;
   getPropertyUser(
+    jwt: string,
     propertyId: string,
     userId: string,
   ): AsyncResponseType<PropertyUser>;
@@ -132,6 +133,7 @@ export default function PropertyTable({
         const property = row.original;
         return (
           <PropertyTableRowActionMenu
+            jwt={jwt}
             getPropertyUser={getPropertyUser}
             propertyId={property.id}
             userId={userId}

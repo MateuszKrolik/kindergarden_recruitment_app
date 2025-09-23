@@ -1,11 +1,3 @@
-import type { AsyncResponseType } from "../../shared/types/response.ts";
-import type { PagedResponse } from "../../shared/types/pagination.ts";
-import type {
-  PropertyUser,
-  PropertyParentDocumentRequirement,
-  PropertyChild,
-  PropertyChildDocumentRequirement,
-} from "./model.ts";
 import type { IPropertyManagementSvc } from "./svc.ts";
 import type { Request, Response } from "express";
 
@@ -15,7 +7,7 @@ export class PropertyManagementHandler {
     this.svc = svc;
   }
 
-  getAllProperties = async (req: Request, res: Response): Promise<void> => {
+  getAllProperties = async (req: Request, res: Response) => {
     const pageSize =
       typeof req.query.pageSize === "string" ? parseInt(req.query.pageSize) : 1;
     const pageNumber =
@@ -27,52 +19,70 @@ export class PropertyManagementHandler {
     res.json(result);
   };
 
-  async getPropertyUser(
-    propertyId: string,
-    userId: string,
-  ): AsyncResponseType<PropertyUser> {
-    return await this.svc.getPropertyUser(propertyId, userId);
-  }
+  getPropertyUser = async (req: Request, res: Response) => {
+    const { propertyId, userId } = req.params;
+    const result = await this.svc.getPropertyUser(propertyId, userId);
+    console.log(result);
+    res.json(result);
+  };
 
-  async getPropertyParentDocumentRequirements(
-    propertyId: string,
-    userId: string,
-  ): AsyncResponseType<PropertyParentDocumentRequirement[]> {
-    return await this.svc.getDocumentRequirementsForGivenPropertyParent(
+  getPropertyParentDocumentRequirements = async (
+    req: Request,
+    res: Response,
+  ) => {
+    // "/properties/:propertyId/users/:userId/parent-document-requirements"
+    const { propertyId, userId } = req.params;
+    const result = await this.svc.getDocumentRequirementsForGivenPropertyParent(
       propertyId,
       userId,
     );
-  }
+    console.log(result);
+    res.json(result);
+  };
 
-  async getAllPropertyChildrenForGivenParent(
-    propertyId: string,
-    parentId: string,
-  ): AsyncResponseType<PropertyChild[]> {
-    return await this.svc.getAllPropertyChildrenForGivenParent(
+  getAllPropertyChildrenForGivenParent = async (
+    req: Request,
+    res: Response,
+  ) => {
+    // /properties/:propertyId/parents/:parentId/property-children
+    const { propertyId, parentId } = req.params;
+    const result = await this.svc.getAllPropertyChildrenForGivenParent(
       propertyId,
       parentId,
     );
-  }
+    console.log(result);
+    res.json(result);
+  };
 
-  async getDocumentRequirementsForGivenPropertyChild(
-    propertyId: string,
-    childId: string,
-  ): AsyncResponseType<PropertyChildDocumentRequirement[]> {
-    return await this.svc.getDocumentRequirementsForGivenPropertyChild(
+  getDocumentRequirementsForGivenPropertyChild = async (
+    req: Request,
+    res: Response,
+  ) => {
+    // /properties/:propertyId/children/:childId/document-requirements
+    const { propertyId, childId } = req.params;
+    const result = await this.svc.getDocumentRequirementsForGivenPropertyChild(
       propertyId,
       childId,
     );
-  }
+    console.log(result);
+    res.json(result);
+  };
 
-  async getAllPropertyChildrenPaged(
-    propertyId: string,
-    pageSize: number,
-    pageNumber: number,
-  ): AsyncResponseType<PagedResponse<PropertyChild>> {
-    return await this.svc.getAllPropertyChildrenPaged(
+  getAllPropertyChildrenPaged = async (req: Request, res: Response) => {
+    // /properties/:propertyId/property-children
+    const { propertyId } = req.params;
+    const pageSize =
+      typeof req.query.pageSize === "string" ? parseInt(req.query.pageSize) : 1;
+    const pageNumber =
+      typeof req.query.pageNumber === "string"
+        ? parseInt(req.query.pageNumber)
+        : 1;
+    const result = await this.svc.getAllPropertyChildrenPaged(
       propertyId,
       pageSize,
       pageNumber,
     );
-  }
+    console.log(result);
+    res.json(result);
+  };
 }

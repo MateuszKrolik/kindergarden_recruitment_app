@@ -8,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
 } from "../ui/dropdown-menu";
-import { PropertyParentDocumentRequirement } from "@/data-access-layer/modules/property-management/model";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { useRef, useState } from "react";
@@ -18,6 +17,7 @@ import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/m
 import { Progress } from "../ui/progress";
 import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 import { NOT_FOUND_ERROR } from "@/data-access-layer/shared/errors";
+import { PropertyParentDocumentRequirement } from "@/data-access-layer/shared/types/property-management";
 
 type ParentDocumentRequirementsTableActionMenuProps = {
   propertyId: string;

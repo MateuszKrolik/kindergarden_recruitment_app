@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { PropertyUser } from "@/data-access-layer/modules/property-management/model";
+import { PropertyUser } from "@/data-access-layer/shared/types/property-management";
 import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -18,15 +18,18 @@ import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 import { NOT_FOUND_ERROR } from "@/data-access-layer/shared/errors";
 
 type PropertyTableRowActionMenuContentProps = {
+  jwt: string;
   propertyId: string;
   userId: string;
   getPropertyUser(
+    jwt: string,
     propertyId: string,
     userId: string,
   ): AsyncResponseType<PropertyUser>;
 };
 
 export const PropertyTableRowActionMenu = ({
+  jwt,
   propertyId,
   userId,
   getPropertyUser,
@@ -37,7 +40,7 @@ export const PropertyTableRowActionMenu = ({
   const handleOnOpenChange = async (open: boolean) => {
     if (open) {
       setIsLoading(true);
-      const { data, error } = await getPropertyUser(propertyId, userId);
+      const { data, error } = await getPropertyUser(jwt, propertyId, userId);
       if (error) {
         if (error.message == NOT_FOUND_ERROR.message) {
           setIsLoading(false);

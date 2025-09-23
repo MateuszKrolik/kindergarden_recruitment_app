@@ -1,6 +1,5 @@
 "use client";
 
-import { PropertyChildDocumentRequirement } from "@/data-access-layer/modules/property-management/model";
 import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -34,19 +33,23 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { PropertyChildDocumentRequirement } from "@/data-access-layer/shared/types/property-management";
 
 const EMPTY_REQUIREMENTS: PropertyChildDocumentRequirement[] = [];
 
 export type ChildrenDocumentRequirementsTableProps = {
+  jwt: string;
   propertyId: string;
   childId: string;
   getPropertyChildDocumentRequirements(
+    jwt: string,
     propertyId: string,
     userId: string,
   ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
 };
 
 export const ChildrenDocumentRequirementsTable = ({
+  jwt,
   propertyId,
   childId,
   getPropertyChildDocumentRequirements,
@@ -161,7 +164,7 @@ export const ChildrenDocumentRequirementsTable = ({
   const fetchData = useCallback(async () => {
     setError(null);
     const { data, error: fetchErr } =
-      await getPropertyChildDocumentRequirements(propertyId, childId);
+      await getPropertyChildDocumentRequirements(jwt, propertyId, childId);
 
     if (fetchErr) {
       const errMsg = getErrorMessage(fetchErr);
@@ -178,7 +181,7 @@ export const ChildrenDocumentRequirementsTable = ({
 
     setData(data);
     setError(null);
-  }, [propertyId, childId, getPropertyChildDocumentRequirements]);
+  }, [jwt, propertyId, childId, getPropertyChildDocumentRequirements]);
 
   useEffect(() => {
     fetchData();

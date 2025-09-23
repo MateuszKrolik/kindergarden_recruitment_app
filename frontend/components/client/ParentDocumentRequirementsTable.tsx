@@ -1,6 +1,5 @@
 "use client";
 
-import { PropertyParentDocumentRequirement } from "@/data-access-layer/modules/property-management/model";
 import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -30,11 +29,14 @@ import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { ParentDocumentRequirementsTableActionMenu } from "./ParentDocumentRequirementsTableActionMenu";
 import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
 import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { PropertyParentDocumentRequirement } from "@/data-access-layer/shared/types/property-management";
 
 export type ParentDocumentRequirementsTableProps = {
+  jwt: string;
   propertyId: string;
   userId: string;
   getPropertyParentDocumentRequirements(
+    jwt: string,
     propertyId: string,
     userId: string,
   ): AsyncResponseType<PropertyParentDocumentRequirement[]>;
@@ -65,6 +67,7 @@ export type ParentDocumentRequirementsTableProps = {
 };
 
 export const ParentDocumentRequirementsTable = ({
+  jwt,
   propertyId,
   userId,
   getPropertyParentDocumentRequirements,
@@ -177,6 +180,7 @@ export const ParentDocumentRequirementsTable = ({
 
   const fetchData = useCallback(async () => {
     const { data, error } = await getPropertyParentDocumentRequirements(
+      jwt,
       propertyId,
       userId,
     );
@@ -194,7 +198,7 @@ export const ParentDocumentRequirementsTable = ({
     }
 
     setData(data);
-  }, [propertyId, userId, getPropertyParentDocumentRequirements]);
+  }, [jwt, propertyId, userId, getPropertyParentDocumentRequirements]);
 
   useEffect(() => {
     fetchData();

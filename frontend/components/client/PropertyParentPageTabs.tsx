@@ -3,7 +3,7 @@
 import {
   PropertyChildDocumentRequirement,
   PropertyParentDocumentRequirement,
-} from "@/data-access-layer/modules/property-management/model";
+} from "@/data-access-layer/shared/types/property-management";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
@@ -14,9 +14,11 @@ import { getAllPropertyChildrenForGivenParent } from "@/app/actions/property-man
 import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 type PropertyParentPageTabsProps = {
+  jwt: string;
   propertyId: string;
   userId: string;
   getPropertyParentDocumentRequirements(
+    jwt: string,
     propertyId: string,
     userId: string,
   ): AsyncResponseType<PropertyParentDocumentRequirement[]>;
@@ -49,12 +51,14 @@ type PropertyParentPageTabsProps = {
     expiresIn: number,
   ): AsyncResponseType<string>;
   getPropertyChildDocumentRequirements(
+    jwt: string,
     propertyId: string,
     childId: string,
   ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
 };
 
 export const PropertyParentPageTabs = ({
+  jwt,
   propertyId,
   userId,
   getParentDocumentByType,
@@ -77,6 +81,7 @@ export const PropertyParentPageTabs = ({
         </TabsList>
         <TabsContent value="my-documents">
           <PropertyParentDocumentTabs
+            jwt={jwt}
             propertyId={propertyId}
             userId={userId}
             getParentDocumentByType={getParentDocumentByType}
@@ -98,6 +103,7 @@ export const PropertyParentPageTabs = ({
         </TabsContent>
         <TabsContent value="children-documents">
           <PropertyParentChildrenTable
+            jwt={jwt}
             propertyId={propertyId}
             userId={userId}
             getAllPropertyChildrenForGivenParent={

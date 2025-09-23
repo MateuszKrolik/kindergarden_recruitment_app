@@ -7,7 +7,7 @@ import {
 import { getPropertyUser } from "@/app/actions/property-management";
 import { getParentDocumentURLByDocumentID } from "@/app/actions/reporting";
 import AdminPropertyParentDocumentTable from "@/components/client/AdminPropertyParentDocumentTable";
-import { PROPERTY_USER_ROLE } from "@/data-access-layer/modules/property-management/model";
+import { PROPERTY_USER_ROLE } from "@/data-access-layer/shared/types/property-management";
 import { auth } from "@/lib/auth";
 import { getErrorMessage } from "@/util/error";
 import { headers } from "next/headers";
@@ -18,12 +18,15 @@ type PageProps = {
 };
 
 export default async function Page({ params }: PageProps) {
-  const session = await auth.api.getSession({
+  const sessionResponse = await auth.api.getSession({
     headers: await headers(),
+    asResponse: true,
   });
-  const userId = session?.user.id || "";
+  const session = await sessionResponse.json();
+  const userId = session?.user?.id || "";
+  const jwt = sessionResponse.headers.get("set-auth-jwt") || "";
   const { propertyId } = await params;
-  const { data, error } = await getPropertyUser(propertyId, userId);
+  const { data, error } = await getPropertyUser(jwt, propertyId, userId);
   if (error) {
     console.error(getErrorMessage(error));
     return;

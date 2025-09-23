@@ -14,11 +14,8 @@ export default async function PropertySelectionPage() {
     asResponse: true,
   });
   const session = await sessionResponse.json();
-  const userId = session["user"]["id"];
-  console.log(userId);
-  console.log(session);
+  const userId = session?.user?.id || "";
   const jwt = sessionResponse.headers.get("set-auth-jwt") || "";
-  console.log(jwt);
   return (
     <PropertyTable
       jwt={jwt}

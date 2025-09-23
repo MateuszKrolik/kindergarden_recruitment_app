@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyParentDocumentRequirement } from "@/data-access-layer/modules/property-management/model";
+import { PropertyParentDocumentRequirement } from "@/data-access-layer/shared/types/property-management";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { ParentDocumentRequirementsTable } from "./ParentDocumentRequirementsTable";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
@@ -10,9 +10,11 @@ import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/m
 import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 
 type PropertyParentDocumentTabsProps = {
+  jwt: string;
   propertyId: string;
   userId: string;
   getPropertyParentDocumentRequirements(
+    jwt: string,
     propertyId: string,
     userId: string,
   ): AsyncResponseType<PropertyParentDocumentRequirement[]>;
@@ -47,6 +49,7 @@ type PropertyParentDocumentTabsProps = {
 };
 
 export const PropertyParentDocumentTabs = ({
+  jwt,
   propertyId,
   userId,
   getParentDocumentByType,
@@ -68,6 +71,7 @@ export const PropertyParentDocumentTabs = ({
         </TabsList>
         <TabsContent value="document_requirements">
           <ParentDocumentRequirementsTable
+            jwt={jwt}
             propertyId={propertyId}
             userId={userId}
             getParentDocumentByType={getParentDocumentByType}

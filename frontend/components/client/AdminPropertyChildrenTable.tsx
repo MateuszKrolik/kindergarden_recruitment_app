@@ -1,6 +1,5 @@
 "use client";
 
-import { PropertyChild } from "@/data-access-layer/modules/property-management/model";
 import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -40,12 +39,15 @@ import {
 } from "../ui/dropdown-menu";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { PropertyChild } from "@/data-access-layer/shared/types/property-management";
 
 const EMPTY_CHILDREN: PropertyChild[] = [];
 
 export type AdminPropertyChildrenTableProps = {
+  jwt: string;
   propertyId: string;
   getAllPropertyChildrenPaged(
+    jwt: string,
     propertyId: string,
     pageSize: number,
     pageNumber: number,
@@ -53,6 +55,7 @@ export type AdminPropertyChildrenTableProps = {
 };
 
 export const AdminPropertyChildrenTable = ({
+  jwt,
   propertyId,
   getAllPropertyChildrenPaged,
 }: AdminPropertyChildrenTableProps) => {
@@ -162,7 +165,7 @@ export const AdminPropertyChildrenTable = ({
       setError(null);
       setIsLoading(true);
       const { data: result, error: fetchErr } =
-        await getAllPropertyChildrenPaged(propertyId, size, pNum);
+        await getAllPropertyChildrenPaged(jwt, propertyId, size, pNum);
 
       if (fetchErr) {
         const errMsg = getErrorMessage(fetchErr);
@@ -180,7 +183,7 @@ export const AdminPropertyChildrenTable = ({
       setError(null);
       setIsLoading(false);
     },
-    [getAllPropertyChildrenPaged],
+    [jwt, getAllPropertyChildrenPaged],
   );
 
   useEffect(() => {

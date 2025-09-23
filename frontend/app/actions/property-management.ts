@@ -1,6 +1,5 @@
 "use server";
 
-import svc from "@/data-access-layer/modules/property-management/svc";
 import { PagedResponse } from "@/types/pagination";
 import {
   Property,
@@ -31,47 +30,87 @@ export async function getAllProperties(
 }
 
 export async function getPropertyUser(
+  jwt: string,
   propertyId: string,
   userId: string,
 ): AsyncResponseType<PropertyUser> {
-  return await svc.getPropertyUser(propertyId, userId);
+  const response = await fetch(
+    `${BASE_URL}/properties/${propertyId}/users/${userId}`,
+    {
+      headers: {
+        Authorization: jwt,
+      },
+      method: "GET",
+    },
+  );
+  return await response.json();
 }
 
 export async function getPropertyParentDocumentRequirements(
+  jwt: string,
   propertyId: string,
   userId: string,
 ): AsyncResponseType<PropertyParentDocumentRequirement[]> {
-  return await svc.getDocumentRequirementsForGivenPropertyParent(
-    propertyId,
-    userId,
+  const response = await fetch(
+    `${BASE_URL}/properties/${propertyId}/users/${userId}/parent-document-requirements`,
+    {
+      headers: {
+        Authorization: jwt,
+      },
+      method: "GET",
+    },
   );
+  return await response.json();
 }
 
 export async function getAllPropertyChildrenForGivenParent(
+  jwt: string,
   propertyId: string,
   parentId: string,
 ): AsyncResponseType<PropertyChild[]> {
-  return await svc.getAllPropertyChildrenForGivenParent(propertyId, parentId);
+  const response = await fetch(
+    `${BASE_URL}/properties/${propertyId}/parents/${parentId}/property-children`,
+    {
+      headers: {
+        Authorization: jwt,
+      },
+      method: "GET",
+    },
+  );
+  return await response.json();
 }
 
 export async function getDocumentRequirementsForGivenPropertyChild(
+  jwt: string,
   propertyId: string,
   childId: string,
 ): AsyncResponseType<PropertyChildDocumentRequirement[]> {
-  return await svc.getDocumentRequirementsForGivenPropertyChild(
-    propertyId,
-    childId,
+  const response = await fetch(
+    `${BASE_URL}/properties/${propertyId}/children/${childId}/document-requirements`,
+    {
+      headers: {
+        Authorization: jwt,
+      },
+      method: "GET",
+    },
   );
+  return await response.json();
 }
 
 export async function getAllPropertyChildrenPaged(
+  jwt: string,
   propertyId: string,
   pageSize: number,
   pageNumber: number,
 ): AsyncResponseType<PagedResponse<PropertyChild>> {
-  return await svc.getAllPropertyChildrenPaged(
-    propertyId,
-    pageSize,
-    pageNumber,
+  const response = await fetch(
+    `${BASE_URL}/properties/${propertyId}/property-children?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+    {
+      headers: {
+        Authorization: jwt,
+      },
+      method: "GET",
+    },
   );
+  return await response.json();
 }

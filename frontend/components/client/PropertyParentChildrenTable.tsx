@@ -3,7 +3,7 @@
 import {
   PropertyChild,
   PropertyChildDocumentRequirement,
-} from "@/data-access-layer/modules/property-management/model";
+} from "@/data-access-layer/shared/types/property-management";
 import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -39,19 +39,23 @@ import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
 const EMPTY_CHILDREN: PropertyChild[] = [];
 
 export type PropertyParentChildrenTableProps = {
+  jwt: string;
   propertyId: string;
   userId: string;
   getAllPropertyChildrenForGivenParent(
+    jwt: string,
     propertyId: string,
     parentId: string,
   ): AsyncResponseType<PropertyChild[]>;
   getPropertyChildDocumentRequirements(
+    jwt: string,
     propertyId: string,
     childId: string,
   ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
 };
 
 export const PropertyParentChildrenTable = ({
+  jwt,
   propertyId,
   userId,
   getAllPropertyChildrenForGivenParent,
@@ -123,7 +127,7 @@ export const PropertyParentChildrenTable = ({
   const fetchPropertyChildrenForGivenParent = useCallback(async () => {
     setError(null);
     const { data, error: fetchErr } =
-      await getAllPropertyChildrenForGivenParent(propertyId, userId);
+      await getAllPropertyChildrenForGivenParent(jwt, propertyId, userId);
 
     if (fetchErr) {
       const errMsg = getErrorMessage(fetchErr);
@@ -139,7 +143,7 @@ export const PropertyParentChildrenTable = ({
 
     setData(data);
     setError(null);
-  }, [propertyId, userId, getAllPropertyChildrenForGivenParent]);
+  }, [jwt, propertyId, userId, getAllPropertyChildrenForGivenParent]);
 
   useEffect(() => {
     fetchPropertyChildrenForGivenParent();
@@ -274,6 +278,7 @@ export const PropertyParentChildrenTable = ({
                           <CollapsibleContent className="p-4 bg-gray-100">
                             {isOpen && (
                               <ChildrenDocumentRequirementsTable
+                                jwt={jwt}
                                 propertyId={propertyId}
                                 childId={row.original.child_id}
                                 getPropertyChildDocumentRequirements={
