@@ -6,12 +6,15 @@ import {
 } from "@/data-access-layer/shared/types/property-management";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
-import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
+import { PropertyParentDocument } from "@/data-access-layer/shared/types/compliance";
 import { PropertyParentDocumentTabs } from "./PropertyParentDocumentTabs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { PropertyParentChildrenTable } from "./PropertyParentChildrenTable";
 import { getAllPropertyChildrenForGivenParent } from "@/app/actions/property-management";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import {
+  ApiResponse,
+  AsyncResponseType,
+} from "@/data-access-layer/shared/types/response";
 
 type PropertyParentPageTabsProps = {
   jwt: string;
@@ -21,25 +24,28 @@ type PropertyParentPageTabsProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyParentDocumentRequirement[]>;
+  ): ApiResponse<PropertyParentDocumentRequirement[]>;
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
   ): AsyncResponseType<ParentDocument>;
   getAllDocumentApprovalRequestsForGivenPropertyParent(
+    jwt: string,
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyParentDocument[]>;
+  ): ApiResponse<PropertyParentDocument[]>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
+    jwt: string,
     propertyId: string,
-    userId: string,
+    parentId: string,
     parentDocId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   sendPropertyParentDocumentApprovalRequest(
+    jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   saveParentDocument(
     userId: string,
     documentType: DocumentType,
@@ -54,7 +60,7 @@ type PropertyParentPageTabsProps = {
     jwt: string,
     propertyId: string,
     childId: string,
-  ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
+  ): ApiResponse<PropertyChildDocumentRequirement[]>;
 };
 
 export const PropertyParentPageTabs = ({

@@ -1,6 +1,5 @@
 "use client";
 
-import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import {
@@ -26,7 +25,10 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import socket from "@/app/socket";
 import { PROPERTY_MANAGEMENT_EVENTS } from "@/data-access-layer/shared/events/property-management";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import {
+  ApiResponse,
+  AsyncResponseType,
+} from "@/data-access-layer/shared/types/response";
 import { PagedResponse } from "@/types/pagination";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
 import {
@@ -51,7 +53,7 @@ export type AdminPropertyChildrenTableProps = {
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): AsyncResponseType<PagedResponse<PropertyChild>>;
+  ): ApiResponse<PagedResponse<PropertyChild>>;
 };
 
 export const AdminPropertyChildrenTable = ({
@@ -168,7 +170,7 @@ export const AdminPropertyChildrenTable = ({
         await getAllPropertyChildrenPaged(jwt, propertyId, size, pNum);
 
       if (fetchErr) {
-        const errMsg = getErrorMessage(fetchErr);
+        const errMsg = fetchErr.message;
         toast.error(errMsg);
         setError(errMsg);
         setIsLoading(false);

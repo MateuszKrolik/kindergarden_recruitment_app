@@ -12,9 +12,8 @@ import { PropertyUser } from "@/data-access-layer/shared/types/property-manageme
 import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { getErrorMessage } from "@/util/error";
 import { Progress } from "../ui/progress";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 import { NOT_FOUND_ERROR } from "@/data-access-layer/shared/errors";
 
 type PropertyTableRowActionMenuContentProps = {
@@ -25,7 +24,7 @@ type PropertyTableRowActionMenuContentProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyUser>;
+  ): ApiResponse<PropertyUser>;
 };
 
 export const PropertyTableRowActionMenu = ({
@@ -46,7 +45,7 @@ export const PropertyTableRowActionMenu = ({
           setIsLoading(false);
           return;
         }
-        toast.error(getErrorMessage(error));
+        toast.error(error.message);
         setIsLoading(false);
         return;
       }

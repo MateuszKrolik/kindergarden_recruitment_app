@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
+import { PropertyParentDocument } from "@/data-access-layer/shared/types/compliance";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -16,7 +16,6 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
-import { getErrorMessage } from "@/util/error";
 import {
   Table,
   TableBody,
@@ -28,18 +27,21 @@ import {
 import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
 import socket from "@/app/socket";
 import { EventEnvelope } from "@/data-access-layer/shared/types/event";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 
 type ParentDocumentApprovalsTableProps = {
+  jwt: string;
   propertyId: string;
   userId: string;
   getAllDocumentApprovalRequestsForGivenPropertyParent(
+    jwt: string,
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyParentDocument[]>;
+  ): ApiResponse<PropertyParentDocument[]>;
 };
 
 export const ParentDocumentApprovalsTable = ({
+  jwt,
   propertyId,
   userId,
   getAllDocumentApprovalRequestsForGivenPropertyParent,
@@ -108,12 +110,13 @@ export const ParentDocumentApprovalsTable = ({
   const fetchData = useCallback(async () => {
     const { data: result, error } =
       await getAllDocumentApprovalRequestsForGivenPropertyParent(
+        jwt,
         propertyId,
         userId,
       );
 
     if (error) {
-      const errMsg = getErrorMessage(error);
+      const errMsg = error.message;
       toast.error(`Error: ${errMsg}`);
       setError(errMsg);
       return;
@@ -126,6 +129,7 @@ export const ParentDocumentApprovalsTable = ({
 
     setData(result);
   }, [
+    jwt,
     propertyId,
     userId,
     getAllDocumentApprovalRequestsForGivenPropertyParent,

@@ -1,6 +1,5 @@
 "use client";
 
-import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import {
@@ -32,7 +31,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 import { PropertyChildDocumentRequirement } from "@/data-access-layer/shared/types/property-management";
 
 const EMPTY_REQUIREMENTS: PropertyChildDocumentRequirement[] = [];
@@ -45,7 +44,7 @@ export type ChildrenDocumentRequirementsTableProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
+  ): ApiResponse<PropertyChildDocumentRequirement[]>;
 };
 
 export const ChildrenDocumentRequirementsTable = ({
@@ -167,15 +166,10 @@ export const ChildrenDocumentRequirementsTable = ({
       await getPropertyChildDocumentRequirements(jwt, propertyId, childId);
 
     if (fetchErr) {
-      const errMsg = getErrorMessage(fetchErr);
+      const errMsg = fetchErr.message;
       toast.error(errMsg);
       setError(errMsg);
       console.error(fetchErr);
-      return;
-    }
-
-    if (!data) {
-      toast.error(`Error: No data available!`);
       return;
     }
 

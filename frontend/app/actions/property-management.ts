@@ -7,8 +7,8 @@ import {
   PropertyParentDocumentRequirement,
   PropertyChildDocumentRequirement,
   PropertyUser,
-} from "@/data-access-layer/modules/property-management/model";
-import type { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+} from "@/data-access-layer/shared/types/property-management";
+import type { ApiResponse } from "@/data-access-layer/shared/types/response";
 
 const BASE_URL = "http://localhost:3001";
 
@@ -16,7 +16,7 @@ export async function getAllProperties(
   jwt: string,
   pageSize: number,
   pageNumber: number,
-): AsyncResponseType<PagedResponse<Property>> {
+): ApiResponse<PagedResponse<Property>> {
   const response = await fetch(
     `${BASE_URL}/properties?pageSize=${pageSize}&pageNumber=${pageNumber}`,
     {
@@ -26,14 +26,23 @@ export async function getAllProperties(
       method: "GET",
     },
   );
-  return await response.json();
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function getPropertyUser(
   jwt: string,
   propertyId: string,
   userId: string,
-): AsyncResponseType<PropertyUser> {
+): ApiResponse<PropertyUser> {
   const response = await fetch(
     `${BASE_URL}/properties/${propertyId}/users/${userId}`,
     {
@@ -43,14 +52,23 @@ export async function getPropertyUser(
       method: "GET",
     },
   );
-  return await response.json();
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function getPropertyParentDocumentRequirements(
   jwt: string,
   propertyId: string,
   userId: string,
-): AsyncResponseType<PropertyParentDocumentRequirement[]> {
+): ApiResponse<PropertyParentDocumentRequirement[]> {
   const response = await fetch(
     `${BASE_URL}/properties/${propertyId}/users/${userId}/parent-document-requirements`,
     {
@@ -60,14 +78,23 @@ export async function getPropertyParentDocumentRequirements(
       method: "GET",
     },
   );
-  return await response.json();
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function getAllPropertyChildrenForGivenParent(
   jwt: string,
   propertyId: string,
   parentId: string,
-): AsyncResponseType<PropertyChild[]> {
+): ApiResponse<PropertyChild[]> {
   const response = await fetch(
     `${BASE_URL}/properties/${propertyId}/parents/${parentId}/property-children`,
     {
@@ -77,14 +104,23 @@ export async function getAllPropertyChildrenForGivenParent(
       method: "GET",
     },
   );
-  return await response.json();
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function getDocumentRequirementsForGivenPropertyChild(
   jwt: string,
   propertyId: string,
   childId: string,
-): AsyncResponseType<PropertyChildDocumentRequirement[]> {
+): ApiResponse<PropertyChildDocumentRequirement[]> {
   const response = await fetch(
     `${BASE_URL}/properties/${propertyId}/children/${childId}/document-requirements`,
     {
@@ -94,7 +130,16 @@ export async function getDocumentRequirementsForGivenPropertyChild(
       method: "GET",
     },
   );
-  return await response.json();
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function getAllPropertyChildrenPaged(
@@ -102,7 +147,7 @@ export async function getAllPropertyChildrenPaged(
   propertyId: string,
   pageSize: number,
   pageNumber: number,
-): AsyncResponseType<PagedResponse<PropertyChild>> {
+): ApiResponse<PagedResponse<PropertyChild>> {
   const response = await fetch(
     `${BASE_URL}/properties/${propertyId}/property-children?pageSize=${pageSize}&pageNumber=${pageNumber}`,
     {
@@ -112,5 +157,14 @@ export async function getAllPropertyChildrenPaged(
       method: "GET",
     },
   );
-  return await response.json();
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }

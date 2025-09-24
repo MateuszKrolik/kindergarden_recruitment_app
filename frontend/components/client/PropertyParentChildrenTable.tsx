@@ -4,7 +4,6 @@ import {
   PropertyChild,
   PropertyChildDocumentRequirement,
 } from "@/data-access-layer/shared/types/property-management";
-import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import {
@@ -34,7 +33,10 @@ import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import socket from "@/app/socket";
 import { PROPERTY_MANAGEMENT_EVENTS } from "@/data-access-layer/shared/events/property-management";
 import { ChildrenDocumentRequirementsTable } from "./ChildrenDocumentRequirementsTable";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import {
+  ApiResponse,
+  AsyncResponseType,
+} from "@/data-access-layer/shared/types/response";
 
 const EMPTY_CHILDREN: PropertyChild[] = [];
 
@@ -46,12 +48,12 @@ export type PropertyParentChildrenTableProps = {
     jwt: string,
     propertyId: string,
     parentId: string,
-  ): AsyncResponseType<PropertyChild[]>;
+  ): ApiResponse<PropertyChild[]>;
   getPropertyChildDocumentRequirements(
     jwt: string,
     propertyId: string,
     childId: string,
-  ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
+  ): ApiResponse<PropertyChildDocumentRequirement[]>;
 };
 
 export const PropertyParentChildrenTable = ({
@@ -130,14 +132,9 @@ export const PropertyParentChildrenTable = ({
       await getAllPropertyChildrenForGivenParent(jwt, propertyId, userId);
 
     if (fetchErr) {
-      const errMsg = getErrorMessage(fetchErr);
-      toast.error(`Error: ${errMsg}`);
+      const errMsg = fetchErr.message;
+      toast.error(errMsg);
       setError(errMsg);
-      return;
-    }
-
-    if (!data) {
-      toast.error(`Error: No data available!`);
       return;
     }
 

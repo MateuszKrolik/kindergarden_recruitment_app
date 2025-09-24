@@ -40,32 +40,38 @@ import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
 import {
   PropertyParentDocument,
   RequestStatus,
-} from "@/data-access-layer/modules/compliance/model";
+} from "@/data-access-layer/shared/types/compliance";
 import AdminPropertyParentDocumentTableActionMenu from "./AdminPropertyParentDocumentTableActionMenu";
 import { EventEnvelope } from "@/data-access-layer/shared/types/event";
 import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
 import socket from "@/app/socket";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import {
+  ApiResponse,
+  AsyncResponseType,
+} from "@/data-access-layer/shared/types/response";
 
 interface AdminPropertyParentDocumentTableProps {
+  jwt: string;
   propertyId: string;
   adminId: string;
   getAllDocumentApprovalRequestsForGivenProperty(
+    jwt: string,
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): AsyncResponseType<PagedResponse<PropertyParentDocument>>;
+  ): ApiResponse<PagedResponse<PropertyParentDocument>>;
   setPropertyParentDocumentApprovalRequestStatus(
+    jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
-    adminId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   getParentDocumentURLByDocumentID(docId: string): AsyncResponseType<string>;
 }
 
 export default function AdminPropertyParentDocumentTable({
+  jwt,
   propertyId,
   adminId,
   getAllDocumentApprovalRequestsForGivenProperty,
@@ -94,16 +100,13 @@ export default function AdminPropertyParentDocumentTable({
       try {
         const { data: result, error } =
           await getAllDocumentApprovalRequestsForGivenProperty(
+            jwt,
             propertyId,
             size,
             pageNumber,
           );
         if (error) {
-          toast.error(getErrorMessage(result));
-          return;
-        }
-        if (!result) {
-          toast.error("No data found!");
+          toast.error(error.message);
           return;
         }
 
@@ -118,7 +121,7 @@ export default function AdminPropertyParentDocumentTable({
         setIsLoading(false);
       }
     },
-    [propertyId, getAllDocumentApprovalRequestsForGivenProperty],
+    [jwt, propertyId, getAllDocumentApprovalRequestsForGivenProperty],
   );
 
   const columns: ColumnDef<PropertyParentDocument>[] = [
@@ -198,6 +201,7 @@ export default function AdminPropertyParentDocumentTable({
 
         return (
           <AdminPropertyParentDocumentTableActionMenu
+            jwt={jwt}
             adminId={adminId}
             request={request}
             setPropertyParentDocumentApprovalRequestStatus={

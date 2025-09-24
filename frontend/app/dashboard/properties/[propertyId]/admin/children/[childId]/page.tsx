@@ -3,7 +3,6 @@
 import { getPropertyUser } from "@/app/actions/property-management";
 import { PROPERTY_USER_ROLE } from "@/data-access-layer/shared/types/property-management";
 import { auth } from "@/lib/auth";
-import { getErrorMessage } from "@/util/error";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -22,7 +21,7 @@ export default async function Page({ params }: PageProps) {
   const { propertyId, childId } = await params;
   const { data, error } = await getPropertyUser(jwt, propertyId, userId);
   if (error) {
-    console.error(getErrorMessage(error));
+    console.error(error.message);
     return;
   }
   if (data?.role != PROPERTY_USER_ROLE.Admin) {

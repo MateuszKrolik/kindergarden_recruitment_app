@@ -6,8 +6,11 @@ import { ParentDocumentRequirementsTable } from "./ParentDocumentRequirementsTab
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { ParentDocumentApprovalsTable } from "./ParentDocumentApprovalsTable";
-import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { PropertyParentDocument } from "@/data-access-layer/shared/types/compliance";
+import {
+  ApiResponse,
+  AsyncResponseType,
+} from "@/data-access-layer/shared/types/response";
 
 type PropertyParentDocumentTabsProps = {
   jwt: string;
@@ -17,25 +20,28 @@ type PropertyParentDocumentTabsProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyParentDocumentRequirement[]>;
+  ): ApiResponse<PropertyParentDocumentRequirement[]>;
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
   ): AsyncResponseType<ParentDocument>;
   getAllDocumentApprovalRequestsForGivenPropertyParent(
+    jwt: string,
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyParentDocument[]>;
+  ): ApiResponse<PropertyParentDocument[]>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
+    jwt: string,
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   sendPropertyParentDocumentApprovalRequest(
+    jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   saveParentDocument(
     userId: string,
     documentType: DocumentType,
@@ -90,6 +96,7 @@ export const PropertyParentDocumentTabs = ({
         </TabsContent>
         <TabsContent value="approval_requests">
           <ParentDocumentApprovalsTable
+            jwt={jwt}
             propertyId={propertyId}
             userId={userId}
             getAllDocumentApprovalRequestsForGivenPropertyParent={

@@ -35,13 +35,12 @@ import {
 } from "@/components/ui/table";
 import { PagedResponse } from "@/types/pagination";
 import { toast } from "sonner";
-import { getErrorMessage } from "@/util/error";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
 import { PropertyTableRowActionMenu } from "./PropertyTableRowActionMenu";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 
 interface PropertiesTableProps {
   jwt: string;
@@ -50,12 +49,12 @@ interface PropertiesTableProps {
     jwt: string,
     pageSize: number,
     pageNumber: number,
-  ): AsyncResponseType<PagedResponse<Property>>;
+  ): ApiResponse<PagedResponse<Property>>;
   getPropertyUser(
     jwt: string,
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyUser>;
+  ): ApiResponse<PropertyUser>;
 }
 
 export default function PropertyTable({
@@ -89,7 +88,7 @@ export default function PropertyTable({
         pageNumber,
       );
       if (error) {
-        toast.error(getErrorMessage(result));
+        toast.error(error.message);
         setIsLoading(false);
         return;
       }

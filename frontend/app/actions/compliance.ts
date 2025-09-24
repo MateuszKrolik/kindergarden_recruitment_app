@@ -3,69 +3,143 @@
 import {
   PropertyParentDocument,
   RequestStatus,
-} from "@/data-access-layer/modules/compliance/model";
-import svc from "@/data-access-layer/modules/compliance/svc";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+} from "@/data-access-layer/shared/types/compliance";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 import { PagedResponse } from "@/types/pagination";
 
+const BASE_URL = "http://localhost:3001";
+
 export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
+  jwt: string,
   propertyId: string,
-  userId: string,
-): AsyncResponseType<PropertyParentDocument[]> {
-  return await svc.getAllDocumentApprovalRequestsForGivenPropertyParent(
-    propertyId,
-    userId,
+  parentId: string,
+): ApiResponse<PropertyParentDocument[]> {
+  const response = await fetch(
+    `${BASE_URL}/properties/${propertyId}/parents/${parentId}/parent-document-requests`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: jwt,
+      },
+    },
   );
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function getPropertyParentDocumentApprovalRequestByDocumentId(
+  jwt: string,
   propertyId: string,
-  userId: string,
+  parentId: string,
   parentDocId: string,
-): AsyncResponseType<PropertyParentDocument> {
-  return await svc.getPropertyParentDocumentApprovalRequestByDocumentId(
-    propertyId,
-    userId,
-    parentDocId,
+): ApiResponse<PropertyParentDocument> {
+  const response = await fetch(
+    `${BASE_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: jwt,
+      },
+    },
   );
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function sendPropertyParentDocumentApprovalRequest(
+  jwt: string,
   propertyId: string,
-  userId: string,
+  parentId: string,
   parentDocumentId: string,
-): AsyncResponseType<PropertyParentDocument> {
-  return await svc.sendPropertyParentDocumentApprovalRequest(
-    propertyId,
-    userId,
-    parentDocumentId,
+): ApiResponse<PropertyParentDocument> {
+  const response = await fetch(
+    `${BASE_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocumentId}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: jwt,
+      },
+    },
   );
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function getAllDocumentApprovalRequestsForGivenProperty(
+  jwt: string,
   propertyId: string,
   pageSize: number,
   pageNumber: number,
-): AsyncResponseType<PagedResponse<PropertyParentDocument>> {
-  return await svc.getAllDocumentApprovalRequestsForGivenProperty(
-    propertyId,
-    pageSize,
-    pageNumber,
+): ApiResponse<PagedResponse<PropertyParentDocument>> {
+  const response = await fetch(
+    `${BASE_URL}/properties/${propertyId}/parent-document-requests?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: jwt,
+      },
+    },
   );
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function setPropertyParentDocumentApprovalRequestStatus(
+  jwt: string,
   propertyId: string,
-  userId: string,
+  parentId: string,
   parentDocumentId: string,
   requestStatus: RequestStatus,
-  adminId: string,
-): AsyncResponseType<PropertyParentDocument> {
-  return await svc.setPropertyParentDocumentRequestStatus(
-    propertyId,
-    userId,
-    parentDocumentId,
-    requestStatus,
-    adminId,
+): ApiResponse<PropertyParentDocument> {
+  const response = await fetch(
+    `${BASE_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocumentId}/status/${requestStatus}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: jwt,
+      },
+    },
   );
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }

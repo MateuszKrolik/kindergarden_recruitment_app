@@ -13,13 +13,17 @@ import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/util/error";
-import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
+import { PropertyParentDocument } from "@/data-access-layer/shared/types/compliance";
 import { Progress } from "../ui/progress";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import {
+  ApiResponse,
+  AsyncResponseType,
+} from "@/data-access-layer/shared/types/response";
 import { NOT_FOUND_ERROR } from "@/data-access-layer/shared/errors";
 import { PropertyParentDocumentRequirement } from "@/data-access-layer/shared/types/property-management";
 
 type ParentDocumentRequirementsTableActionMenuProps = {
+  jwt: string;
   propertyId: string;
   userId: string;
   requirement: PropertyParentDocumentRequirement;
@@ -28,15 +32,17 @@ type ParentDocumentRequirementsTableActionMenuProps = {
     documentType: DocumentType,
   ): AsyncResponseType<ParentDocument>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
+    jwt: string,
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   sendPropertyParentDocumentApprovalRequest(
+    jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   saveParentDocument(
     userId: string,
     documentType: DocumentType,
@@ -50,6 +56,7 @@ type ParentDocumentRequirementsTableActionMenuProps = {
 };
 
 export const ParentDocumentRequirementsTableActionMenu = ({
+  jwt,
   propertyId,
   userId,
   requirement,
@@ -86,6 +93,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
       setParentDoc(parentDocResult);
       const { error: approvalReqError } =
         await getPropertyParentDocumentApprovalRequestByDocumentId(
+          jwt,
           propertyId,
           userId,
           parentDocResult.id,
@@ -128,12 +136,13 @@ export const ParentDocumentRequirementsTableActionMenu = ({
                 onClick={async () => {
                   const { error } =
                     await sendPropertyParentDocumentApprovalRequest(
+                      jwt,
                       propertyId,
                       userId,
                       parentDoc.id,
                     );
                   if (error) {
-                    toast.error(getErrorMessage(error));
+                    toast.error(error.message);
                     return;
                   }
                   toast.success(

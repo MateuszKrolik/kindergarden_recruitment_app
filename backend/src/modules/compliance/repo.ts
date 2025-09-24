@@ -11,7 +11,7 @@ import type { RedisClientType } from "../../db/redis-client.ts";
 import {
   newPagedResponse,
   type PagedResponse,
-} from "../../../types/pagination.ts";
+} from "../../shared/types/pagination.ts";
 import { catchError } from "../../shared/util/error.ts";
 import type { AsyncResponseType } from "../../shared/types/response.ts";
 import { NOT_FOUND_ERROR } from "../../shared/errors.ts";
@@ -250,7 +250,7 @@ export class ComplianceRepo implements IComplianceRepo {
       if (error) return { data: undefined, error };
       if (data.rows.length === 0)
         return { data: undefined, error: NOT_FOUND_ERROR };
-      return { data: data?.rows[0].is_approved, error };
+      return { data: data.rows[0].is_approved, error: undefined };
     });
   }
 

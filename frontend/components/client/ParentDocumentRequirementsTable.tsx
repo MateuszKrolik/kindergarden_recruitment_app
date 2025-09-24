@@ -1,6 +1,5 @@
 "use client";
 
-import { getErrorMessage } from "@/util/error";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import {
@@ -27,8 +26,11 @@ import { useCallback, useEffect, useState } from "react";
 import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { ParentDocumentRequirementsTableActionMenu } from "./ParentDocumentRequirementsTableActionMenu";
-import { PropertyParentDocument } from "@/data-access-layer/modules/compliance/model";
-import { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import { PropertyParentDocument } from "@/data-access-layer/shared/types/compliance";
+import {
+  ApiResponse,
+  AsyncResponseType,
+} from "@/data-access-layer/shared/types/response";
 import { PropertyParentDocumentRequirement } from "@/data-access-layer/shared/types/property-management";
 
 export type ParentDocumentRequirementsTableProps = {
@@ -39,21 +41,23 @@ export type ParentDocumentRequirementsTableProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyParentDocumentRequirement[]>;
+  ): ApiResponse<PropertyParentDocumentRequirement[]>;
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
   ): AsyncResponseType<ParentDocument>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
+    jwt: string,
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   sendPropertyParentDocumentApprovalRequest(
+    jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   saveParentDocument(
     userId: string,
     documentType: DocumentType,
@@ -160,6 +164,7 @@ export const ParentDocumentRequirementsTable = ({
         const requirement = row.original;
         return (
           <ParentDocumentRequirementsTableActionMenu
+            jwt={jwt}
             propertyId={propertyId}
             userId={userId}
             getParentDocumentByType={getParentDocumentByType}
@@ -186,14 +191,9 @@ export const ParentDocumentRequirementsTable = ({
     );
 
     if (error) {
-      const errMsg = getErrorMessage(error);
-      toast.error(`Error: ${errMsg}`);
+      const errMsg = error.message;
+      toast.error(errMsg);
       setError(errMsg);
-      return;
-    }
-
-    if (!data) {
-      toast.error(`Error: No data available!`);
       return;
     }
 

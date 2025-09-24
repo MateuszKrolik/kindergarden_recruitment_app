@@ -1,16 +1,14 @@
-import { redisClient, type RedisClientType } from "../../db/redis-client.ts";
+import { type RedisClientType } from "../../db/redis-client.ts";
 import {
   type PropertyParentDocument,
   REQUEST_STATUS,
   type RequestStatus,
 } from "./model.ts";
-import { ComplianceRepo, type IComplianceRepo } from "./repo.ts";
-import { pool } from "../../db/db.ts";
-import type { PagedResponse } from "../../../types/pagination.ts";
+import { type IComplianceRepo } from "./repo.ts";
+import type { PagedResponse } from "../../shared/types/pagination.ts";
 import { COMPLIANCE_EVENTS } from "../../shared/events/compliance.ts";
 import { createEvent } from "../../shared/types/event.ts";
 import type { Server as SocketServer } from "socket.io";
-import { getSocketServer } from "../../../socketServer.ts";
 import type { AsyncResponseType } from "../../shared/types/response.ts";
 
 export interface IComplianceSvc {
@@ -47,18 +45,18 @@ export interface IComplianceSvc {
   ): AsyncResponseType<boolean>;
 }
 
-class ComplianceSvc implements IComplianceSvc {
+export class ComplianceSvc implements IComplianceSvc {
   private redisClient: RedisClientType;
-  private socketServer: SocketServer | null = null;
+  private socketServer: SocketServer;
   private repo: IComplianceRepo;
   constructor(
+    repo: IComplianceRepo,
     redisClient: RedisClientType,
-    socketServer: SocketServer | null = null,
-    repo?: IComplianceRepo,
+    socketServer: SocketServer,
   ) {
     this.redisClient = redisClient;
     this.socketServer = socketServer;
-    this.repo = repo ?? new ComplianceRepo(pool, redisClient);
+    this.repo = repo;
   }
 
   async getAllDocumentApprovalRequestsForGivenPropertyParent(
@@ -96,8 +94,7 @@ class ComplianceSvc implements IComplianceSvc {
       );
     if (error) return { data: undefined, error: error };
 
-    if (!this.socketServer) this.initSocketServer();
-    this.socketServer?.emit(
+    this.socketServer.emit(
       COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
       data,
     );
@@ -163,13 +160,4 @@ class ComplianceSvc implements IComplianceSvc {
       parentDocumentId,
     );
   }
-
-  private initSocketServer() {
-    const socketServer = getSocketServer();
-    if (!socketServer) return;
-    this.socketServer = socketServer;
-  }
 }
-
-const complianceSvc = new ComplianceSvc(redisClient);
-export default complianceSvc;
