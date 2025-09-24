@@ -6,7 +6,12 @@ export const DOCUMENT_TYPE = {
   ResidesInDesiredLocationProof: "resides_in_desired_location_proof",
 } as const;
 
-export type DocumentType = (typeof DOCUMENT_TYPE)[keyof typeof DOCUMENT_TYPE];
+export type DocumentType =
+  | "employment_proof"
+  | "self_employment_proof"
+  | "student_proof"
+  | "filed_tax_in_desired_location_proof"
+  | "resides_in_desired_location_proof";
 
 export const CHILD_DOCUMENT_TYPE = {
   DisabilityProof: "disability_proof",

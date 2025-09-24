@@ -8,17 +8,13 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
 } from "../ui/dropdown-menu";
-import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
+import { ParentDocument } from "@/data-access-layer/shared/types/reporting";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { getErrorMessage } from "@/util/error";
 import { PropertyParentDocument } from "@/data-access-layer/shared/types/compliance";
 import { Progress } from "../ui/progress";
-import {
-  ApiResponse,
-  AsyncResponseType,
-} from "@/data-access-layer/shared/types/response";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 import { NOT_FOUND_ERROR } from "@/data-access-layer/shared/errors";
 import { PropertyParentDocumentRequirement } from "@/data-access-layer/shared/types/property-management";
 
@@ -28,9 +24,10 @@ type ParentDocumentRequirementsTableActionMenuProps = {
   userId: string;
   requirement: PropertyParentDocumentRequirement;
   getParentDocumentByType(
+    jwt: string,
     userId: string,
     documentType: DocumentType,
-  ): AsyncResponseType<ParentDocument>;
+  ): ApiResponse<ParentDocument>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
@@ -44,15 +41,12 @@ type ParentDocumentRequirementsTableActionMenuProps = {
     parentDocumentId: string,
   ): ApiResponse<PropertyParentDocument>;
   saveParentDocument(
+    jwt: string,
     userId: string,
     documentType: DocumentType,
     file: File,
-  ): AsyncResponseType<ParentDocument>;
-  getDocumentURLByFilePath(
-    key?: string,
-    bucket?: string,
-    expiresIn?: number,
-  ): AsyncResponseType<string>;
+  ): ApiResponse<ParentDocument>;
+  getDocumentURLByFilePath(jwt: string, key: string): ApiResponse<string>;
 };
 
 export const ParentDocumentRequirementsTableActionMenu = ({
@@ -78,6 +72,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
     if (nextOpen) {
       setIsLoading(true);
       const { data: parentDocResult, error } = await getParentDocumentByType(
+        jwt,
         userId,
         requirement.document_type,
       );
@@ -86,7 +81,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
           setIsLoading(false);
           return;
         }
-        toast.error(getErrorMessage(error));
+        toast.error(error.message);
         setIsLoading(false);
         return;
       }
@@ -104,7 +99,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
           setIsLoading(false);
           return;
         }
-        toast.error(getErrorMessage(approvalReqError));
+        toast.error(approvalReqError.message);
         setIsLoading(false);
         return;
       }
@@ -156,10 +151,11 @@ export const ParentDocumentRequirementsTableActionMenu = ({
               <DropdownMenuItem
                 onClick={async () => {
                   const { data, error } = await getDocumentURLByFilePath(
+                    jwt,
                     parentDoc.file_path,
                   );
                   if (error) {
-                    toast.error(getErrorMessage(error));
+                    toast.error(error.message);
                     return;
                   }
                   window.open(data, "_blank");
@@ -190,12 +186,13 @@ export const ParentDocumentRequirementsTableActionMenu = ({
           const file = e.target.files?.[0];
           if (!file) return;
           const { error } = await saveParentDocument(
+            jwt,
             userId,
             requirement.document_type,
             file,
           );
           if (error) {
-            toast.error(getErrorMessage(error));
+            toast.error(error.message);
             return;
           }
           toast.success(

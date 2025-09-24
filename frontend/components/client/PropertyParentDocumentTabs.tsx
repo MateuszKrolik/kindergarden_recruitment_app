@@ -3,14 +3,11 @@
 import { PropertyParentDocumentRequirement } from "@/data-access-layer/shared/types/property-management";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { ParentDocumentRequirementsTable } from "./ParentDocumentRequirementsTable";
-import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
+import { ParentDocument } from "@/data-access-layer/shared/types/reporting";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { ParentDocumentApprovalsTable } from "./ParentDocumentApprovalsTable";
 import { PropertyParentDocument } from "@/data-access-layer/shared/types/compliance";
-import {
-  ApiResponse,
-  AsyncResponseType,
-} from "@/data-access-layer/shared/types/response";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 
 type PropertyParentDocumentTabsProps = {
   jwt: string;
@@ -22,9 +19,10 @@ type PropertyParentDocumentTabsProps = {
     userId: string,
   ): ApiResponse<PropertyParentDocumentRequirement[]>;
   getParentDocumentByType(
+    jwt: string,
     userId: string,
     documentType: DocumentType,
-  ): AsyncResponseType<ParentDocument>;
+  ): ApiResponse<ParentDocument>;
   getAllDocumentApprovalRequestsForGivenPropertyParent(
     jwt: string,
     propertyId: string,
@@ -43,15 +41,12 @@ type PropertyParentDocumentTabsProps = {
     parentDocumentId: string,
   ): ApiResponse<PropertyParentDocument>;
   saveParentDocument(
+    jwt: string,
     userId: string,
     documentType: DocumentType,
     file: File,
-  ): AsyncResponseType<ParentDocument>;
-  getDocumentURLByFilePath(
-    key?: string,
-    bucket?: string,
-    expiresIn?: number,
-  ): AsyncResponseType<string>;
+  ): ApiResponse<ParentDocument>;
+  getDocumentURLByFilePath(jwt: string, key: string): ApiResponse<string>;
 };
 
 export const PropertyParentDocumentTabs = ({

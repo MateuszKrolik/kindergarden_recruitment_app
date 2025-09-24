@@ -16,6 +16,7 @@ import { ReportingSvc } from "./modules/reporting/svc.ts";
 import { ComplianceRepo } from "./modules/compliance/repo.ts";
 import { ComplianceSvc } from "./modules/compliance/svc.ts";
 import { ComplianceHandler } from "./modules/compliance/handler.ts";
+import { ReportingHandler } from "./modules/reporting/handler.ts";
 
 const BASE_URL = "http://localhost";
 const BE_PORT = 3001;
@@ -33,14 +34,16 @@ app.use(express.json());
 
 const pool = initDB();
 const { redisClient, redisSubscriber } = await createRedisClients();
-// IDENTITY MODULE SERVICES
+// IDENTITY
 const identityRepo = new IdentityRepo(pool, redisClient);
 const identitySvc = new IdentitySvc(identityRepo);
-// REPORTING MODULE SERVICES
+// REPORTING
 const s3Repo = new S3Repository();
 const reportingRepo = new ReportingRepo(pool, redisClient);
 const reportingSvc = new ReportingSvc(reportingRepo, s3Repo);
-// PROPERTY MANAGEMENT MODULE SERVICES
+const reportingHandler = new ReportingHandler(reportingSvc, authN);
+app.use(reportingHandler.router);
+// PROPERTY MANAGEMENT
 const propertyManagementRepo = new PropertyManagementRepo(pool, redisClient);
 const propertyManagementSvc = new PropertyManagementSvc(
   propertyManagementRepo,
@@ -57,7 +60,7 @@ const propertyManagementHandler = new PropertyManagementHandler(
   authN,
 );
 app.use(propertyManagementHandler.router);
-// COMPLIANCE MODULE SERVICES
+// COMPLIANCE
 const complianceRepo = new ComplianceRepo(pool, redisClient);
 const complianceSvc = new ComplianceSvc(
   complianceRepo,

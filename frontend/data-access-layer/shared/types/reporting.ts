@@ -14,3 +14,10 @@ export const CHILD_DOCUMENT_TYPE = {
 
 export type ChildDocumentType =
   (typeof CHILD_DOCUMENT_TYPE)[keyof typeof CHILD_DOCUMENT_TYPE];
+
+export type ParentDocument = {
+  id: string;
+  user_id: string;
+  document_type: DocumentType;
+  file_path: string;
+};

@@ -23,14 +23,11 @@ import {
   TableRow,
 } from "../ui/table";
 import { useCallback, useEffect, useState } from "react";
-import { ParentDocument } from "@/data-access-layer/modules/reporting/model";
+import { ParentDocument } from "@/data-access-layer/shared/types/reporting";
 import { DocumentType } from "@/data-access-layer/shared/types/reporting";
 import { ParentDocumentRequirementsTableActionMenu } from "./ParentDocumentRequirementsTableActionMenu";
 import { PropertyParentDocument } from "@/data-access-layer/shared/types/compliance";
-import {
-  ApiResponse,
-  AsyncResponseType,
-} from "@/data-access-layer/shared/types/response";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 import { PropertyParentDocumentRequirement } from "@/data-access-layer/shared/types/property-management";
 
 export type ParentDocumentRequirementsTableProps = {
@@ -43,9 +40,10 @@ export type ParentDocumentRequirementsTableProps = {
     userId: string,
   ): ApiResponse<PropertyParentDocumentRequirement[]>;
   getParentDocumentByType(
+    jwt: string,
     userId: string,
     documentType: DocumentType,
-  ): AsyncResponseType<ParentDocument>;
+  ): ApiResponse<ParentDocument>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
@@ -59,15 +57,12 @@ export type ParentDocumentRequirementsTableProps = {
     parentDocumentId: string,
   ): ApiResponse<PropertyParentDocument>;
   saveParentDocument(
+    jwt: string,
     userId: string,
     documentType: DocumentType,
     file: File,
-  ): AsyncResponseType<ParentDocument>;
-  getDocumentURLByFilePath(
-    key?: string,
-    bucket?: string,
-    expiresIn?: number,
-  ): AsyncResponseType<string>;
+  ): ApiResponse<ParentDocument>;
+  getDocumentURLByFilePath(jwt: string, key: string): ApiResponse<string>;
 };
 
 export const ParentDocumentRequirementsTable = ({

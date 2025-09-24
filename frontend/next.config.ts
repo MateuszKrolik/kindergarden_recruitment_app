@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   experimental: {
     cacheComponents: true,
   },
+  output: "standalone",
 };
 
 export default nextConfig;

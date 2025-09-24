@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/table";
 import { PagedResponse } from "@/types/pagination";
 import { toast } from "sonner";
-import { getErrorMessage } from "@/util/error";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -45,10 +44,7 @@ import AdminPropertyParentDocumentTableActionMenu from "./AdminPropertyParentDoc
 import { EventEnvelope } from "@/data-access-layer/shared/types/event";
 import { COMPLIANCE_EVENTS } from "@/data-access-layer/shared/events/compliance";
 import socket from "@/app/socket";
-import {
-  ApiResponse,
-  AsyncResponseType,
-} from "@/data-access-layer/shared/types/response";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 
 interface AdminPropertyParentDocumentTableProps {
   jwt: string;
@@ -67,7 +63,10 @@ interface AdminPropertyParentDocumentTableProps {
     parentDocumentId: string,
     requestStatus: RequestStatus,
   ): ApiResponse<PropertyParentDocument>;
-  getParentDocumentURLByDocumentID(docId: string): AsyncResponseType<string>;
+  getParentDocumentURLByDocumentID(
+    jwt: string,
+    docId: string,
+  ): ApiResponse<string>;
 }
 
 export default function AdminPropertyParentDocumentTable({
@@ -97,29 +96,25 @@ export default function AdminPropertyParentDocumentTable({
   const loadProperties = useCallback(
     async (size: number, pageNumber: number) => {
       setIsLoading(true);
-      try {
-        const { data: result, error } =
-          await getAllDocumentApprovalRequestsForGivenProperty(
-            jwt,
-            propertyId,
-            size,
-            pageNumber,
-          );
-        if (error) {
-          toast.error(error.message);
-          return;
-        }
-
-        setResult(result.items);
-        setTotalCount(result.total);
-        setHasNextPage(result.has_next_page);
-        setHasPreviousPage(result.has_previous_page);
-        setTotalPages(result.total_pages);
-      } catch (error) {
-        toast.error(getErrorMessage(error));
-      } finally {
+      const { data: result, error } =
+        await getAllDocumentApprovalRequestsForGivenProperty(
+          jwt,
+          propertyId,
+          size,
+          pageNumber,
+        );
+      if (error) {
+        toast.error(error.message);
         setIsLoading(false);
+        return;
       }
+
+      setResult(result.items);
+      setTotalCount(result.total);
+      setHasNextPage(result.has_next_page);
+      setHasPreviousPage(result.has_previous_page);
+      setTotalPages(result.total_pages);
+      setIsLoading(false);
     },
     [jwt, propertyId, getAllDocumentApprovalRequestsForGivenProperty],
   );

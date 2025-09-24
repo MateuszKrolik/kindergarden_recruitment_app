@@ -18,8 +18,8 @@ export interface IReportingSvc {
     file: File,
   ): AsyncResponseType<ParentDocument>;
   getDocumentURLByFilePath(
-    bucket: string,
     key: string,
+    bucket: string,
     expiresIn: number,
   ): AsyncResponseType<string>;
   getParentDocumentURLByDocumentID(docId: string): AsyncResponseType<string>;

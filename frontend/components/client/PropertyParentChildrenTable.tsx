@@ -33,10 +33,7 @@ import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import socket from "@/app/socket";
 import { PROPERTY_MANAGEMENT_EVENTS } from "@/data-access-layer/shared/events/property-management";
 import { ChildrenDocumentRequirementsTable } from "./ChildrenDocumentRequirementsTable";
-import {
-  ApiResponse,
-  AsyncResponseType,
-} from "@/data-access-layer/shared/types/response";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 
 const EMPTY_CHILDREN: PropertyChild[] = [];
 

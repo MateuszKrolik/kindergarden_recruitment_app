@@ -14,11 +14,7 @@ import {
   REQUEST_STATUS,
 } from "@/data-access-layer/shared/types/compliance";
 import { toast } from "sonner";
-import { getErrorMessage } from "@/util/error";
-import {
-  ApiResponse,
-  AsyncResponseType,
-} from "@/data-access-layer/shared/types/response";
+import { ApiResponse } from "@/data-access-layer/shared/types/response";
 
 type AdminPropertyParentDocumentTableActionMenuProps = {
   jwt: string;
@@ -31,7 +27,10 @@ type AdminPropertyParentDocumentTableActionMenuProps = {
     parentDocumentId: string,
     requestStatus: RequestStatus,
   ): ApiResponse<PropertyParentDocument>;
-  getParentDocumentURLByDocumentID(docId: string): AsyncResponseType<string>;
+  getParentDocumentURLByDocumentID(
+    jwt: string,
+    docId: string,
+  ): ApiResponse<string>;
 };
 
 export default function AdminPropertyParentDocumentTableActionMenu({
@@ -63,10 +62,11 @@ export default function AdminPropertyParentDocumentTableActionMenu({
         <DropdownMenuItem
           onClick={async () => {
             const { data, error } = await getParentDocumentURLByDocumentID(
+              jwt,
               request.parent_document_id,
             );
             if (error) {
-              toast.error(getErrorMessage(error));
+              toast.error(error.message);
               return;
             }
             window.open(data, "_blank");

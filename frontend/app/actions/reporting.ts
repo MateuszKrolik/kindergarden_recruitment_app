@@ -1,35 +1,109 @@
 "use server";
 
-import type { ParentDocument } from "@/data-access-layer/modules/reporting/model";
-import svc from "@/data-access-layer/modules/reporting/svc";
-import type { DocumentType } from "@/data-access-layer/shared/types/reporting";
-import type { AsyncResponseType } from "@/data-access-layer/shared/types/response";
+import type {
+  DocumentType,
+  ParentDocument,
+} from "@/data-access-layer/shared/types/reporting";
+import type { ApiResponse } from "@/data-access-layer/shared/types/response";
+
+const BASE_URL = "http://localhost:3001";
 
 export async function getParentDocumentByType(
-  userId: string,
+  jwt: string,
+  parentId: string,
   documentType: DocumentType,
-): AsyncResponseType<ParentDocument> {
-  return await svc.getParentDocumentByType(userId, documentType);
+): ApiResponse<ParentDocument> {
+  const response = await fetch(
+    `${BASE_URL}/parents/${parentId}/documents/${documentType}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: jwt,
+      },
+    },
+  );
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function saveParentDocument(
-  userId: string,
+  jwt: string,
+  parentId: string,
   documentType: DocumentType,
   file: File,
-): AsyncResponseType<ParentDocument> {
-  return await svc.saveParentDocument(userId, documentType, file);
+): ApiResponse<ParentDocument> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch(
+    `${BASE_URL}/parents/${parentId}/documents/${documentType}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: jwt,
+      },
+      body: formData,
+    },
+  );
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function getDocumentURLByFilePath(
-  key: string,
-  bucket: string = "mybucket",
-  expiresIn: number = 3600,
-): AsyncResponseType<string> {
-  return await svc.getDocumentURLByFilePath(key, bucket, expiresIn);
+  jwt: string,
+  filePath: string,
+): ApiResponse<string> {
+  const response = await fetch(`${BASE_URL}/documents/${filePath}`, {
+    method: "GET",
+    headers: {
+      Authorization: jwt,
+    },
+  });
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
 
 export async function getParentDocumentURLByDocumentID(
-  docId: string,
-): AsyncResponseType<string> {
-  return await svc.getParentDocumentURLByDocumentID(docId);
+  jwt: string,
+  documentId: string,
+): ApiResponse<string> {
+  const response = await fetch(`${BASE_URL}/parent-documents/${documentId}`, {
+    method: "GET",
+    headers: {
+      Authorization: jwt,
+    },
+  });
+  const { data, error } = await response.json();
+  return {
+    data: data,
+    error: error
+      ? {
+        code: response.status,
+        message: error,
+      }
+      : undefined,
+  };
 }
