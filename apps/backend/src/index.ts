@@ -72,6 +72,7 @@ const complianceSvc = new ComplianceSvc(
   complianceRepo,
   redisClient,
   socketServer,
+  genericLogger,
 );
 const complianceHandler = new ComplianceHandler(complianceSvc, authN);
 app.use(complianceHandler.router);

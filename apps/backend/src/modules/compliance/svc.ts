@@ -10,6 +10,7 @@ import { COMPLIANCE_EVENTS } from "shared/events/modules/compliance.ts";
 import { createEvent } from "shared/utils/event.ts";
 import type { Server as SocketServer } from "socket.io";
 import type { ApiResponse } from "shared/types/response.ts";
+import { Logger } from "winston";
 
 export interface IComplianceSvc {
   getAllDocumentApprovalRequestsForGivenProperty(
@@ -49,14 +50,19 @@ export class ComplianceSvc implements IComplianceSvc {
   private redisClient: RedisClientType;
   private socketServer: SocketServer;
   private repo: IComplianceRepo;
+  private logger: Logger;
   constructor(
     repo: IComplianceRepo,
     redisClient: RedisClientType,
     socketServer: SocketServer,
+    logger: Logger,
   ) {
     this.redisClient = redisClient;
     this.socketServer = socketServer;
     this.repo = repo;
+    this.logger = logger.child({
+      service: "compliance-svc",
+    });
   }
 
   async getAllDocumentApprovalRequestsForGivenPropertyParent(
@@ -132,17 +138,22 @@ export class ComplianceSvc implements IComplianceSvc {
     if (error) return { data: undefined, error: error };
     switch (requestStatus) {
       case REQUEST_STATUS.APPROVED:
-        console.log("Emitting event...");
+        const eventBody = JSON.stringify(
+          createEvent(
+            COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+            "compliance",
+            "1.0",
+            data,
+          ),
+        );
+        this.logger.log(
+          "info",
+          `Emitting event: ${COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED}
+          Event Body: ${eventBody}`,
+        );
         this.redisClient.publish(
           COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
-          JSON.stringify(
-            createEvent(
-              COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
-              "compliance",
-              "1.0",
-              data,
-            ),
-          ),
+          eventBody,
         );
       //TODO: Rejected
     }
