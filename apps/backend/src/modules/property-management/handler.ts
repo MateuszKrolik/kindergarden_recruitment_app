@@ -39,7 +39,6 @@ export class PropertyManagementHandler {
             ? parseInt(req.query.pageNumber)
             : 1;
         const result = await this.svc.getAllProperties(pageSize, pageNumber);
-        console.log(result);
         res.json(result);
       },
     );
@@ -52,7 +51,6 @@ export class PropertyManagementHandler {
       async (req: Request, res: Response) => {
         const { propertyId, userId } = req.params;
         const result = await this.svc.getPropertyUser(propertyId, userId);
-        console.log(result);
         res.json(result);
       },
     );
@@ -69,7 +67,6 @@ export class PropertyManagementHandler {
             propertyId,
             userId,
           );
-        console.log(result);
         res.json(result);
       },
     );
@@ -85,7 +82,6 @@ export class PropertyManagementHandler {
           propertyId,
           parentId,
         );
-        console.log(result);
         res.json(result);
       },
     );
@@ -102,7 +98,6 @@ export class PropertyManagementHandler {
             propertyId,
             childId,
           );
-        console.log(result);
         res.json(result);
       },
     );
@@ -127,7 +122,6 @@ export class PropertyManagementHandler {
           pageSize,
           pageNumber,
         );
-        console.log(result);
         res.json(result);
       },
     );

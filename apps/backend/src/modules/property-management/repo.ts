@@ -19,6 +19,7 @@ import type { RedisClientType } from "../../db/redis-client.ts";
 import type { DocumentType } from "shared/types/modules/reporting.ts";
 import type { ApiResponse } from "shared/types/response.ts";
 import { catchError } from "shared/utils/error.ts";
+import type { Logger } from "winston";
 
 export interface IPropertyManagementRepo {
   getAllProperties(
@@ -56,9 +57,13 @@ export interface IPropertyManagementRepo {
 export class PropertyManagementRepo implements IPropertyManagementRepo {
   private pool: Pool;
   private redisClient: RedisClientType;
-  constructor(pool: Pool, redisClient: RedisClientType) {
+  private logger: Logger;
+  constructor(pool: Pool, redisClient: RedisClientType, logger: Logger) {
     this.pool = pool;
     this.redisClient = redisClient;
+    this.logger = logger.child({
+      service: "property-management-repo",
+    });
   }
 
   async getAllProperties(
@@ -76,7 +81,8 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
     const { data, error } = await executeQuery<
       Property & { total_count: number }
     >(this.pool, sql, [pageSize, calculateOffset(pageSize, pageNumber)]);
-    if (error)
+    if (error) {
+      this.logger.error(error);
       return {
         data: undefined,
         error: {
@@ -84,6 +90,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
           message: error.message,
         },
       };
+    }
     if (data.rows.length === 0)
       return {
         data: newPagedResponse([], 0, pageNumber, pageSize),
@@ -109,7 +116,8 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
       propertyId,
       userId,
     ]);
-    if (error)
+    if (error) {
+      this.logger.error(error);
       return {
         data: undefined,
         error: {
@@ -117,6 +125,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
           message: error.message,
         },
       };
+    }
     if (data.rows.length === 0)
       return {
         data: undefined,
@@ -142,7 +151,8 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
         await executeQuery<PropertyParentDocumentRequirement>(this.pool, sql, [
           propertyId,
         ]);
-      if (error)
+      if (error) {
+        this.logger.error(error);
         return {
           data: undefined,
           error: {
@@ -150,6 +160,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
             message: error.message,
           },
         };
+      }
       return { data: data.rows, error: undefined };
     });
   }
@@ -172,7 +183,8 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
           sql,
           [propertyId],
         );
-        if (error)
+        if (error) {
+          this.logger.error(error);
           return {
             data: undefined,
             error: {
@@ -180,6 +192,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
               message: error.message,
             },
           };
+        }
         return { data: data.rows, error: undefined };
       },
     );
@@ -211,7 +224,8 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
           sql,
           [pointValue, propertyId, childrenIds],
         );
-        if (error)
+        if (error) {
+          this.logger.error(error);
           return {
             data: undefined,
             error: {
@@ -219,6 +233,7 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
               message: error.message,
             },
           };
+        }
         return { data: data.rows, error: undefined };
       },
     );

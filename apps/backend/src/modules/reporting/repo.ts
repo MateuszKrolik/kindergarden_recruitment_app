@@ -17,6 +17,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { catchError } from "shared/utils/error.ts";
 import type { ApiResponse } from "shared/types/response.ts";
+import type { Logger } from "winston";
 
 export interface IReportingRepo {
   getParentDocumentByType(
@@ -37,9 +38,13 @@ export interface IReportingRepo {
 export class ReportingRepo implements IReportingRepo {
   private pool: Pool;
   private redisClient: RedisClientType;
-  constructor(pool: Pool, redisClient: RedisClientType) {
+  private logger: Logger;
+  constructor(pool: Pool, redisClient: RedisClientType, logger: Logger) {
     this.pool = pool;
     this.redisClient = redisClient;
+    this.logger = logger.child({
+      service: "reporting-repo",
+    });
   }
 
   async getParentDocumentByType(
@@ -59,7 +64,8 @@ export class ReportingRepo implements IReportingRepo {
         sql,
         [userId, documentType],
       );
-      if (error)
+      if (error) {
+        this.logger.error(error);
         return {
           data: undefined,
           error: {
@@ -67,6 +73,7 @@ export class ReportingRepo implements IReportingRepo {
             message: error.message,
           },
         };
+      }
       if (data.rows.length === 0)
         return {
           data: undefined,
@@ -93,7 +100,8 @@ export class ReportingRepo implements IReportingRepo {
       const { data, error } = await executeQuery<{
         document_type: DocumentType;
       }>(this.pool, sql, [parentDocumentId]);
-      if (error)
+      if (error) {
+        this.logger.error(error);
         return {
           data: undefined,
           error: {
@@ -101,6 +109,7 @@ export class ReportingRepo implements IReportingRepo {
             message: error.message,
           },
         };
+      }
       if (data.rows.length === 0)
         return {
           data: undefined,
@@ -136,7 +145,8 @@ export class ReportingRepo implements IReportingRepo {
           sql,
           [userId, documentType, filePath],
         );
-        if (error)
+        if (error) {
+          this.logger.error(error);
           return {
             data: undefined,
             error: {
@@ -144,6 +154,7 @@ export class ReportingRepo implements IReportingRepo {
               message: error.message,
             },
           };
+        }
         if (data.rows.length === 0)
           return {
             data: undefined,
@@ -173,7 +184,8 @@ export class ReportingRepo implements IReportingRepo {
         sql,
         [docId],
       );
-      if (error)
+      if (error) {
+        this.logger.error(error);
         return {
           data: undefined,
           error: {
@@ -181,6 +193,7 @@ export class ReportingRepo implements IReportingRepo {
             message: error.message,
           },
         };
+      }
       if (data.rows.length === 0)
         return {
           data: undefined,
@@ -205,8 +218,9 @@ export interface IS3Repository {
 
 export class S3Repository implements IS3Repository {
   private client: S3Client;
+  private logger: Logger;
 
-  constructor() {
+  constructor(logger: Logger) {
     this.client = new S3Client({
       region: "us-east-1", // dummy MinIO region
       endpoint: "http://localhost:9000",
@@ -215,6 +229,9 @@ export class S3Repository implements IS3Repository {
         accessKeyId: "minioadmin",
         secretAccessKey: "minioadmin",
       },
+    });
+    this.logger = logger.child({
+      service: "reporting-s3-repo",
     });
   }
 
@@ -235,7 +252,8 @@ export class S3Repository implements IS3Repository {
         }),
       ),
     );
-    if (error)
+    if (error) {
+      this.logger.error(error);
       return {
         data: undefined,
         error: {
@@ -243,6 +261,7 @@ export class S3Repository implements IS3Repository {
           message: error.message,
         },
       };
+    }
 
     return { data: `/${bucket}/${key}`, error: undefined };
   }
@@ -264,7 +283,8 @@ export class S3Repository implements IS3Repository {
         },
       ),
     );
-    if (error)
+    if (error) {
+      this.logger.error(error);
       return {
         data: undefined,
         error: {
@@ -272,6 +292,7 @@ export class S3Repository implements IS3Repository {
           message: error.message,
         },
       };
+    }
     return { data, error: undefined };
   }
 }

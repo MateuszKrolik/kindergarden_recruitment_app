@@ -7,6 +7,7 @@ import type { RedisClientType } from "../../db/redis-client.ts";
 import { catchErrorSync, formatAggregateError } from "shared/utils/error.ts";
 import type { IReportingClient } from "./client.ts";
 import { PROPERTY_MANAGEMENT_EVENTS } from "shared/events/modules/property-management.ts";
+import { type Logger } from "winston";
 
 export interface IPropertyManagementEventHandler {
   handlePropertyParentDocumentRequestApprovedEvent(): Promise<void>;
@@ -18,17 +19,22 @@ export class PropertyManagementEventHandler
   private reportingClient: IReportingClient;
   private redisSubscriber: RedisClientType;
   private socketServer: SocketServer;
+  private logger: Logger;
   constructor(
     svc: IPropertyManagementSvc,
     reportingClient: IReportingClient,
     redisSubscriber: RedisClientType,
     socketServer: SocketServer,
+    logger: Logger,
   ) {
     this.svc = svc;
     this.reportingClient = reportingClient;
     this.redisSubscriber = redisSubscriber;
     this.socketServer = socketServer;
     this.handlePropertyParentDocumentRequestApprovedEvent();
+    this.logger = logger.child({
+      service: "property-management-event-handler",
+    });
   }
 
   async handlePropertyParentDocumentRequestApprovedEvent(): Promise<void> {
@@ -40,23 +46,27 @@ export class PropertyManagementEventHandler
           JSON.parse(message),
         );
         if (parseError) {
+          this.logger.error(parseError);
           console.error(parseError);
           return;
         }
         const event: EventEnvelope<PropertyParentDocument> = data;
-        console.log("Received event:", event);
+        this.logger.log("Received event:", event);
 
         const { data: documentType, error: documentTypeError } =
           await this.reportingClient.getParentDocumentTypeByDocumentId(
             event.payload.parent_document_id,
           );
         if (documentTypeError) {
+          this.logger.error(documentTypeError);
           console.error(documentTypeError);
           return;
         }
         if (!documentType) {
-          console.error(
-            `No document type found for: ${event.payload.parent_document_id}!`,
+          this.logger.error(
+            new Error(
+              `No document type found for: ${event.payload.parent_document_id}!`,
+            ),
           );
           return;
         }
@@ -76,7 +86,9 @@ export class PropertyManagementEventHandler
           .map((result) => result.error?.message)
           .filter((error) => error !== undefined);
         if (errors.length > 0) {
-          console.error(formatAggregateError(errors));
+          const errMsg = formatAggregateError(errors);
+          this.logger.error(new Error(errMsg));
+          console.error(errMsg);
           return;
         }
         const [pointValueResult, propertyChildrenResult] = promiseResults;
@@ -92,10 +104,9 @@ export class PropertyManagementEventHandler
             pointValue,
           );
         if (incrementError) {
-          console.error(incrementError);
+          this.logger.error(incrementError);
           return;
         }
-        console.log(incrementData);
         // Emit to socket listeners only if all above pass
         this.socketServer?.emit(
           COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,

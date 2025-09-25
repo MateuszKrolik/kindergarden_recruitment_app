@@ -7,6 +7,7 @@ import type {
 } from "shared/types/modules/identity.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
 import type { ApiResponse } from "shared/types/response.ts";
+import type { Logger } from "winston";
 
 export interface IIdentityRepo {
   doesAccountExist(accountId: string): ApiResponse<boolean>;
@@ -18,9 +19,13 @@ export interface IIdentityRepo {
 export class IdentityRepo implements IIdentityRepo {
   private pool: Pool;
   private redisClient: RedisClientType;
-  constructor(pool: Pool, redisClient: RedisClientType) {
+  private logger: Logger;
+  constructor(pool: Pool, redisClient: RedisClientType, logger: Logger) {
     this.pool = pool;
     this.redisClient = redisClient;
+    this.logger = logger.child({
+      service: "indentity-repo",
+    });
   }
 
   async doesAccountExist(accountId: string): ApiResponse<boolean> {
@@ -32,7 +37,8 @@ export class IdentityRepo implements IIdentityRepo {
       sql,
       [accountId],
     );
-    if (error)
+    if (error) {
+      this.logger.error(error);
       return {
         data: undefined,
         error: {
@@ -40,6 +46,7 @@ export class IdentityRepo implements IIdentityRepo {
           message: error.message,
         },
       };
+    }
     if (data.rows.length === 0)
       return {
         data: undefined,
@@ -69,7 +76,8 @@ export class IdentityRepo implements IIdentityRepo {
       sql,
       [userId],
     );
-    if (error)
+    if (error) {
+      this.logger.error(error);
       return {
         data: undefined,
         error: {
@@ -77,6 +85,7 @@ export class IdentityRepo implements IIdentityRepo {
           message: error.message,
         },
       };
+    }
     if (data.rows.length === 0)
       return {
         data: undefined,
@@ -105,7 +114,8 @@ export class IdentityRepo implements IIdentityRepo {
           sql,
           [parentId],
         );
-        if (error)
+        if (error) {
+          this.logger.error(error);
           return {
             data: undefined,
             error: {
@@ -113,6 +123,7 @@ export class IdentityRepo implements IIdentityRepo {
               message: error.message,
             },
           };
+        }
         return { data: data.rows, error: undefined };
       },
     );
@@ -137,7 +148,8 @@ export class IdentityRepo implements IIdentityRepo {
         sql,
         [childId],
       );
-      if (error)
+      if (error) {
+        this.logger.error(error);
         return {
           data: undefined,
           error: {
@@ -145,6 +157,7 @@ export class IdentityRepo implements IIdentityRepo {
             message: error.message,
           },
         };
+      }
       if (data.rows.length === 0)
         return {
           data: undefined,

@@ -17,6 +17,7 @@ import { ComplianceRepo } from "./modules/compliance/repo.ts";
 import { ComplianceSvc } from "./modules/compliance/svc.ts";
 import { ComplianceHandler } from "./modules/compliance/handler.ts";
 import { ReportingHandler } from "./modules/reporting/handler.ts";
+import { genericLogger } from "./shared/logger.ts";
 
 const BASE_URL = "http://localhost";
 const BE_PORT = 3001;
@@ -35,16 +36,20 @@ app.use(express.json());
 const pool = initDB();
 const { redisClient, redisSubscriber } = await createRedisClients();
 // IDENTITY
-const identityRepo = new IdentityRepo(pool, redisClient);
+const identityRepo = new IdentityRepo(pool, redisClient, genericLogger);
 const identitySvc = new IdentitySvc(identityRepo);
 // REPORTING
-const s3Repo = new S3Repository();
-const reportingRepo = new ReportingRepo(pool, redisClient);
+const s3Repo = new S3Repository(genericLogger);
+const reportingRepo = new ReportingRepo(pool, redisClient, genericLogger);
 const reportingSvc = new ReportingSvc(reportingRepo, s3Repo);
 const reportingHandler = new ReportingHandler(reportingSvc, authN);
 app.use(reportingHandler.router);
 // PROPERTY MANAGEMENT
-const propertyManagementRepo = new PropertyManagementRepo(pool, redisClient);
+const propertyManagementRepo = new PropertyManagementRepo(
+  pool,
+  redisClient,
+  genericLogger,
+);
 const propertyManagementSvc = new PropertyManagementSvc(
   propertyManagementRepo,
   identitySvc,
@@ -54,6 +59,7 @@ new PropertyManagementEventHandler(
   reportingSvc,
   redisSubscriber,
   socketServer,
+  genericLogger,
 );
 const propertyManagementHandler = new PropertyManagementHandler(
   propertyManagementSvc,
@@ -61,7 +67,7 @@ const propertyManagementHandler = new PropertyManagementHandler(
 );
 app.use(propertyManagementHandler.router);
 // COMPLIANCE
-const complianceRepo = new ComplianceRepo(pool, redisClient);
+const complianceRepo = new ComplianceRepo(pool, redisClient, genericLogger);
 const complianceSvc = new ComplianceSvc(
   complianceRepo,
   redisClient,

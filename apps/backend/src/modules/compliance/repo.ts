@@ -15,6 +15,7 @@ import { type PagedResponse } from "shared/types/pagination.ts";
 import { newPagedResponse } from "shared/utils/pagination.ts";
 import { catchError } from "shared/utils/error.ts";
 import type { ApiResponse } from "shared/types/response.ts";
+import type { Logger } from "winston";
 
 export interface IComplianceRepo {
   getAllDocumentApprovalRequestsForGivenPropertyParent(
@@ -53,9 +54,13 @@ export interface IComplianceRepo {
 export class ComplianceRepo implements IComplianceRepo {
   private pool: Pool;
   private redisClient: RedisClientType;
-  constructor(pool: Pool, redisClient: RedisClientType) {
+  private logger: Logger;
+  constructor(pool: Pool, redisClient: RedisClientType, logger: Logger) {
     this.pool = pool;
     this.redisClient = redisClient;
+    this.logger = logger.child({
+      service: "compliance-repo",
+    });
   }
   async getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
@@ -77,7 +82,8 @@ export class ComplianceRepo implements IComplianceRepo {
         sql,
         [propertyId, userId],
       );
-      if (error)
+      if (error) {
+        this.logger.error(error);
         return {
           data: undefined,
           error: {
@@ -85,6 +91,7 @@ export class ComplianceRepo implements IComplianceRepo {
             message: error.message,
           },
         };
+      }
       return { data: data.rows, error: undefined };
     });
   }
@@ -110,7 +117,8 @@ export class ComplianceRepo implements IComplianceRepo {
         sql,
         [propertyId, userId, parentDocId],
       );
-      if (error)
+      if (error) {
+        this.logger.error(error);
         return {
           data: undefined,
           error: {
@@ -118,6 +126,7 @@ export class ComplianceRepo implements IComplianceRepo {
             message: error.message,
           },
         };
+      }
       if (data.rows.length === 0)
         return {
           data: undefined,
@@ -160,7 +169,8 @@ export class ComplianceRepo implements IComplianceRepo {
           sql,
           [propertyId, userId, parentDocumentId],
         );
-        if (error)
+        if (error) {
+          this.logger.error(error);
           return {
             data: undefined,
             error: {
@@ -168,6 +178,7 @@ export class ComplianceRepo implements IComplianceRepo {
               message: error.message,
             },
           };
+        }
         if (data.rows.length === 0)
           return {
             data: undefined,
@@ -228,7 +239,8 @@ export class ComplianceRepo implements IComplianceRepo {
           pageSize,
           calculateOffset(pageSize, pageNumber),
         ]);
-        if (error)
+        if (error) {
+          this.logger.error(error);
           return {
             data: undefined,
             error: {
@@ -236,10 +248,14 @@ export class ComplianceRepo implements IComplianceRepo {
               message: error.message,
             },
           };
+        }
         return { data: data, error: undefined };
       },
     );
-    if (error) return { data: undefined, error: error };
+    if (error) {
+      this.logger.error(error);
+      return { data: undefined, error: error };
+    }
 
     const pagedSetKey =
       this.getAllDocumentApprovalRequestsForGivenPropertyPagedSetKey(
@@ -249,8 +265,10 @@ export class ComplianceRepo implements IComplianceRepo {
       this.redisClient.sAdd(pagedSetKey, cacheKey),
     );
     if (setAddError)
-      console.error(
-        `Error while adding key '${cacheKey}' to set '${pagedSetKey}': ${setAddError}`,
+      this.logger.error(
+        new Error(
+          `Error while adding key '${cacheKey}' to set '${pagedSetKey}': ${setAddError}`,
+        ),
       );
 
     if (data.rows.length === 0) {
@@ -288,7 +306,8 @@ export class ComplianceRepo implements IComplianceRepo {
         sql,
         [propertyId, userId, parentDocumentId],
       );
-      if (error)
+      if (error) {
+        this.logger.error(error);
         return {
           data: undefined,
           error: {
@@ -296,6 +315,7 @@ export class ComplianceRepo implements IComplianceRepo {
             message: error.message,
           },
         };
+      }
       if (data.rows.length === 0)
         return {
           data: undefined,
@@ -335,7 +355,8 @@ export class ComplianceRepo implements IComplianceRepo {
           sql,
           [requestStatus, adminId, propertyId, userId, parentDocumentId],
         );
-        if (error)
+        if (error) {
+          this.logger.error(error);
           return {
             data: undefined,
             error: {
@@ -343,6 +364,7 @@ export class ComplianceRepo implements IComplianceRepo {
               message: error.message,
             },
           };
+        }
         if (data.rows.length === 0)
           return {
             data: undefined,
@@ -391,19 +413,25 @@ export class ComplianceRepo implements IComplianceRepo {
       this.redisClient.sMembers(setKey),
     );
     if (error)
-      console.error(`Redis GET error for key set '${setKey}': ${error}`);
+      this.logger.error(
+        new Error(`Redis GET error for key set '${setKey}': ${error}`),
+      );
     if (sMembers && sMembers.length > 0) {
       const { error: setDelError } = await catchError(
         this.redisClient.del(sMembers),
       );
       if (setDelError)
-        console.error(
-          `Redis DEL error for set members '${setKey}': ${setDelError}`,
+        this.logger.error(
+          new Error(
+            `Redis DEL error for set members '${setKey}': ${setDelError}`,
+          ),
         );
     }
     const { error: delError } = await catchError(this.redisClient.del(setKey));
     if (delError) {
-      console.error(`Redis DEL error for set '${setKey}': ${delError}`);
+      this.logger.error(
+        new Error(`Redis DEL error for set '${setKey}': ${delError}`),
+      );
     }
   }
 
