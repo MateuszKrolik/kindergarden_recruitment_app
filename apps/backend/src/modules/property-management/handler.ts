@@ -38,8 +38,15 @@ export class PropertyManagementHandler {
           typeof req.query.pageNumber === "string"
             ? parseInt(req.query.pageNumber)
             : 1;
-        const result = await this.svc.getAllProperties(pageSize, pageNumber);
-        res.json(result);
+        const { data, error } = await this.svc.getAllProperties(
+          pageSize,
+          pageNumber,
+        );
+        if (error) {
+          res.status(error.code).json(error);
+          return;
+        }
+        res.status(200).json({ data: data });
       },
     );
   };
@@ -50,8 +57,15 @@ export class PropertyManagementHandler {
       this.authenticationMiddleware,
       async (req: Request, res: Response) => {
         const { propertyId, userId } = req.params;
-        const result = await this.svc.getPropertyUser(propertyId, userId);
-        res.json(result);
+        const { data, error } = await this.svc.getPropertyUser(
+          propertyId,
+          userId,
+        );
+        if (error) {
+          res.status(error.code).json(error);
+          return;
+        }
+        res.status(200).json({ data: data });
       },
     );
   };
@@ -62,12 +76,16 @@ export class PropertyManagementHandler {
       this.authenticationMiddleware,
       async (req: Request, res: Response) => {
         const { propertyId, userId } = req.params;
-        const result =
+        const { data, error } =
           await this.svc.getDocumentRequirementsForGivenPropertyParent(
             propertyId,
             userId,
           );
-        res.json(result);
+        if (error) {
+          res.status(error.code).json(error);
+          return;
+        }
+        res.status(200).json({ data: data });
       },
     );
   };
@@ -78,11 +96,16 @@ export class PropertyManagementHandler {
       this.authenticationMiddleware,
       async (req: Request, res: Response) => {
         const { propertyId, parentId } = req.params;
-        const result = await this.svc.getAllPropertyChildrenForGivenParent(
-          propertyId,
-          parentId,
-        );
-        res.json(result);
+        const { data, error } =
+          await this.svc.getAllPropertyChildrenForGivenParent(
+            propertyId,
+            parentId,
+          );
+        if (error) {
+          res.status(error.code).json(error);
+          return;
+        }
+        res.status(200).json({ data: data });
       },
     );
   };
@@ -93,12 +116,16 @@ export class PropertyManagementHandler {
       this.authenticationMiddleware,
       async (req: Request, res: Response) => {
         const { propertyId, childId } = req.params;
-        const result =
+        const { data, error } =
           await this.svc.getDocumentRequirementsForGivenPropertyChild(
             propertyId,
             childId,
           );
-        res.json(result);
+        if (error) {
+          res.status(error.code).json(error);
+          return;
+        }
+        res.status(200).json({ data: data });
       },
     );
   };
@@ -117,12 +144,16 @@ export class PropertyManagementHandler {
           typeof req.query.pageNumber === "string"
             ? parseInt(req.query.pageNumber)
             : 1;
-        const result = await this.svc.getAllPropertyChildrenPaged(
+        const { data, error } = await this.svc.getAllPropertyChildrenPaged(
           propertyId,
           pageSize,
           pageNumber,
         );
-        res.json(result);
+        if (error) {
+          res.status(error.code).json(error);
+          return;
+        }
+        res.status(200).json({ data: data });
       },
     );
   };

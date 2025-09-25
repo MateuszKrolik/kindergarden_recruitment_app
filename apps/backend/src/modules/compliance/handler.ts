@@ -37,8 +37,7 @@ export class ComplianceHandler {
             parentId,
           );
         if (error) {
-          console.error(error);
-          res.status(500).json({ error: error.message });
+          res.status(error.code).json(error);
           return;
         }
         res.status(200).json({ data: data });
@@ -59,8 +58,7 @@ export class ComplianceHandler {
             parentDocId,
           );
         if (error) {
-          console.error(error);
-          res.status(500).json({ error: error.message });
+          res.status(error.code).json(error);
           return;
         }
         res.status(200).json({ data: data });
@@ -81,8 +79,7 @@ export class ComplianceHandler {
             parentDocId,
           );
         if (error) {
-          console.error(error);
-          res.status(500).json({ error: error.message });
+          res.status(error.code).json(error);
           return;
         }
         res.status(200).json({ data: data });
@@ -111,8 +108,7 @@ export class ComplianceHandler {
             pageNumber,
           );
         if (error) {
-          console.error(error);
-          res.status(500).json({ error: error.message });
+          res.status(error.code).json(error);
           return;
         }
         res.status(200).json({ data: data });
@@ -134,7 +130,9 @@ export class ComplianceHandler {
           status === REQUEST_STATUS.APPROVED ||
           status === REQUEST_STATUS.REJECTED;
         if (!isValidStatus(requestStatus)) {
-          res.status(400).json({ error: "Invalid request status!" });
+          res
+            .status(400)
+            .json({ code: 400, message: "Invalid request status!" });
           return;
         }
         const { data, error } =
@@ -146,8 +144,7 @@ export class ComplianceHandler {
             adminId,
           );
         if (error) {
-          console.error(error);
-          res.status(500).json({ error: error.message });
+          res.status(error.code).json(error);
           return;
         }
         res.status(200).json({ data: data });

@@ -41,7 +41,9 @@ export class ReportingHandler {
           return set.has(documentType as DocumentType);
         };
         if (!isValidDocumentType(documentType)) {
-          res.status(400).json({ error: "Invalid document type!" });
+          res
+            .status(400)
+            .json({ code: 400, messsage: "Invalid document type!" });
           return;
         }
         const { data, error } = await this.svc.getParentDocumentByType(
@@ -49,8 +51,7 @@ export class ReportingHandler {
           documentType,
         );
         if (error) {
-          console.error(error);
-          res.status(500).json({ error: error.message });
+          res.status(error.code).json(error);
           return;
         }
         res.status(200).json({ data: data });
@@ -73,12 +74,14 @@ export class ReportingHandler {
           return set.has(documentType as DocumentType);
         };
         if (!isValidDocumentType(documentType)) {
-          res.status(400).json({ error: "Invalid document type!" });
+          res
+            .status(400)
+            .json({ code: 400, message: "Invalid document type!" });
           return;
         }
         const file = req?.file;
         if (!file) {
-          res.status(400).json({ error: "File is required!" });
+          res.status(400).json({ code: 400, message: "File is required!" });
           return;
         }
         const browserFile = new File(
@@ -95,8 +98,7 @@ export class ReportingHandler {
           browserFile,
         );
         if (error) {
-          console.error(error);
-          res.status(500).json({ error: error.message });
+          res.status(error.code).json(error);
           return;
         }
         res.status(200).json({ data: data });
@@ -118,11 +120,10 @@ export class ReportingHandler {
           3600,
         );
         if (error) {
-          console.error(error);
-          res.status(500).json({ error: error.message });
+          res.status(error.code).json(error);
           return;
         }
-        return res.status(200).json({ data: data });
+        res.status(200).json({ data: data });
       },
     );
   };
@@ -136,8 +137,7 @@ export class ReportingHandler {
         const { data, error } =
           await this.svc.getParentDocumentURLByDocumentID(documentId);
         if (error) {
-          console.error(error);
-          res.status(500).json({ error: error.message });
+          res.status(error.code).json(error);
           return;
         }
         res.status(200).json({ data: data });
