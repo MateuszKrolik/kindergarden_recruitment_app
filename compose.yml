@@ -52,7 +52,7 @@ services:
 
     # backend:
     #   build:
-    #     context: ./backend
+    #     context: ./apps/backend
     #   environment:
     #     NODE_ENV: production
     #   ports:
@@ -65,21 +65,21 @@ services:
     #     pg_db:
     #       condition: service_healthy
     #
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - HOSTNAME=0.0.0.0
-    env_file:
-      - .env
-    networks:
-      - my-network
-    depends_on:
-      pg_db:
-        condition: service_healthy
+  # frontend:
+  #   build: ./apps/frontend
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=3000
+  #     - HOSTNAME=0.0.0.0
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - my-network
+  #   depends_on:
+  #     pg_db:
+  #       condition: service_healthy
 
 volumes:
   data:

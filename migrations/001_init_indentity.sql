@@ -19,6 +19,17 @@ create table identity."user" (
   "updatedAt" timestamp default CURRENT_TIMESTAMP not null
 );
 
+create table identity."session" (
+  "id" uuid DEFAULT gen_random_uuid() primary key,
+  "expiresAt" timestamptz not null,
+  "token" text not null unique,
+  "createdAt" timestamptz default CURRENT_TIMESTAMP not null,
+  "updatedAt" timestamptz not null,
+  "ipAddress" text,
+  "userAgent" text,
+  "userId" uuid not null references identity."user" ("id") on delete cascade
+);
+
 create table identity."account" (
   "id" uuid DEFAULT gen_random_uuid() primary key,
   "accountId" text not null,
