@@ -7,7 +7,7 @@ export type ApiResponse<T> = Promise<
   { data: T; error: undefined } | { data: undefined; error: HTTPError }
 >;
 
-//TODO: remove
+// Direct DB operations only
 export type AsyncResponseType<T> = Promise<
   { data: T; error: undefined } | { data: undefined; error: Error }
 >;

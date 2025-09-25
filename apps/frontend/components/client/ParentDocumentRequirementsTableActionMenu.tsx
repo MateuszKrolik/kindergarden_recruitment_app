@@ -8,13 +8,15 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
 } from "../ui/dropdown-menu";
-import { DocumentType, ParentDocument } from "shared/types/modules/reporting";
+import type {
+  DocumentType as SharedDocumentType,
+  ParentDocument,
+} from "shared/types/modules/reporting";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { PropertyParentDocument } from "shared/types/modules/compliance";
 import { Progress } from "../ui/progress";
 import { ApiResponse } from "shared/types/response";
-import { NOT_FOUND_ERROR } from "shared/errors";
 import { PropertyParentDocumentRequirement } from "shared/types/modules/property-management";
 
 type ParentDocumentRequirementsTableActionMenuProps = {
@@ -25,7 +27,7 @@ type ParentDocumentRequirementsTableActionMenuProps = {
   getParentDocumentByType(
     jwt: string,
     userId: string,
-    documentType: DocumentType,
+    documentType: SharedDocumentType,
   ): ApiResponse<ParentDocument>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     jwt: string,
@@ -42,7 +44,7 @@ type ParentDocumentRequirementsTableActionMenuProps = {
   saveParentDocument(
     jwt: string,
     userId: string,
-    documentType: DocumentType,
+    documentType: SharedDocumentType,
     file: File,
   ): ApiResponse<ParentDocument>;
   getDocumentURLByFilePath(jwt: string, key: string): ApiResponse<string>;
@@ -76,7 +78,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
         requirement.document_type,
       );
       if (error) {
-        if (error.message === NOT_FOUND_ERROR.message) {
+        if (error.code === 404) {
           setIsLoading(false);
           return;
         }
@@ -93,7 +95,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
           parentDocResult.id,
         );
       if (approvalReqError) {
-        if (approvalReqError.message === NOT_FOUND_ERROR.message) {
+        if (approvalReqError.code === 404) {
           setDisableApprovalRequest(false);
           setIsLoading(false);
           return;

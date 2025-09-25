@@ -73,7 +73,7 @@ export class PropertyManagementEventHandler
         ]);
 
         const errors = promiseResults
-          .map((result) => result.error)
+          .map((result) => result.error?.message)
           .filter((error) => error !== undefined);
         if (errors.length > 0) {
           console.error(formatAggregateError(errors));

@@ -26,16 +26,7 @@ export async function getAllProperties(
       method: "GET",
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function getPropertyUser(
@@ -52,16 +43,7 @@ export async function getPropertyUser(
       method: "GET",
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function getPropertyParentDocumentRequirements(
@@ -78,16 +60,7 @@ export async function getPropertyParentDocumentRequirements(
       method: "GET",
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function getAllPropertyChildrenForGivenParent(
@@ -104,16 +77,7 @@ export async function getAllPropertyChildrenForGivenParent(
       method: "GET",
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function getDocumentRequirementsForGivenPropertyChild(
@@ -130,16 +94,7 @@ export async function getDocumentRequirementsForGivenPropertyChild(
       method: "GET",
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function getAllPropertyChildrenPaged(
@@ -157,14 +112,5 @@ export async function getAllPropertyChildrenPaged(
       method: "GET",
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }

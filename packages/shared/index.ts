@@ -17,6 +17,3 @@ export * from "./events/modules/property-management.ts";
 export * from "./utils/error.ts";
 export * from "./utils/event.ts";
 export * from "./utils/pagination.ts";
-
-// ERRORS
-export * from "./errors.ts";

@@ -23,16 +23,7 @@ export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
       },
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function getPropertyParentDocumentApprovalRequestByDocumentId(
@@ -50,16 +41,7 @@ export async function getPropertyParentDocumentApprovalRequestByDocumentId(
       },
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function sendPropertyParentDocumentApprovalRequest(
@@ -77,16 +59,7 @@ export async function sendPropertyParentDocumentApprovalRequest(
       },
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function getAllDocumentApprovalRequestsForGivenProperty(
@@ -104,16 +77,7 @@ export async function getAllDocumentApprovalRequestsForGivenProperty(
       },
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function setPropertyParentDocumentApprovalRequestStatus(
@@ -132,14 +96,5 @@ export async function setPropertyParentDocumentApprovalRequestStatus(
       },
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }

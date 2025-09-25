@@ -4,14 +4,12 @@ import type {
   ParentChild,
   ChildConditionKeys,
 } from "shared/types/modules/identity.ts";
-import type { AsyncResponseType } from "shared/types/response.ts";
+import type { ApiResponse } from "shared/types/response.ts";
 
 export interface IIdentityClient {
-  getParentConditionKeys(
-    userId: string,
-  ): AsyncResponseType<ParentConditionKeys>;
-  getAllParentChildren(parentId: string): AsyncResponseType<ParentChild[]>;
-  getChildConditionKeys(childId: string): AsyncResponseType<ChildConditionKeys>;
+  getParentConditionKeys(userId: string): ApiResponse<ParentConditionKeys>;
+  getAllParentChildren(parentId: string): ApiResponse<ParentChild[]>;
+  getChildConditionKeys(childId: string): ApiResponse<ChildConditionKeys>;
 }
 
 export interface IComplianceClient {
@@ -19,11 +17,11 @@ export interface IComplianceClient {
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): AsyncResponseType<boolean>;
+  ): ApiResponse<boolean>;
 }
 
 export interface IReportingClient {
   getParentDocumentTypeByDocumentId(
     parentDocumentId: string,
-  ): AsyncResponseType<DocumentType>;
+  ): ApiResponse<DocumentType>;
 }

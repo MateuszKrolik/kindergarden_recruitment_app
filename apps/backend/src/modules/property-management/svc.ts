@@ -17,47 +17,45 @@ import type {
 } from "shared/types/modules/identity.ts";
 import type { DocumentType } from "shared/types/modules/reporting.ts";
 import { formatAggregateError } from "shared/utils/error.ts";
-import type { AsyncResponseType } from "shared/types/response.ts";
+import type { ApiResponse } from "shared/types/response.ts";
 
 export interface IPropertyManagementSvc {
   getAllProperties(
     pageSize: number,
     pageNumber: number,
-  ): AsyncResponseType<PagedResponse<Property>>;
+  ): ApiResponse<PagedResponse<Property>>;
   getPropertyUser(
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyUser>;
+  ): ApiResponse<PropertyUser>;
   getDocumentRequirementsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyParentDocumentRequirement[]>;
+  ): ApiResponse<PropertyParentDocumentRequirement[]>;
   getDocumentRequirementsForGivenPropertyChild(
     propertyId: string,
     childId: string,
-  ): AsyncResponseType<PropertyChildDocumentRequirement[]>;
+  ): ApiResponse<PropertyChildDocumentRequirement[]>;
   getAllPropertyChildrenForGivenParent(
     propertyId: string,
     parentId: string,
-  ): AsyncResponseType<PropertyChild[]>;
-  getAllPropertyChildren(
-    propertyId: string,
-  ): AsyncResponseType<PropertyChild[]>;
+  ): ApiResponse<PropertyChild[]>;
+  getAllPropertyChildren(propertyId: string): ApiResponse<PropertyChild[]>;
   incrementPropertyChildrenPointsForGivenParent(
     propertyId: string,
     parentId: string,
     childrenIds: string[],
     pointValue: number,
-  ): AsyncResponseType<PropertyChild[]>;
+  ): ApiResponse<PropertyChild[]>;
   getPointValueForGivenPropertyParentDocumentByDocumentType(
     propertyId: string,
     documentType: DocumentType,
-  ): AsyncResponseType<number>;
+  ): ApiResponse<number>;
   getAllPropertyChildrenPaged(
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): AsyncResponseType<PagedResponse<PropertyChild>>;
+  ): ApiResponse<PagedResponse<PropertyChild>>;
 }
 
 export class PropertyManagementSvc implements IPropertyManagementSvc {
@@ -70,30 +68,30 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
   async getAllProperties(
     pageSize: number,
     pageNumber: number,
-  ): AsyncResponseType<PagedResponse<Property>> {
+  ): ApiResponse<PagedResponse<Property>> {
     return this.repo.getAllProperties(pageSize, pageNumber);
   }
   async getPropertyUser(
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyUser> {
+  ): ApiResponse<PropertyUser> {
     return this.repo.getPropertyUser(propertyId, userId);
   }
   async getDocumentRequirementsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyParentDocumentRequirement[]> {
+  ): ApiResponse<PropertyParentDocumentRequirement[]> {
     const promiseResults = await Promise.all([
       this.repo.getAllPropertyParentDocumentRequirements(propertyId),
       this.identityClient.getParentConditionKeys(userId),
     ]);
     const errors = promiseResults
-      .map((result) => result.error)
+      .map((result) => result.error?.message)
       .filter((error) => error !== undefined);
     if (errors.length > 0)
       return {
         data: undefined,
-        error: formatAggregateError(errors),
+        error: { code: 500, message: formatAggregateError(errors) },
       };
     const [allReqPromiseResult, conditionKeyPromiseResult] = promiseResults;
     const activeReqs: PropertyParentDocumentRequirement[] = [];
@@ -112,25 +110,25 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
 
   async getAllPropertyChildren(
     propertyId: string,
-  ): AsyncResponseType<PropertyChild[]> {
+  ): ApiResponse<PropertyChild[]> {
     return await this.repo.getAllPropertyChildren(propertyId);
   }
 
   async getAllPropertyChildrenForGivenParent(
     propertyId: string,
     parentId: string,
-  ): AsyncResponseType<PropertyChild[]> {
+  ): ApiResponse<PropertyChild[]> {
     const taskResults = await Promise.all([
       this.getAllPropertyChildren(propertyId),
       this.identityClient.getAllParentChildren(parentId),
     ]);
     const errors = taskResults
-      .map((result) => result.error)
+      .map((result) => result.error?.message)
       .filter((error) => error !== undefined);
     if (errors.length > 0)
       return {
         data: undefined,
-        error: formatAggregateError(errors),
+        error: { code: 500, message: formatAggregateError(errors) },
       };
     const [propChildrenResult, parentChildrenResult] = taskResults;
     const propChildren = propChildrenResult.data || [];
@@ -147,7 +145,7 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
     parentId: string,
     childrenIds: string[],
     pointValue: number,
-  ): AsyncResponseType<PropertyChild[]> {
+  ): ApiResponse<PropertyChild[]> {
     return await this.repo.incrementPropertyChildrenPointsForGivenParent(
       propertyId,
       parentId,
@@ -159,7 +157,7 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
   async getPointValueForGivenPropertyParentDocumentByDocumentType(
     propertyId: string,
     documentType: DocumentType,
-  ): AsyncResponseType<number> {
+  ): ApiResponse<number> {
     return await this.repo.getPointValueForGivenPropertyParentDocumentByDocumentType(
       propertyId,
       documentType,
@@ -169,18 +167,18 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
   async getDocumentRequirementsForGivenPropertyChild(
     propertyId: string,
     childId: string,
-  ): AsyncResponseType<PropertyChildDocumentRequirement[]> {
+  ): ApiResponse<PropertyChildDocumentRequirement[]> {
     const promiseResults = await Promise.all([
       this.repo.getAllPropertyChildrenDocumentRequirements(propertyId),
       this.identityClient.getChildConditionKeys(childId),
     ]);
     const errors = promiseResults
-      .map((result) => result.error)
+      .map((result) => result.error?.message)
       .filter((error) => error !== undefined);
     if (errors.length > 0)
       return {
         data: undefined,
-        error: formatAggregateError(errors),
+        error: { code: 500, message: formatAggregateError(errors) },
       };
     const [allReqPromiseResult, conditionKeyPromiseResult] = promiseResults;
     const activeReqs: PropertyChildDocumentRequirement[] = [];
@@ -201,7 +199,7 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): AsyncResponseType<PagedResponse<PropertyChild>> {
+  ): ApiResponse<PagedResponse<PropertyChild>> {
     return await this.repo.getAllPropertyChildrenPaged(
       propertyId,
       pageSize,

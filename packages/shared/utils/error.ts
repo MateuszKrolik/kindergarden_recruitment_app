@@ -22,14 +22,14 @@ export function catchErrorSync<T>(operation: () => T): SyncResponseType<T> {
   }
 }
 
-export function formatAggregateError(errors: Error[]): Error {
+export function formatAggregateError(errors: string[]): string {
   if (errors.length === 1) {
     return errors[0];
   }
 
   const errorMessages = errors
-    .map((error, index) => `${index + 1}. ${error.message}`)
+    .map((error, index) => `${index + 1}. ${error}`)
     .join("\n    ");
 
-  return new Error(`${errors.length} Errors occurred:\n    ${errorMessages}`);
+  return `${errors.length} Errors occurred:\n    ${errorMessages}`;
 }

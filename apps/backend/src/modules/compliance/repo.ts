@@ -14,41 +14,40 @@ import type { RedisClientType } from "../../db/redis-client.ts";
 import { type PagedResponse } from "shared/types/pagination.ts";
 import { newPagedResponse } from "shared/utils/pagination.ts";
 import { catchError } from "shared/utils/error.ts";
-import type { AsyncResponseType } from "shared/types/response.ts";
-import { NOT_FOUND_ERROR } from "shared/errors.ts";
+import type { ApiResponse } from "shared/types/response.ts";
 
 export interface IComplianceRepo {
   getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyParentDocument[]>;
+  ): ApiResponse<PropertyParentDocument[]>;
   getAllDocumentApprovalRequestsForGivenProperty(
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): AsyncResponseType<PagedResponse<PropertyParentDocument>>;
+  ): ApiResponse<PagedResponse<PropertyParentDocument>>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   setPropertyParentDocumentRequestStatus(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
     requestStatus: RequestStatus,
     adminId: string,
-  ): AsyncResponseType<PropertyParentDocument>;
+  ): ApiResponse<PropertyParentDocument>;
   isPropertyParentDocumentRequestApproved(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): AsyncResponseType<boolean>;
+  ): ApiResponse<boolean>;
 }
 
 export class ComplianceRepo implements IComplianceRepo {
@@ -61,7 +60,7 @@ export class ComplianceRepo implements IComplianceRepo {
   async getAllDocumentApprovalRequestsForGivenPropertyParent(
     propertyId: string,
     userId: string,
-  ): AsyncResponseType<PropertyParentDocument[]> {
+  ): ApiResponse<PropertyParentDocument[]> {
     const cacheKey =
       this.getAllDocumentApprovalRequestsForGivenPropertyParentCacheKey(
         propertyId,
@@ -78,7 +77,14 @@ export class ComplianceRepo implements IComplianceRepo {
         sql,
         [propertyId, userId],
       );
-      if (error) return { data: undefined, error: error };
+      if (error)
+        return {
+          data: undefined,
+          error: {
+            code: 500,
+            message: error.message,
+          },
+        };
       return { data: data.rows, error: undefined };
     });
   }
@@ -87,7 +93,7 @@ export class ComplianceRepo implements IComplianceRepo {
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): AsyncResponseType<PropertyParentDocument> {
+  ): ApiResponse<PropertyParentDocument> {
     const cacheKey = this.getPropertyParentDocumentApprovalRequestCacheKey(
       propertyId,
       userId,
@@ -104,17 +110,31 @@ export class ComplianceRepo implements IComplianceRepo {
         sql,
         [propertyId, userId, parentDocId],
       );
-      if (error) return { data: undefined, error: error };
+      if (error)
+        return {
+          data: undefined,
+          error: {
+            code: 500,
+            message: error.message,
+          },
+        };
       if (data.rows.length === 0)
-        return { data: undefined, error: NOT_FOUND_ERROR };
+        return {
+          data: undefined,
+          error: {
+            code: 404,
+            message: `Parent document request with id: ${parentDocId} was not found!`,
+          },
+        };
       return { data: data.rows[0], error: undefined };
     });
   }
+
   async sendPropertyParentDocumentApprovalRequest(
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): AsyncResponseType<PropertyParentDocument> {
+  ): ApiResponse<PropertyParentDocument> {
     const cacheKey = this.getPropertyParentDocumentApprovalRequestCacheKey(
       propertyId,
       userId,
@@ -140,9 +160,22 @@ export class ComplianceRepo implements IComplianceRepo {
           sql,
           [propertyId, userId, parentDocumentId],
         );
-        if (error) return { data: undefined, error: error };
+        if (error)
+          return {
+            data: undefined,
+            error: {
+              code: 500,
+              message: error.message,
+            },
+          };
         if (data.rows.length === 0)
-          return { data: undefined, error: NOT_FOUND_ERROR };
+          return {
+            data: undefined,
+            error: {
+              code: 404,
+              message: `Approval request: ${parentDocumentId} was not saved successfully!`,
+            },
+          };
         return { data: data.rows[0], error: undefined };
       },
     );
@@ -167,7 +200,7 @@ export class ComplianceRepo implements IComplianceRepo {
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): AsyncResponseType<PagedResponse<PropertyParentDocument>> {
+  ): ApiResponse<PagedResponse<PropertyParentDocument>> {
     const cacheKey =
       this.getAllDocumentApprovalRequestsForGivenPropertyCacheKey(
         propertyId,
@@ -195,7 +228,14 @@ export class ComplianceRepo implements IComplianceRepo {
           pageSize,
           calculateOffset(pageSize, pageNumber),
         ]);
-        if (error) return { data: undefined, error: error };
+        if (error)
+          return {
+            data: undefined,
+            error: {
+              code: 500,
+              message: error.message,
+            },
+          };
         return { data: data, error: undefined };
       },
     );
@@ -231,7 +271,7 @@ export class ComplianceRepo implements IComplianceRepo {
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): AsyncResponseType<boolean> {
+  ): ApiResponse<boolean> {
     const cacheKey = this.getIsPropertyParentDocumentRequestApprovedCacheKey(
       propertyId,
       userId,
@@ -248,9 +288,22 @@ export class ComplianceRepo implements IComplianceRepo {
         sql,
         [propertyId, userId, parentDocumentId],
       );
-      if (error) return { data: undefined, error };
+      if (error)
+        return {
+          data: undefined,
+          error: {
+            code: 500,
+            message: error.message,
+          },
+        };
       if (data.rows.length === 0)
-        return { data: undefined, error: NOT_FOUND_ERROR };
+        return {
+          data: undefined,
+          error: {
+            code: 404,
+            message: `Request with id ${parentDocumentId} was not found!`,
+          },
+        };
       return { data: data.rows[0].is_approved, error: undefined };
     });
   }
@@ -261,7 +314,7 @@ export class ComplianceRepo implements IComplianceRepo {
     parentDocumentId: string,
     requestStatus: RequestStatus,
     adminId: string,
-  ): AsyncResponseType<PropertyParentDocument> {
+  ): ApiResponse<PropertyParentDocument> {
     const cacheKey = this.getPropertyParentDocumentApprovalRequestCacheKey(
       propertyId,
       userId,
@@ -282,10 +335,23 @@ export class ComplianceRepo implements IComplianceRepo {
           sql,
           [requestStatus, adminId, propertyId, userId, parentDocumentId],
         );
-        if (error) return { data: undefined, error: error };
+        if (error)
+          return {
+            data: undefined,
+            error: {
+              code: 500,
+              message: error.message,
+            },
+          };
         if (data.rows.length === 0)
-          return { data: undefined, error: NOT_FOUND_ERROR };
-        return { data: data?.rows[0], error: undefined };
+          return {
+            data: undefined,
+            error: {
+              code: 404,
+              message: `Parent document request: ${parentDocumentId} was not found!`,
+            },
+          };
+        return { data: data.rows[0], error: undefined };
       },
     );
 

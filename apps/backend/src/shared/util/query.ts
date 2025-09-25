@@ -1,14 +1,14 @@
 import { Pool, type QueryResult, type QueryResultRow } from "pg";
 import { catchError, catchErrorSync } from "shared/utils/error.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
-import type { AsyncResponseType } from "shared/types/response.ts";
+import type { ApiResponse, AsyncResponseType } from "shared/types/response.ts";
 
 export async function withCacheAsideRedis<T>(
   client: RedisClientType,
   cacheKey: string,
-  fetchFn: () => AsyncResponseType<T>,
+  fetchFn: () => ApiResponse<T>,
   ttlSeconds = 3600 * 24,
-): AsyncResponseType<T> {
+): ApiResponse<T> {
   const { data: cachedData, error } = await catchError(client.get(cacheKey));
   if (error) console.error(`Redis GET error: ${error}`);
 
@@ -37,9 +37,9 @@ export async function withCacheAsideRedis<T>(
 export async function withWriteThroughRedisCache<T>(
   client: RedisClientType,
   cacheKey: string,
-  fetchFn: () => AsyncResponseType<T>,
+  fetchFn: () => ApiResponse<T>,
   ttlSeconds = 3600 * 24,
-): AsyncResponseType<T> {
+): ApiResponse<T> {
   const { data, error } = await fetchFn();
   if (error) return { data: undefined, error: error };
   if (data) {

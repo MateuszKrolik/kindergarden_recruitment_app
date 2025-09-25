@@ -2,27 +2,27 @@ import type { ParentDocument } from "shared/types/modules/reporting.ts";
 import { type IReportingRepo, type IS3Repository } from "./repo.ts";
 import type { DocumentType } from "shared/types/modules/reporting.ts";
 import { extname } from "path";
-import type { AsyncResponseType } from "shared/types/response.ts";
+import type { ApiResponse } from "shared/types/response.ts";
 
 export interface IReportingSvc {
   getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): AsyncResponseType<ParentDocument>;
+  ): ApiResponse<ParentDocument>;
   getParentDocumentTypeByDocumentId(
     parentDocumentId: string,
-  ): AsyncResponseType<DocumentType>;
+  ): ApiResponse<DocumentType>;
   saveParentDocument(
     userId: string,
     documentType: DocumentType,
     file: File,
-  ): AsyncResponseType<ParentDocument>;
+  ): ApiResponse<ParentDocument>;
   getDocumentURLByFilePath(
     key: string,
     bucket: string,
     expiresIn: number,
-  ): AsyncResponseType<string>;
-  getParentDocumentURLByDocumentID(docId: string): AsyncResponseType<string>;
+  ): ApiResponse<string>;
+  getParentDocumentURLByDocumentID(docId: string): ApiResponse<string>;
 }
 
 export class ReportingSvc implements IReportingSvc {
@@ -36,13 +36,13 @@ export class ReportingSvc implements IReportingSvc {
   async getParentDocumentByType(
     userId: string,
     documentType: DocumentType,
-  ): AsyncResponseType<ParentDocument> {
+  ): ApiResponse<ParentDocument> {
     return await this.repo.getParentDocumentByType(userId, documentType);
   }
 
   async getParentDocumentTypeByDocumentId(
     parentDocumentId: string,
-  ): AsyncResponseType<DocumentType> {
+  ): ApiResponse<DocumentType> {
     return await this.repo.getParentDocumentTypeByDocumentId(parentDocumentId);
   }
 
@@ -50,7 +50,7 @@ export class ReportingSvc implements IReportingSvc {
     userId: string,
     documentType: DocumentType,
     file: File,
-  ): AsyncResponseType<ParentDocument> {
+  ): ApiResponse<ParentDocument> {
     const filePath = `parents/${userId}/documents/${documentType}${extname(file.name)}`;
     const { error } = await this.s3Repo.uploadFile("mybucket", filePath, file);
     if (error) return { data: undefined, error };
@@ -67,13 +67,11 @@ export class ReportingSvc implements IReportingSvc {
     key: string,
     bucket: string = "mybucket",
     expiresIn: number = 3600,
-  ): AsyncResponseType<string> {
+  ): ApiResponse<string> {
     return await this.s3Repo.getDocumentURLByFilePath(key, bucket, expiresIn);
   }
 
-  async getParentDocumentURLByDocumentID(
-    docId: string,
-  ): AsyncResponseType<string> {
+  async getParentDocumentURLByDocumentID(docId: string): ApiResponse<string> {
     const { data, error } =
       await this.repo.getParentDocumentFilePathByDocumentID(docId);
     if (error) return { data: undefined, error };

@@ -4,15 +4,13 @@ import type {
   ChildConditionKeys,
 } from "shared/types/modules/identity.ts";
 import type { ParentChild } from "shared/types/modules/identity.ts";
-import type { AsyncResponseType } from "shared/types/response.ts";
+import type { ApiResponse } from "shared/types/response.ts";
 
 export interface IIdentitySvc {
-  doesAccountExist(accountId: string): AsyncResponseType<boolean>;
-  getParentConditionKeys(
-    userId: string,
-  ): AsyncResponseType<ParentConditionKeys>;
-  getChildConditionKeys(childId: string): AsyncResponseType<ChildConditionKeys>;
-  getAllParentChildren(parentId: string): AsyncResponseType<ParentChild[]>;
+  doesAccountExist(accountId: string): ApiResponse<boolean>;
+  getParentConditionKeys(userId: string): ApiResponse<ParentConditionKeys>;
+  getChildConditionKeys(childId: string): ApiResponse<ChildConditionKeys>;
+  getAllParentChildren(parentId: string): ApiResponse<ParentChild[]>;
 }
 
 export class IdentitySvc implements IIdentitySvc {
@@ -21,25 +19,23 @@ export class IdentitySvc implements IIdentitySvc {
     this.repo = repo;
   }
 
-  async doesAccountExist(accountId: string): AsyncResponseType<boolean> {
+  async doesAccountExist(accountId: string): ApiResponse<boolean> {
     return await this.repo.doesAccountExist(accountId);
   }
 
   async getParentConditionKeys(
     userId: string,
-  ): AsyncResponseType<ParentConditionKeys> {
+  ): ApiResponse<ParentConditionKeys> {
     return await this.repo.getParentConditionKeys(userId);
   }
 
-  async getAllParentChildren(
-    parentId: string,
-  ): AsyncResponseType<ParentChild[]> {
+  async getAllParentChildren(parentId: string): ApiResponse<ParentChild[]> {
     return await this.repo.getAllParentChildren(parentId);
   }
 
   async getChildConditionKeys(
     childId: string,
-  ): AsyncResponseType<ChildConditionKeys> {
+  ): ApiResponse<ChildConditionKeys> {
     return await this.repo.getChildConditionKeys(childId);
   }
 }

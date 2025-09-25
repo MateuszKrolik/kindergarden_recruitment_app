@@ -22,16 +22,7 @@ export async function getParentDocumentByType(
       },
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function saveParentDocument(
@@ -52,16 +43,7 @@ export async function saveParentDocument(
       body: formData,
     },
   );
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function getDocumentURLByFilePath(
@@ -74,16 +56,7 @@ export async function getDocumentURLByFilePath(
       Authorization: jwt,
     },
   });
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }
 
 export async function getParentDocumentURLByDocumentID(
@@ -96,14 +69,5 @@ export async function getParentDocumentURLByDocumentID(
       Authorization: jwt,
     },
   });
-  const { data, error } = await response.json();
-  return {
-    data: data,
-    error: error
-      ? {
-        code: response.status,
-        message: error,
-      }
-      : undefined,
-  };
+  return await response.json();
 }

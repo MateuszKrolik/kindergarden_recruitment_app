@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Progress } from "../ui/progress";
 import { ApiResponse } from "shared/types/response";
-import { NOT_FOUND_ERROR } from "shared/errors";
 
 type PropertyTableRowActionMenuContentProps = {
   jwt: string;
@@ -41,7 +40,7 @@ export const PropertyTableRowActionMenu = ({
       setIsLoading(true);
       const { data, error } = await getPropertyUser(jwt, propertyId, userId);
       if (error) {
-        if (error.message == NOT_FOUND_ERROR.message) {
+        if (error.code === 404) {
           setIsLoading(false);
           return;
         }
