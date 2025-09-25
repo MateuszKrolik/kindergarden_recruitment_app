@@ -4,7 +4,7 @@ import type {
   ParentChild,
   ChildConditionKeys,
 } from "shared/types/modules/identity.ts";
-import type { AsyncResponseType } from "../../shared/types/response.ts";
+import type { AsyncResponseType } from "shared/types/response.ts";
 
 export interface IIdentityClient {
   getParentConditionKeys(

@@ -11,13 +11,11 @@ import {
   withWriteThroughRedisCache,
 } from "../../shared/util/query.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
-import {
-  newPagedResponse,
-  type PagedResponse,
-} from "../../shared/types/pagination.ts";
-import { catchError } from "../../shared/util/error.ts";
-import type { AsyncResponseType } from "../../shared/types/response.ts";
-import { NOT_FOUND_ERROR } from "../../shared/errors.ts";
+import { type PagedResponse } from "shared/types/pagination.ts";
+import { newPagedResponse } from "shared/utils/pagination.ts";
+import { catchError } from "shared/utils/error.ts";
+import type { AsyncResponseType } from "shared/types/response.ts";
+import { NOT_FOUND_ERROR } from "shared/errors.ts";
 
 export interface IComplianceRepo {
   getAllDocumentApprovalRequestsForGivenPropertyParent(

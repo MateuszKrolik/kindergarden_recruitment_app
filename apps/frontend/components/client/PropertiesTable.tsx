@@ -33,7 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PagedResponse } from "@/types/pagination";
+import { PagedResponse } from "shared/types/pagination";
 import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";

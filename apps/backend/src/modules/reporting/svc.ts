@@ -2,7 +2,7 @@ import type { ParentDocument } from "shared/types/modules/reporting.ts";
 import { type IReportingRepo, type IS3Repository } from "./repo.ts";
 import type { DocumentType } from "shared/types/modules/reporting.ts";
 import { extname } from "path";
-import type { AsyncResponseType } from "../../shared/types/response.ts";
+import type { AsyncResponseType } from "shared/types/response.ts";
 
 export interface IReportingSvc {
   getParentDocumentByType(

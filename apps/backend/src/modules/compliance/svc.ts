@@ -5,11 +5,11 @@ import {
   type RequestStatus,
 } from "shared/types/modules/compliance.ts";
 import { type IComplianceRepo } from "./repo.ts";
-import type { PagedResponse } from "../../shared/types/pagination.ts";
+import type { PagedResponse } from "shared/types/pagination.ts";
 import { COMPLIANCE_EVENTS } from "shared/events/modules/compliance.ts";
-import { createEvent } from "../../shared/types/event.ts";
+import { createEvent } from "shared/utils/event.ts";
 import type { Server as SocketServer } from "socket.io";
-import type { AsyncResponseType } from "../../shared/types/response.ts";
+import type { AsyncResponseType } from "shared/types/response.ts";
 
 export interface IComplianceSvc {
   getAllDocumentApprovalRequestsForGivenProperty(

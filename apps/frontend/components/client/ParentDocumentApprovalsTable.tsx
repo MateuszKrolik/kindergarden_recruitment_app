@@ -26,7 +26,7 @@ import {
 } from "../ui/table";
 import { COMPLIANCE_EVENTS } from "shared/events/modules/compliance";
 import socket from "@/app/socket";
-import { EventEnvelope } from "@/data-access-layer/shared/types/event";
+import { EventEnvelope } from "shared/types/event";
 import { ApiResponse } from "shared/types/response";
 
 type ParentDocumentApprovalsTableProps = {

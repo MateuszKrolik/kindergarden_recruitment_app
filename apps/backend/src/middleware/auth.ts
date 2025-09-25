@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
-import { catchError } from "../shared/util/error.ts";
+import { catchError } from "shared/utils/error.ts";
 
 const PORT = 3000;
 const BASE_URL = "http://localhost";
@@ -11,7 +11,7 @@ export type AuthenticationMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => Promise<Response<any, Record<string, any>>>;
+) => Promise<Response<any, Record<string, any>> | undefined>;
 
 declare module "express-serve-static-core" {
   interface Request {

@@ -5,7 +5,7 @@ import {
   RequestStatus,
 } from "shared/types/modules/compliance";
 import { ApiResponse } from "shared/types/response";
-import { PagedResponse } from "@/types/pagination";
+import { PagedResponse } from "shared/types/pagination";
 
 const BASE_URL = "http://localhost:3001";
 

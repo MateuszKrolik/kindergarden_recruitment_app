@@ -26,7 +26,7 @@ import { useCallback, useEffect, useState } from "react";
 import socket from "@/app/socket";
 import { PROPERTY_MANAGEMENT_EVENTS } from "shared/events/modules/property-management";
 import { ApiResponse } from "shared/types/response";
-import { PagedResponse } from "@/types/pagination";
+import { PagedResponse } from "shared/types/pagination";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
 import {
   DropdownMenu,

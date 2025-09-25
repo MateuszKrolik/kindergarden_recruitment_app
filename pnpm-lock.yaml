@@ -172,7 +172,11 @@ importers:
         specifier: ^5
         version: 5.9.2
 
-  packages/shared: {}
+  packages/shared:
+    dependencies:
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
 
 packages:
 

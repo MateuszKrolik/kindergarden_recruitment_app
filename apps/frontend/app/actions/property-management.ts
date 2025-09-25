@@ -1,6 +1,6 @@
 "use server";
 
-import { PagedResponse } from "@/types/pagination";
+import { PagedResponse } from "shared/types/pagination";
 import {
   Property,
   PropertyChild,

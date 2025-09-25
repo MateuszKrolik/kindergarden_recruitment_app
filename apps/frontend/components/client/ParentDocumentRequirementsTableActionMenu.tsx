@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { PropertyParentDocument } from "shared/types/modules/compliance";
 import { Progress } from "../ui/progress";
 import { ApiResponse } from "shared/types/response";
-import { NOT_FOUND_ERROR } from "@/data-access-layer/shared/errors";
+import { NOT_FOUND_ERROR } from "shared/errors";
 import { PropertyParentDocumentRequirement } from "shared/types/modules/property-management";
 
 type ParentDocumentRequirementsTableActionMenuProps = {

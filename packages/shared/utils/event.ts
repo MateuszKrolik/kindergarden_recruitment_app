@@ -1,13 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-
-export type EventEnvelope<T> = {
-  id: string;
-  type: string;
-  timestamp: Date;
-  payload: T;
-  source: string;
-  version: string;
-};
+import type { EventEnvelope } from "../types/event";
 
 export function createEvent<T>(
   type: string,

@@ -4,7 +4,7 @@ import type {
   ChildConditionKeys,
 } from "shared/types/modules/identity.ts";
 import type { ParentChild } from "shared/types/modules/identity.ts";
-import type { AsyncResponseType } from "../../shared/types/response.ts";
+import type { AsyncResponseType } from "shared/types/response.ts";
 
 export interface IIdentitySvc {
   doesAccountExist(accountId: string): AsyncResponseType<boolean>;

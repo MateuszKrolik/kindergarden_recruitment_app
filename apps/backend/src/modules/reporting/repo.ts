@@ -15,9 +15,9 @@ import {
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { catchError } from "../../shared/util/error.ts";
-import type { AsyncResponseType } from "../../shared/types/response.ts";
-import { NOT_FOUND_ERROR } from "../../shared/errors.ts";
+import { catchError } from "shared/utils/error.ts";
+import type { AsyncResponseType } from "shared/types/response.ts";
+import { NOT_FOUND_ERROR } from "shared/errors.ts";
 
 export interface IReportingRepo {
   getParentDocumentByType(

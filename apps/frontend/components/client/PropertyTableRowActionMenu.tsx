@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Progress } from "../ui/progress";
 import { ApiResponse } from "shared/types/response";
-import { NOT_FOUND_ERROR } from "@/data-access-layer/shared/errors";
+import { NOT_FOUND_ERROR } from "shared/errors";
 
 type PropertyTableRowActionMenuContentProps = {
   jwt: string;

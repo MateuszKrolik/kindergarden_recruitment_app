@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PagedResponse } from "@/types/pagination";
+import { PagedResponse } from "shared/types/pagination";
 import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -41,7 +41,7 @@ import {
   RequestStatus,
 } from "shared/types/modules/compliance";
 import AdminPropertyParentDocumentTableActionMenu from "./AdminPropertyParentDocumentTableActionMenu";
-import { EventEnvelope } from "@/data-access-layer/shared/types/event";
+import { EventEnvelope } from "shared/types/event";
 import { COMPLIANCE_EVENTS } from "shared/events/modules/compliance";
 import socket from "@/app/socket";
 import { ApiResponse } from "shared/types/response";

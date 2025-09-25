@@ -6,8 +6,8 @@ import type {
   ChildConditionKeys,
 } from "shared/types/modules/identity.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
-import type { AsyncResponseType } from "../../shared/types/response.ts";
-import { NOT_FOUND_ERROR } from "../../shared/errors.ts";
+import type { AsyncResponseType } from "shared/types/response.ts";
+import { NOT_FOUND_ERROR } from "shared/errors.ts";
 
 export interface IIdentityRepo {
   doesAccountExist(accountId: string): AsyncResponseType<boolean>;

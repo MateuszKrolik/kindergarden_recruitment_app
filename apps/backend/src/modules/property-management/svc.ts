@@ -1,4 +1,4 @@
-import type { PagedResponse } from "../../shared/types/pagination.ts";
+import type { PagedResponse } from "shared/types/pagination.ts";
 import {
   type Property,
   type PropertyChild,
@@ -16,8 +16,8 @@ import type {
   ChildConditionKeys,
 } from "shared/types/modules/identity.ts";
 import type { DocumentType } from "shared/types/modules/reporting.ts";
-import { formatAggregateError } from "../../shared/util/error.ts";
-import type { AsyncResponseType } from "../../shared/types/response.ts";
+import { formatAggregateError } from "shared/utils/error.ts";
+import type { AsyncResponseType } from "shared/types/response.ts";
 
 export interface IPropertyManagementSvc {
   getAllProperties(

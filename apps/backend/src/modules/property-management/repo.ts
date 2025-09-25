@@ -1,7 +1,5 @@
-import {
-  newPagedResponse,
-  type PagedResponse,
-} from "../../shared/types/pagination.ts";
+import { type PagedResponse } from "shared/types/pagination.ts";
+import { newPagedResponse } from "shared/utils/pagination.ts";
 import type {
   Property,
   PropertyChild,
@@ -19,9 +17,9 @@ import {
 } from "../../shared/util/query.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
 import type { DocumentType } from "shared/types/modules/reporting.ts";
-import type { AsyncResponseType } from "../../shared/types/response.ts";
-import { NOT_FOUND_ERROR } from "../../shared/errors.ts";
-import { catchError } from "../../shared/util/error.ts";
+import type { AsyncResponseType } from "shared/types/response.ts";
+import { NOT_FOUND_ERROR } from "shared/errors.ts";
+import { catchError } from "shared/utils/error.ts";
 
 export interface IPropertyManagementRepo {
   getAllProperties(

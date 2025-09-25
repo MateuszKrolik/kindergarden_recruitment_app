@@ -1,13 +1,10 @@
 import { COMPLIANCE_EVENTS } from "shared/events/modules/compliance.ts";
-import type { EventEnvelope } from "../../shared/types/event.ts";
+import type { EventEnvelope } from "shared/types/event.ts";
 import type { PropertyParentDocument } from "shared/types/modules/compliance.ts";
 import type { Server as SocketServer } from "socket.io";
 import type { IPropertyManagementSvc } from "./svc.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
-import {
-  catchErrorSync,
-  formatAggregateError,
-} from "../../shared/util/error.ts";
+import { catchErrorSync, formatAggregateError } from "shared/utils/error.ts";
 import type { IReportingClient } from "./client.ts";
 import { PROPERTY_MANAGEMENT_EVENTS } from "shared/events/modules/property-management.ts";
 
