@@ -6,18 +6,24 @@ import {
 import type { IReportingSvc } from "./svc.ts";
 import { type Request, type Response, Router } from "express";
 import multer from "multer";
+import type { Logger } from "winston";
 
 export class ReportingHandler {
   private svc: IReportingSvc;
   private authenticationMiddleware: AuthenticationMiddleware;
+  private logger: Logger;
   public router: Router;
   constructor(
     svc: IReportingSvc,
     authenticationMiddleware: AuthenticationMiddleware,
+    logger: Logger,
   ) {
     this.svc = svc;
     this.authenticationMiddleware = authenticationMiddleware;
     this.router = Router();
+    this.logger = logger.child({
+      service: "reporting-handler",
+    });
     this.registerRoutes();
   }
 
@@ -51,6 +57,11 @@ export class ReportingHandler {
           documentType,
         );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -98,6 +109,11 @@ export class ReportingHandler {
           browserFile,
         );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -120,6 +136,11 @@ export class ReportingHandler {
           3600,
         );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -137,6 +158,11 @@ export class ReportingHandler {
         const { data, error } =
           await this.svc.getParentDocumentURLByDocumentID(documentId);
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }

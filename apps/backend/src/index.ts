@@ -42,7 +42,11 @@ const identitySvc = new IdentitySvc(identityRepo);
 const s3Repo = new S3Repository(genericLogger);
 const reportingRepo = new ReportingRepo(pool, redisClient, genericLogger);
 const reportingSvc = new ReportingSvc(reportingRepo, s3Repo);
-const reportingHandler = new ReportingHandler(reportingSvc, authN);
+const reportingHandler = new ReportingHandler(
+  reportingSvc,
+  authN,
+  genericLogger,
+);
 app.use(reportingHandler.router);
 // PROPERTY MANAGEMENT
 const propertyManagementRepo = new PropertyManagementRepo(
@@ -64,6 +68,7 @@ new PropertyManagementEventHandler(
 const propertyManagementHandler = new PropertyManagementHandler(
   propertyManagementSvc,
   authN,
+  genericLogger,
 );
 app.use(propertyManagementHandler.router);
 // COMPLIANCE

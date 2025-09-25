@@ -2,10 +2,12 @@ import type { AuthenticationMiddleware } from "../../middleware/auth.ts";
 import { REQUEST_STATUS } from "shared/types/modules/compliance.ts";
 import type { IComplianceSvc } from "./svc.ts";
 import { type Request, type Response, Router } from "express";
+import type { Logger } from "winston";
 
 export class ComplianceHandler {
   private svc: IComplianceSvc;
   private authenticationMiddleware: AuthenticationMiddleware;
+  private logger: Logger;
   public router: Router;
   constructor(
     svc: IComplianceSvc,
@@ -14,6 +16,9 @@ export class ComplianceHandler {
     this.svc = svc;
     this.authenticationMiddleware = authenticationMiddleware;
     this.router = Router();
+    this.logger = this.logger.child({
+      service: "compliance-handler",
+    });
     this.registerRoutes();
   }
 
@@ -37,6 +42,11 @@ export class ComplianceHandler {
             parentId,
           );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -58,6 +68,11 @@ export class ComplianceHandler {
             parentDocId,
           );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -79,6 +94,11 @@ export class ComplianceHandler {
             parentDocId,
           );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -108,6 +128,11 @@ export class ComplianceHandler {
             pageNumber,
           );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -144,6 +169,11 @@ export class ComplianceHandler {
             adminId,
           );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }

@@ -35,16 +35,17 @@ export const authN: AuthenticationMiddleware = async (
   const authHeaderToken = req.headers.authorization;
   if (!authHeaderToken) {
     return res.status(401).send({
-      data: undefined,
-      error: "Unauthorized: Missing auth header!",
+      code: 401,
+      message: "Unauthorized: Missing auth header!",
     });
   }
 
   const { data, error } = await catchError(jwtVerify(authHeaderToken, JWKS));
 
   if (error) {
-    console.error(error);
-    return res.status(401).send({ error: "Unauthorized: Invalid token!" });
+    return res
+      .status(401)
+      .send({ code: 401, message: "Unauthorized: Invalid token!" });
   }
 
   const { payload } = data;

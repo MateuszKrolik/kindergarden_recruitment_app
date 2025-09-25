@@ -1,18 +1,24 @@
 import type { AuthenticationMiddleware } from "../../middleware/auth.ts";
 import type { IPropertyManagementSvc } from "./svc.ts";
 import { type Request, type Response, Router } from "express";
+import type { Logger } from "winston";
 
 export class PropertyManagementHandler {
   private svc: IPropertyManagementSvc;
   private authenticationMiddleware: AuthenticationMiddleware;
+  private logger: Logger;
   public router: Router;
   constructor(
     svc: IPropertyManagementSvc,
     authenticationMiddleware: AuthenticationMiddleware,
+    logger: Logger,
   ) {
     this.svc = svc;
     this.authenticationMiddleware = authenticationMiddleware;
     this.router = Router();
+    this.logger = logger.child({
+      service: "property-management-handler",
+    });
     this.registerRoutes();
   }
 
@@ -43,6 +49,11 @@ export class PropertyManagementHandler {
           pageNumber,
         );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -62,6 +73,11 @@ export class PropertyManagementHandler {
           userId,
         );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -82,6 +98,16 @@ export class PropertyManagementHandler {
             userId,
           );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -102,6 +128,11 @@ export class PropertyManagementHandler {
             parentId,
           );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -122,6 +153,11 @@ export class PropertyManagementHandler {
             childId,
           );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
@@ -150,6 +186,11 @@ export class PropertyManagementHandler {
           pageNumber,
         );
         if (error) {
+          this.logger.error(error.message, {
+            route: req.route,
+            method: req.method,
+            statusCode: error.code,
+          });
           res.status(error.code).json(error);
           return;
         }
