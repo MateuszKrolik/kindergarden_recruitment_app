@@ -54,7 +54,7 @@ export class PropertyManagementHandler {
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });
@@ -78,7 +78,7 @@ export class PropertyManagementHandler {
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });
@@ -108,7 +108,7 @@ export class PropertyManagementHandler {
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });
@@ -133,7 +133,7 @@ export class PropertyManagementHandler {
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });
@@ -158,7 +158,7 @@ export class PropertyManagementHandler {
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });
@@ -191,7 +191,7 @@ export class PropertyManagementHandler {
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });
