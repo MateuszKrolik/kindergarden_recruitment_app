@@ -145,11 +145,12 @@ export class ComplianceSvc implements IComplianceSvc {
             "1.0",
             data,
           ),
+          null,
+          2,
         );
         this.logger.log(
           "info",
-          `Emitting event: ${COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED}
-          Event Body: ${eventBody}`,
+          `Emitting event: ${COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED}\nEvent Body: ${eventBody}`,
         );
         this.redisClient.publish(
           COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,

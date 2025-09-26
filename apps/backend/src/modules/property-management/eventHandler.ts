@@ -51,7 +51,10 @@ export class PropertyManagementEventHandler
           return;
         }
         const event: EventEnvelope<PropertyParentDocument> = data;
-        this.logger.log("Received event:", event);
+        this.logger.log(
+          "info",
+          `Received event:\n${JSON.stringify(event, null, 2)}`,
+        );
 
         const { data: documentType, error: documentTypeError } =
           await this.reportingClient.getParentDocumentTypeByDocumentId(
