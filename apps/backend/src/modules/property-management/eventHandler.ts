@@ -47,7 +47,6 @@ export class PropertyManagementEventHandler
         );
         if (parseError) {
           this.logger.error(parseError);
-          console.error(parseError);
           return;
         }
         const event: EventEnvelope<PropertyParentDocument> = data;
@@ -62,7 +61,6 @@ export class PropertyManagementEventHandler
           );
         if (documentTypeError) {
           this.logger.error(documentTypeError);
-          console.error(documentTypeError);
           return;
         }
         if (!documentType) {
@@ -91,7 +89,6 @@ export class PropertyManagementEventHandler
         if (errors.length > 0) {
           const errMsg = formatAggregateError(errors);
           this.logger.error(new Error(errMsg));
-          console.error(errMsg);
           return;
         }
         const [pointValueResult, propertyChildrenResult] = promiseResults;
