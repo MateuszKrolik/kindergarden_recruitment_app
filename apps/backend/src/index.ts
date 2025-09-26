@@ -18,6 +18,7 @@ import { ComplianceSvc } from "./modules/compliance/svc.ts";
 import { ComplianceHandler } from "./modules/compliance/handler.ts";
 import { ReportingHandler } from "./modules/reporting/handler.ts";
 import { genericLogger } from "./shared/logger.ts";
+import { morganMiddleware } from "./middleware/log.ts";
 
 const BASE_URL = "http://localhost";
 const BE_PORT = 3001;
@@ -32,6 +33,7 @@ const socketServer = new SocketServer(server, {
   },
 });
 app.use(express.json());
+app.use(morganMiddleware);
 
 const pool = initDB();
 const { redisClient, redisSubscriber } = await createRedisClients();
