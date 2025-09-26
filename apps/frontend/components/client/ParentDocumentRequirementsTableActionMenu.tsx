@@ -79,10 +79,12 @@ export const ParentDocumentRequirementsTableActionMenu = ({
       );
       if (error) {
         if (error.code === 404) {
+          setParentDoc(null);
           setIsLoading(false);
           return;
         }
         toast.error(error.message);
+        setParentDoc(null);
         setIsLoading(false);
         return;
       }

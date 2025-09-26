@@ -44,11 +44,11 @@ export class ComplianceHandler {
           );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });
@@ -70,11 +70,11 @@ export class ComplianceHandler {
           );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });
@@ -96,11 +96,11 @@ export class ComplianceHandler {
           );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });
@@ -130,11 +130,11 @@ export class ComplianceHandler {
           );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });
@@ -171,11 +171,11 @@ export class ComplianceHandler {
           );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
-          res.status(error.code).json(error);
+          res.status(error.code).json({ error: error });
           return;
         }
         res.status(200).json({ data: data });

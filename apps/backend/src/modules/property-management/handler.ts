@@ -50,7 +50,7 @@ export class PropertyManagementHandler {
         );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
@@ -74,7 +74,7 @@ export class PropertyManagementHandler {
         );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
@@ -99,12 +99,12 @@ export class PropertyManagementHandler {
           );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
@@ -129,7 +129,7 @@ export class PropertyManagementHandler {
           );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
@@ -154,7 +154,7 @@ export class PropertyManagementHandler {
           );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });
@@ -187,7 +187,7 @@ export class PropertyManagementHandler {
         );
         if (error) {
           this.logger.error(error.message, {
-            route: req.route,
+            route: req.route?.path,
             method: req.method,
             statusCode: error.code,
           });

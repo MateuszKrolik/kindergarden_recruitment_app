@@ -1,4 +1,4 @@
-import type { ChildDocumentType } from "./reporting.ts";
+import type { ChildDocumentType, DocumentType } from "./reporting.ts";
 
 export type Property = {
   id: string;
