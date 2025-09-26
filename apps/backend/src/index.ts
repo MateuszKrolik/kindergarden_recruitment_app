@@ -79,7 +79,11 @@ const complianceSvc = new ComplianceSvc(
   socketServer,
   genericLogger,
 );
-const complianceHandler = new ComplianceHandler(complianceSvc, authN);
+const complianceHandler = new ComplianceHandler(
+  complianceSvc,
+  authN,
+  genericLogger,
+);
 app.use(complianceHandler.router);
 
 socketServer.on("connection", (socket) => {

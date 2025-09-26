@@ -12,11 +12,12 @@ export class ComplianceHandler {
   constructor(
     svc: IComplianceSvc,
     authenticationMiddleware: AuthenticationMiddleware,
+    logger: Logger,
   ) {
     this.svc = svc;
     this.authenticationMiddleware = authenticationMiddleware;
     this.router = Router();
-    this.logger = this.logger.child({
+    this.logger = logger.child({
       service: "compliance-handler",
     });
     this.registerRoutes();

@@ -15,7 +15,7 @@ export const auth = betterAuth({
   },
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
-    options: "-c search_path=identity",
+    options: "-c search_path=auth",
     max: 10,
   }),
   advanced: {
