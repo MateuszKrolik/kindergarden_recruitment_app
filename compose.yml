@@ -50,30 +50,34 @@ services:
     networks:
       - my-network
 
-  backend:
-    build:
-      context: .
-      dockerfile: backend.Dockerfile
-    environment:
-      NODE_ENV: production
-    ports:
-      - 3001:3001
-    env_file:
-      - .env
-    networks:
-      - my-network
-    depends_on:
-      pg_db:
-        condition: service_healthy
-
+  # backend:
+  #   build:
+  #     context: .
+  #     dockerfile: backend.Dockerfile
+  #   environment:
+  #     - NODE_ENV=production
+  #     - FRONTEND_URL=http://frontend:3000
+  #   ports:
+  #     - 3001:3001
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - my-network
+  #   depends_on:
+  #     pg_db:
+  #       condition: service_healthy
+  #
   # frontend:
-  #   build: ./apps/frontend
+  #   build:
+  #     context: .
+  #     dockerfile: frontend.Dockerfile
   #   ports:
   #     - "3000:3000"
   #   environment:
   #     - NODE_ENV=production
   #     - PORT=3000
   #     - HOSTNAME=0.0.0.0
+  #     - BACKEND_URL=http://backend:3001
   #   env_file:
   #     - .env
   #   networks:

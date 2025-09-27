@@ -2,10 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { catchError } from "shared/utils/error.ts";
 
-const PORT = 3000;
-const BASE_URL = "http://localhost";
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
-const JWKS = createRemoteJWKSet(new URL(`${BASE_URL}:${PORT}/api/auth/jwks`));
+const JWKS = createRemoteJWKSet(new URL(`${FRONTEND_URL}/api/auth/jwks`));
 
 export type AuthenticationMiddleware = (
   req: Request,

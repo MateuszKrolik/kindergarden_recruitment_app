@@ -7,7 +7,7 @@ import {
 import { ApiResponse } from "shared/types/response";
 import { PagedResponse } from "shared/types/pagination";
 
-const BASE_URL = "http://localhost:3001";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
 
 export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
   jwt: string,
@@ -15,7 +15,7 @@ export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
   parentId: string,
 ): ApiResponse<PropertyParentDocument[]> {
   const response = await fetch(
-    `${BASE_URL}/properties/${propertyId}/parents/${parentId}/parent-document-requests`,
+    `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/parent-document-requests`,
     {
       method: "GET",
       headers: {
@@ -33,7 +33,7 @@ export async function getPropertyParentDocumentApprovalRequestByDocumentId(
   parentDocId: string,
 ): ApiResponse<PropertyParentDocument> {
   const response = await fetch(
-    `${BASE_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocId}`,
+    `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocId}`,
     {
       method: "GET",
       headers: {
@@ -51,7 +51,7 @@ export async function sendPropertyParentDocumentApprovalRequest(
   parentDocumentId: string,
 ): ApiResponse<PropertyParentDocument> {
   const response = await fetch(
-    `${BASE_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocumentId}`,
+    `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocumentId}`,
     {
       method: "POST",
       headers: {
@@ -69,7 +69,7 @@ export async function getAllDocumentApprovalRequestsForGivenProperty(
   pageNumber: number,
 ): ApiResponse<PagedResponse<PropertyParentDocument>> {
   const response = await fetch(
-    `${BASE_URL}/properties/${propertyId}/parent-document-requests?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+    `${BACKEND_URL}/properties/${propertyId}/parent-document-requests?pageSize=${pageSize}&pageNumber=${pageNumber}`,
     {
       method: "GET",
       headers: {
@@ -88,7 +88,7 @@ export async function setPropertyParentDocumentApprovalRequestStatus(
   requestStatus: RequestStatus,
 ): ApiResponse<PropertyParentDocument> {
   const response = await fetch(
-    `${BASE_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocumentId}/status/${requestStatus}`,
+    `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocumentId}/status/${requestStatus}`,
     {
       method: "PATCH",
       headers: {

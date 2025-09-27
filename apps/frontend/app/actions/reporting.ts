@@ -6,7 +6,7 @@ import type {
 } from "shared/types/modules/reporting";
 import type { ApiResponse } from "shared/types/response";
 
-const BASE_URL = "http://localhost:3001";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
 
 export async function getParentDocumentByType(
   jwt: string,
@@ -14,7 +14,7 @@ export async function getParentDocumentByType(
   documentType: DocumentType,
 ): ApiResponse<ParentDocument> {
   const response = await fetch(
-    `${BASE_URL}/parents/${parentId}/documents/${documentType}`,
+    `${BACKEND_URL}/parents/${parentId}/documents/${documentType}`,
     {
       method: "GET",
       headers: {
@@ -34,7 +34,7 @@ export async function saveParentDocument(
   const formData = new FormData();
   formData.append("file", file);
   const response = await fetch(
-    `${BASE_URL}/parents/${parentId}/documents/${documentType}`,
+    `${BACKEND_URL}/parents/${parentId}/documents/${documentType}`,
     {
       method: "POST",
       headers: {
@@ -50,7 +50,7 @@ export async function getDocumentURLByFilePath(
   jwt: string,
   filePath: string,
 ): ApiResponse<string> {
-  const response = await fetch(`${BASE_URL}/documents/${filePath}`, {
+  const response = await fetch(`${BACKEND_URL}/documents/${filePath}`, {
     method: "GET",
     headers: {
       Authorization: jwt,
@@ -63,11 +63,14 @@ export async function getParentDocumentURLByDocumentID(
   jwt: string,
   documentId: string,
 ): ApiResponse<string> {
-  const response = await fetch(`${BASE_URL}/parent-documents/${documentId}`, {
-    method: "GET",
-    headers: {
-      Authorization: jwt,
+  const response = await fetch(
+    `${BACKEND_URL}/parent-documents/${documentId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: jwt,
+      },
     },
-  });
+  );
   return await response.json();
 }

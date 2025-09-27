@@ -20,15 +20,14 @@ import { ReportingHandler } from "./modules/reporting/handler.ts";
 import { genericLogger } from "./shared/logger.ts";
 import { morganMiddleware } from "./middleware/log.ts";
 
-const BASE_URL = "http://localhost";
+const FRONTEND_URL = "http://localhost:3000";
 const BE_PORT = 3001;
-const FE_PORT = 3000;
 
 const app = express();
 const server = createServer(app);
 const socketServer = new SocketServer(server, {
   cors: {
-    origin: `${BASE_URL}:${FE_PORT}`,
+    origin: FRONTEND_URL,
     methods: ["GET", "POST"],
   },
 });
@@ -96,5 +95,5 @@ socketServer.on("connection", (socket) => {
 });
 
 server.listen(BE_PORT, () => {
-  console.log(`> Ready on ${BASE_URL}:${BE_PORT}`);
+  console.log(`> Ready on: http://localhost:${BE_PORT}`);
 });

@@ -10,7 +10,7 @@ import {
 } from "shared/types/modules/property-management";
 import type { ApiResponse } from "shared/types/response";
 
-const BASE_URL = "http://localhost:3001";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
 
 export async function getAllProperties(
   jwt: string,
@@ -18,7 +18,7 @@ export async function getAllProperties(
   pageNumber: number,
 ): ApiResponse<PagedResponse<Property>> {
   const response = await fetch(
-    `${BASE_URL}/properties?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+    `${BACKEND_URL}/properties?pageSize=${pageSize}&pageNumber=${pageNumber}`,
     {
       headers: {
         Authorization: jwt,
@@ -35,7 +35,7 @@ export async function getPropertyUser(
   userId: string,
 ): ApiResponse<PropertyUser> {
   const response = await fetch(
-    `${BASE_URL}/properties/${propertyId}/users/${userId}`,
+    `${BACKEND_URL}/properties/${propertyId}/users/${userId}`,
     {
       headers: {
         Authorization: jwt,
@@ -52,7 +52,7 @@ export async function getPropertyParentDocumentRequirements(
   userId: string,
 ): ApiResponse<PropertyParentDocumentRequirement[]> {
   const response = await fetch(
-    `${BASE_URL}/properties/${propertyId}/users/${userId}/parent-document-requirements`,
+    `${BACKEND_URL}/properties/${propertyId}/users/${userId}/parent-document-requirements`,
     {
       headers: {
         Authorization: jwt,
@@ -69,7 +69,7 @@ export async function getAllPropertyChildrenForGivenParent(
   parentId: string,
 ): ApiResponse<PropertyChild[]> {
   const response = await fetch(
-    `${BASE_URL}/properties/${propertyId}/parents/${parentId}/property-children`,
+    `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/property-children`,
     {
       headers: {
         Authorization: jwt,
@@ -86,7 +86,7 @@ export async function getDocumentRequirementsForGivenPropertyChild(
   childId: string,
 ): ApiResponse<PropertyChildDocumentRequirement[]> {
   const response = await fetch(
-    `${BASE_URL}/properties/${propertyId}/children/${childId}/document-requirements`,
+    `${BACKEND_URL}/properties/${propertyId}/children/${childId}/document-requirements`,
     {
       headers: {
         Authorization: jwt,
@@ -104,7 +104,7 @@ export async function getAllPropertyChildrenPaged(
   pageNumber: number,
 ): ApiResponse<PagedResponse<PropertyChild>> {
   const response = await fetch(
-    `${BASE_URL}/properties/${propertyId}/property-children?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+    `${BACKEND_URL}/properties/${propertyId}/property-children?pageSize=${pageSize}&pageNumber=${pageNumber}`,
     {
       headers: {
         Authorization: jwt,
