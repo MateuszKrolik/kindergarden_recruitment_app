@@ -23,15 +23,6 @@ export class PropertyManagementHandler {
   }
 
   private registerRoutes = () => {
-    this.getAllProperties();
-    this.getPropertyUser();
-    this.getPropertyParentDocumentRequirements();
-    this.getAllPropertyChildrenForGivenParent();
-    this.getDocumentRequirementsForGivenPropertyChild();
-    this.getAllPropertyChildrenPaged();
-  };
-
-  private getAllProperties = () => {
     this.router.get(
       "/properties",
       this.authenticationMiddleware,
@@ -60,9 +51,7 @@ export class PropertyManagementHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private getPropertyUser = () => {
     this.router.get(
       "/properties/:propertyId/users/:userId",
       this.authenticationMiddleware,
@@ -84,9 +73,7 @@ export class PropertyManagementHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private getPropertyParentDocumentRequirements = () => {
     this.router.get(
       "/properties/:propertyId/users/:userId/parent-document-requirements",
       this.authenticationMiddleware,
@@ -114,9 +101,7 @@ export class PropertyManagementHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private getAllPropertyChildrenForGivenParent = () => {
     this.router.get(
       "/properties/:propertyId/parents/:parentId/property-children",
       this.authenticationMiddleware,
@@ -139,9 +124,7 @@ export class PropertyManagementHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private getDocumentRequirementsForGivenPropertyChild = () => {
     this.router.get(
       "/properties/:propertyId/children/:childId/document-requirements",
       this.authenticationMiddleware,
@@ -164,9 +147,7 @@ export class PropertyManagementHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private getAllPropertyChildrenPaged = () => {
     this.router.get(
       "/properties/:propertyId/property-children",
       this.authenticationMiddleware,

@@ -2,7 +2,7 @@ export const REQUEST_STATUS = {
   PENDING: "pending",
   APPROVED: "approved",
   REJECTED: "rejected",
-} as const;
+} as const satisfies Record<string, RequestStatus>;
 
 export type RequestStatus = "pending" | "approved" | "rejected";
 

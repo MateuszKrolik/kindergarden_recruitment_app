@@ -4,19 +4,26 @@ import {
   type DocumentType,
 } from "shared/types/modules/reporting.ts";
 import type { IReportingSvc } from "./svc.ts";
-import { type Request, type Response, Router } from "express";
-import multer from "multer";
+import {
+  type Request,
+  type RequestHandler,
+  type Response,
+  Router,
+} from "express";
+import { type Multer } from "multer";
 import type { Logger } from "winston";
 
 export class ReportingHandler {
   private svc: IReportingSvc;
   private authenticationMiddleware: AuthenticationMiddleware;
   private logger: Logger;
+  private uploadMiddleware: RequestHandler;
   public router: Router;
   constructor(
     svc: IReportingSvc,
     authenticationMiddleware: AuthenticationMiddleware,
     logger: Logger,
+    multer: Multer,
   ) {
     this.svc = svc;
     this.authenticationMiddleware = authenticationMiddleware;
@@ -24,17 +31,11 @@ export class ReportingHandler {
     this.logger = logger.child({
       service: "reporting-handler",
     });
+    this.uploadMiddleware = multer.single("file");
     this.registerRoutes();
   }
 
   private registerRoutes = () => {
-    this.getParentDocumentByType();
-    this.saveParentDocument();
-    this.getDocumentURLByFilePath();
-    this.getParentDocumentURLByDocumentID();
-  };
-
-  private getParentDocumentByType = () => {
     this.router.get(
       "/parents/:parentId/documents/:documentType",
       this.authenticationMiddleware,
@@ -68,14 +69,11 @@ export class ReportingHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private saveParentDocument = () => {
-    const upload = multer({ storage: multer.memoryStorage() });
     this.router.post(
       "/parents/:parentId/documents/:documentType",
       this.authenticationMiddleware,
-      upload.single("file"),
+      this.uploadMiddleware,
       async (req: Request, res: Response) => {
         const { parentId, documentType } = req.params;
         const isValidDocumentType = (
@@ -120,9 +118,7 @@ export class ReportingHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private getDocumentURLByFilePath = () => {
     this.router.get(
       "/documents/*filePath",
       this.authenticationMiddleware,
@@ -147,9 +143,7 @@ export class ReportingHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private getParentDocumentURLByDocumentID = () => {
     this.router.get(
       "/parent-documents/:documentId",
       this.authenticationMiddleware,

@@ -19,6 +19,7 @@ import { ComplianceHandler } from "./modules/compliance/handler.ts";
 import { ReportingHandler } from "./modules/reporting/handler.ts";
 import { genericLogger } from "./shared/logger.ts";
 import { morganMiddleware } from "./middleware/log.ts";
+import multer from "multer";
 
 const FRONTEND_URL = "http://localhost:3000";
 const BE_PORT = 3001;
@@ -47,6 +48,7 @@ const reportingHandler = new ReportingHandler(
   reportingSvc,
   authN,
   genericLogger,
+  multer({ storage: multer.memoryStorage() }),
 );
 app.use(reportingHandler.router);
 // PROPERTY MANAGEMENT

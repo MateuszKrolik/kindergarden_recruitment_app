@@ -4,7 +4,7 @@ export const DOCUMENT_TYPE = {
   StudentProof: "student_proof",
   FiledTaxInDesiredLocationProof: "filed_tax_in_desired_location_proof",
   ResidesInDesiredLocationProof: "resides_in_desired_location_proof",
-} as const;
+} as const satisfies Record<string, DocumentType>;
 
 export type DocumentType =
   | "employment_proof"
@@ -15,7 +15,7 @@ export type DocumentType =
 
 export const CHILD_DOCUMENT_TYPE = {
   disabilityproof: "disability_proof",
-} as const;
+} as const satisfies Record<string, ChildDocumentType>;
 
 export type ChildDocumentType = "disability_proof";
 

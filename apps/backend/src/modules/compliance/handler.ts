@@ -1,5 +1,8 @@
 import type { AuthenticationMiddleware } from "../../middleware/auth.ts";
-import { REQUEST_STATUS } from "shared/types/modules/compliance.ts";
+import {
+  REQUEST_STATUS,
+  type RequestStatus,
+} from "shared/types/modules/compliance.ts";
 import type { IComplianceSvc } from "./svc.ts";
 import { type Request, type Response, Router } from "express";
 import type { Logger } from "winston";
@@ -24,14 +27,6 @@ export class ComplianceHandler {
   }
 
   private registerRoutes = () => {
-    this.getAllDocumentApprovalRequestsForGivenPropertyParent();
-    this.getPropertyParentDocumentApprovalRequestByDocumentId();
-    this.sendPropertyParentDocumentApprovalRequest();
-    this.getAllDocumentApprovalRequestsForGivenProperty();
-    this.setPropertyParentDocumentApprovalRequestStatus();
-  };
-
-  private getAllDocumentApprovalRequestsForGivenPropertyParent = () => {
     this.router.get(
       "/properties/:propertyId/parents/:parentId/parent-document-requests",
       this.authenticationMiddleware,
@@ -54,9 +49,7 @@ export class ComplianceHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private getPropertyParentDocumentApprovalRequestByDocumentId = () => {
     this.router.get(
       "/properties/:propertyId/parents/:parentId/parent-documents/:parentDocId",
       this.authenticationMiddleware,
@@ -80,9 +73,7 @@ export class ComplianceHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private sendPropertyParentDocumentApprovalRequest = () => {
     this.router.post(
       "/properties/:propertyId/parents/:parentId/parent-documents/:parentDocId",
       this.authenticationMiddleware,
@@ -106,9 +97,7 @@ export class ComplianceHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private getAllDocumentApprovalRequestsForGivenProperty = () => {
     this.router.get(
       "/properties/:propertyId/parent-document-requests",
       this.authenticationMiddleware,
@@ -140,9 +129,7 @@ export class ComplianceHandler {
         res.status(200).json({ data: data });
       },
     );
-  };
 
-  private setPropertyParentDocumentApprovalRequestStatus = () => {
     this.router.patch(
       "/properties/:propertyId/parents/:parentId/parent-documents/:parentDocumentId/status/:requestStatus",
       this.authenticationMiddleware,
@@ -151,10 +138,10 @@ export class ComplianceHandler {
 
         const { propertyId, parentId, parentDocumentId, requestStatus } =
           req.params;
-        const isValidStatus = (status: string) =>
-          status === REQUEST_STATUS.PENDING ||
-          status === REQUEST_STATUS.APPROVED ||
-          status === REQUEST_STATUS.REJECTED;
+        const isValidStatus = (status: string): status is RequestStatus => {
+          const set = new Set(Object.values(REQUEST_STATUS));
+          return set.has(status as RequestStatus);
+        };
         if (!isValidStatus(requestStatus)) {
           res
             .status(400)

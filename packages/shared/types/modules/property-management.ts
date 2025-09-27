@@ -9,7 +9,7 @@ export type Property = {
 export const PROPERTY_USER_ROLE = {
   Admin: "admin",
   Parent: "parent",
-} as const;
+} as const satisfies Record<string, PropertyUserRole>;
 
 export type PropertyUserRole = "admin" | "parent";
 
@@ -22,7 +22,7 @@ export type PropertyUser = {
 export const REQUIREMENT_TYPE = {
   Always: "always",
   Conditional: "conditional",
-} as const;
+} as const satisfies Record<string, RequirementType>;
 
 export type RequirementType = "always" | "conditional";
 
@@ -32,7 +32,7 @@ export const CONDITION_KEY = {
   IsStudent: "is_student",
   FiledTaxInDesiredLocation: "filed_tax_in_desired_location",
   ResidesInDesiredLocation: "resides_in_desired_location",
-} as const;
+} as const satisfies Record<string, ConditionKey>;
 
 export type ConditionKey =
   | "is_employed"
@@ -43,7 +43,7 @@ export type ConditionKey =
 
 export const CHILD_CONDITION_KEY = {
   HasDisability: "has_disability",
-} as const;
+} as const satisfies Record<string, ChildConditionKey>;
 
 export type ChildConditionKey = "has_disability"; // TODO
 
