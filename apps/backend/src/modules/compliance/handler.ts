@@ -134,7 +134,7 @@ export class ComplianceHandler {
       "/properties/:propertyId/parents/:parentId/parent-documents/:parentDocumentId/status/:requestStatus",
       this.authenticationMiddleware,
       async (req: Request, res: Response) => {
-        const adminId = req?.user?.id || ""; // TODO: authorization check (via authZ middleware)
+        const adminId = req?.user?.id || "";
 
         const { propertyId, parentId, parentDocumentId, requestStatus } =
           req.params;

@@ -1,10 +1,11 @@
 import { executeQuery, withCacheAsideRedis } from "../../shared/util/query.ts";
 import { Pool } from "pg";
-import type {
-  ParentChild,
-  ParentConditionKeys,
-  ChildConditionKeys,
-  PropertyUser,
+import {
+  type ParentChild,
+  type ParentConditionKeys,
+  type ChildConditionKeys,
+  type PropertyUser,
+  PROPERTY_USER_ROLE,
 } from "shared/types/modules/identity.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
 import type { ApiResponse } from "shared/types/response.ts";
@@ -19,6 +20,7 @@ export interface IIdentityRepo {
     propertyId: string,
     userId: string,
   ): ApiResponse<PropertyUser>;
+  isPropertyAdmin(propertyId: string, userId: string): ApiResponse<boolean>;
 }
 
 export class IdentityRepo implements IIdentityRepo {
@@ -208,4 +210,13 @@ export class IdentityRepo implements IIdentityRepo {
       };
     return { data: data.rows[0], error: undefined };
   }
+
+  isPropertyAdmin = async (
+    propertyId: string,
+    userId: string,
+  ): ApiResponse<boolean> => {
+    const { data, error } = await this.getPropertyUser(propertyId, userId);
+    if (error) return { data: undefined, error: error };
+    return { data: data.role === PROPERTY_USER_ROLE.Admin, error: undefined };
+  };
 }

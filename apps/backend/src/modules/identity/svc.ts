@@ -16,6 +16,7 @@ export interface IIdentitySvc {
     propertyId: string,
     userId: string,
   ): ApiResponse<PropertyUser>;
+  isPropertyAdmin(propertyId: string, userId: string): ApiResponse<boolean>;
 }
 
 export class IdentitySvc implements IIdentitySvc {
@@ -48,6 +49,13 @@ export class IdentitySvc implements IIdentitySvc {
     propertyId: string,
     userId: string,
   ): ApiResponse<PropertyUser> {
-    return this.repo.getPropertyUser(propertyId, userId);
+    return await this.repo.getPropertyUser(propertyId, userId);
+  }
+
+  async isPropertyAdmin(
+    propertyId: string,
+    userId: string,
+  ): ApiResponse<boolean> {
+    return await this.repo.isPropertyAdmin(propertyId, userId);
   }
 }

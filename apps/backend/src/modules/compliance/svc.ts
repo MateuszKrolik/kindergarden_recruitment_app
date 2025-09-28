@@ -11,6 +11,7 @@ import { createEvent } from "shared/utils/event.ts";
 import type { Server as SocketServer } from "socket.io";
 import type { ApiResponse } from "shared/types/response.ts";
 import { Logger } from "winston";
+import type { IIdentityClient } from "./client.ts";
 
 export interface IComplianceSvc {
   getAllDocumentApprovalRequestsForGivenProperty(
@@ -51,11 +52,13 @@ export class ComplianceSvc implements IComplianceSvc {
   private socketServer: SocketServer;
   private repo: IComplianceRepo;
   private logger: Logger;
+  private identityClient: IIdentityClient;
   constructor(
     repo: IComplianceRepo,
     redisClient: RedisClientType,
     socketServer: SocketServer,
     logger: Logger,
+    identityClient: IIdentityClient,
   ) {
     this.redisClient = redisClient;
     this.socketServer = socketServer;
@@ -63,6 +66,7 @@ export class ComplianceSvc implements IComplianceSvc {
     this.logger = logger.child({
       service: "compliance-svc",
     });
+    this.identityClient = identityClient;
   }
 
   async getAllDocumentApprovalRequestsForGivenPropertyParent(
@@ -127,6 +131,20 @@ export class ComplianceSvc implements IComplianceSvc {
     requestStatus: RequestStatus,
     adminId: string,
   ): ApiResponse<PropertyParentDocument> {
+    const { data: isAdmin, error: isAdminError } =
+      await this.identityClient.isPropertyAdmin(propertyId, adminId);
+    if (isAdminError) {
+      this.logger.error(new Error(isAdminError.message));
+      return { data: undefined, error: isAdminError };
+    }
+    if (!isAdmin)
+      return {
+        data: undefined,
+        error: {
+          code: 403,
+          message: "Insufficient permissions - required role: 'admin'!",
+        },
+      };
     const { data, error } =
       await this.repo.setPropertyParentDocumentRequestStatus(
         propertyId,

@@ -84,6 +84,7 @@ const complianceSvc = new ComplianceSvc(
   redisClient,
   socketServer,
   genericLogger,
+  identitySvc,
 );
 const complianceHandler = new ComplianceHandler(
   complianceSvc,
