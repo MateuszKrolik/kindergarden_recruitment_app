@@ -3,7 +3,6 @@ import {
   type Property,
   type PropertyChild,
   type PropertyParentDocumentRequirement,
-  type PropertyUser,
   CONDITION_KEY,
   type PropertyChildDocumentRequirement,
   REQUIREMENT_TYPE,
@@ -24,10 +23,6 @@ export interface IPropertyManagementSvc {
     pageSize: number,
     pageNumber: number,
   ): ApiResponse<PagedResponse<Property>>;
-  getPropertyUser(
-    propertyId: string,
-    userId: string,
-  ): ApiResponse<PropertyUser>;
   getDocumentRequirementsForGivenPropertyParent(
     propertyId: string,
     userId: string,
@@ -70,12 +65,6 @@ export class PropertyManagementSvc implements IPropertyManagementSvc {
     pageNumber: number,
   ): ApiResponse<PagedResponse<Property>> {
     return this.repo.getAllProperties(pageSize, pageNumber);
-  }
-  async getPropertyUser(
-    propertyId: string,
-    userId: string,
-  ): ApiResponse<PropertyUser> {
-    return this.repo.getPropertyUser(propertyId, userId);
   }
   async getDocumentRequirementsForGivenPropertyParent(
     propertyId: string,

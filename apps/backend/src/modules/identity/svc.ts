@@ -2,6 +2,7 @@ import { type IIdentityRepo } from "./repo.ts";
 import type {
   ParentConditionKeys,
   ChildConditionKeys,
+  PropertyUser,
 } from "shared/types/modules/identity.ts";
 import type { ParentChild } from "shared/types/modules/identity.ts";
 import type { ApiResponse } from "shared/types/response.ts";
@@ -11,6 +12,10 @@ export interface IIdentitySvc {
   getParentConditionKeys(userId: string): ApiResponse<ParentConditionKeys>;
   getChildConditionKeys(childId: string): ApiResponse<ChildConditionKeys>;
   getAllParentChildren(parentId: string): ApiResponse<ParentChild[]>;
+  getPropertyUser(
+    propertyId: string,
+    userId: string,
+  ): ApiResponse<PropertyUser>;
 }
 
 export class IdentitySvc implements IIdentitySvc {
@@ -37,5 +42,12 @@ export class IdentitySvc implements IIdentitySvc {
     childId: string,
   ): ApiResponse<ChildConditionKeys> {
     return await this.repo.getChildConditionKeys(childId);
+  }
+
+  async getPropertyUser(
+    propertyId: string,
+    userId: string,
+  ): ApiResponse<PropertyUser> {
+    return this.repo.getPropertyUser(propertyId, userId);
   }
 }

@@ -14,3 +14,16 @@ export type ParentChild = {
   parent_id: string;
   child_id: string;
 };
+
+export const PROPERTY_USER_ROLE = {
+  Admin: "admin",
+  Parent: "parent",
+} as const satisfies Record<string, PropertyUserRole>;
+
+export type PropertyUserRole = "admin" | "parent";
+
+export type PropertyUser = {
+  property_id: string;
+  user_id: string;
+  role: PropertyUserRole;
+};

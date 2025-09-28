@@ -4,6 +4,7 @@ import type {
   ParentChild,
   ParentConditionKeys,
   ChildConditionKeys,
+  PropertyUser,
 } from "shared/types/modules/identity.ts";
 import type { RedisClientType } from "../../db/redis-client.ts";
 import type { ApiResponse } from "shared/types/response.ts";
@@ -14,6 +15,10 @@ export interface IIdentityRepo {
   getParentConditionKeys(userId: string): ApiResponse<ParentConditionKeys>;
   getChildConditionKeys(childId: string): ApiResponse<ChildConditionKeys>;
   getAllParentChildren(parentId: string): ApiResponse<ParentChild[]>;
+  getPropertyUser(
+    propertyId: string,
+    userId: string,
+  ): ApiResponse<PropertyUser>;
 }
 
 export class IdentityRepo implements IIdentityRepo {
@@ -168,5 +173,39 @@ export class IdentityRepo implements IIdentityRepo {
         };
       return { data: data.rows[0], error: undefined };
     });
+  }
+
+  async getPropertyUser(
+    propertyId: string,
+    userId: string,
+  ): ApiResponse<PropertyUser> {
+    const sql = `
+    SELECT *
+    FROM identity.property_users
+    WHERE property_id = $1 AND user_id = $2;
+    `;
+    const { data, error } = await executeQuery<PropertyUser>(this.pool, sql, [
+      propertyId,
+      userId,
+    ]);
+    if (error) {
+      this.logger.error(error);
+      return {
+        data: undefined,
+        error: {
+          code: 500,
+          message: error.message,
+        },
+      };
+    }
+    if (data.rows.length === 0)
+      return {
+        data: undefined,
+        error: {
+          code: 404,
+          message: `User: ${userId} is not registered to property: ${propertyId}!`,
+        },
+      };
+    return { data: data.rows[0], error: undefined };
   }
 }

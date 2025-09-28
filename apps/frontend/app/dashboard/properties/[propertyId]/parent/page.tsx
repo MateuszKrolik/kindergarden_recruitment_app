@@ -8,15 +8,15 @@ import {
 import {
   getDocumentRequirementsForGivenPropertyChild,
   getPropertyParentDocumentRequirements,
-  getPropertyUser,
 } from "@/app/actions/property-management";
+import { getPropertyUser } from "@/app/actions/identity";
 import {
   getDocumentURLByFilePath,
   getParentDocumentByType,
   saveParentDocument,
 } from "@/app/actions/reporting";
 import { PropertyParentPageTabs } from "@/components/client/PropertyParentPageTabs";
-import { PROPERTY_USER_ROLE } from "shared/types/modules/property-management";
+import { PROPERTY_USER_ROLE } from "shared/types/modules/identity";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";

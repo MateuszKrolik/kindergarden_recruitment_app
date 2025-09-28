@@ -1,9 +1,7 @@
 "use server";
 
-import {
-  getAllProperties,
-  getPropertyUser,
-} from "@/app/actions/property-management";
+import { getAllProperties } from "@/app/actions/property-management";
+import { getPropertyUser } from "@/app/actions/identity";
 import PropertyTable from "@/components/client/PropertiesTable";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";

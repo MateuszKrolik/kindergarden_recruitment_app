@@ -17,6 +17,7 @@ import { ComplianceRepo } from "./modules/compliance/repo.ts";
 import { ComplianceSvc } from "./modules/compliance/svc.ts";
 import { ComplianceHandler } from "./modules/compliance/handler.ts";
 import { ReportingHandler } from "./modules/reporting/handler.ts";
+import { IdentityHandler } from "./modules/identity/handler.ts";
 import { genericLogger } from "./shared/logger.ts";
 import { morganMiddleware } from "./middleware/log.ts";
 import multer from "multer";
@@ -40,6 +41,8 @@ const { redisClient, redisSubscriber } = await createRedisClients();
 // IDENTITY
 const identityRepo = new IdentityRepo(pool, redisClient, genericLogger);
 const identitySvc = new IdentitySvc(identityRepo);
+const identityHandler = new IdentityHandler(identitySvc, authN, genericLogger);
+app.use(identityHandler.router);
 // REPORTING
 const s3Repo = new S3Repository(genericLogger);
 const reportingRepo = new ReportingRepo(pool, redisClient, genericLogger);

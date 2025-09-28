@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { PropertyUser } from "shared/types/modules/property-management";
+import { PropertyUser } from "shared/types/modules/identity";
 import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";

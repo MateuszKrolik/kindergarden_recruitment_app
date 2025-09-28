@@ -6,7 +6,6 @@ import {
   PropertyChild,
   PropertyParentDocumentRequirement,
   PropertyChildDocumentRequirement,
-  PropertyUser,
 } from "shared/types/modules/property-management";
 import type { ApiResponse } from "shared/types/response";
 
@@ -19,23 +18,6 @@ export async function getAllProperties(
 ): ApiResponse<PagedResponse<Property>> {
   const response = await fetch(
     `${BACKEND_URL}/properties?pageSize=${pageSize}&pageNumber=${pageNumber}`,
-    {
-      headers: {
-        Authorization: jwt,
-      },
-      method: "GET",
-    },
-  );
-  return await response.json();
-}
-
-export async function getPropertyUser(
-  jwt: string,
-  propertyId: string,
-  userId: string,
-): ApiResponse<PropertyUser> {
-  const response = await fetch(
-    `${BACKEND_URL}/properties/${propertyId}/users/${userId}`,
     {
       headers: {
         Authorization: jwt,

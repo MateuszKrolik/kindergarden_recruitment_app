@@ -1,8 +1,6 @@
 "use client";
-import {
-  Property,
-  PropertyUser,
-} from "shared/types/modules/property-management";
+import { Property } from "shared/types/modules/property-management";
+import { PropertyUser } from "shared/types/modules/identity";
 import {
   ColumnDef,
   ColumnFiltersState,

@@ -20,16 +20,6 @@ INSERT INTO property_management.properties(
   'property2'
 );
 
-INSERT INTO property_management.property_users(
-  property_id,
-  user_id,
-  role
-) VALUES (
-  'b2979118-9963-4b97-aa56-c9d25a8b4acf',
-  '6ceaa734-b828-41ba-8351-a0198f64c089',
-  'parent'
-);
-
 INSERT INTO property_management.property_parent_document_requirements(
   property_id,
   document_type,
@@ -100,18 +90,6 @@ INSERT INTO property_management.property_parent_document_requirements(
   'resides_in_desired_location',
   5
 );
-
-
-INSERT INTO property_management.property_users(
-  property_id,
-  user_id,
-  role
-) VALUES (
-  'b2979118-9963-4b97-aa56-c9d25a8b4acf',
-  '9a51a7b5-be68-4df2-aa1f-695ea1ce6aeb',
-  'admin'
-);
-
 
 INSERT INTO property_management.property_children(
   property_id,

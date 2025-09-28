@@ -5,7 +5,6 @@ import type {
   PropertyChild,
   PropertyParentDocumentRequirement,
   PropertyChildDocumentRequirement,
-  PropertyUser,
 } from "shared/types/modules/property-management.ts";
 import { Pool } from "pg";
 import {
@@ -26,10 +25,6 @@ export interface IPropertyManagementRepo {
     pageSize: number,
     pageNumber: number,
   ): ApiResponse<PagedResponse<Property>>;
-  getPropertyUser(
-    propertyId: string,
-    userId: string,
-  ): ApiResponse<PropertyUser>;
   getAllPropertyParentDocumentRequirements(
     propertyId: string,
   ): ApiResponse<PropertyParentDocumentRequirement[]>;
@@ -101,40 +96,6 @@ export class PropertyManagementRepo implements IPropertyManagementRepo {
       data: newPagedResponse(data.rows, total_count, pageNumber, pageSize),
       error: undefined,
     };
-  }
-
-  async getPropertyUser(
-    propertyId: string,
-    userId: string,
-  ): ApiResponse<PropertyUser> {
-    const sql = `
-    SELECT *
-    FROM property_management.property_users
-    WHERE property_id = $1 AND user_id = $2;
-    `;
-    const { data, error } = await executeQuery<PropertyUser>(this.pool, sql, [
-      propertyId,
-      userId,
-    ]);
-    if (error) {
-      this.logger.error(error);
-      return {
-        data: undefined,
-        error: {
-          code: 500,
-          message: error.message,
-        },
-      };
-    }
-    if (data.rows.length === 0)
-      return {
-        data: undefined,
-        error: {
-          code: 404,
-          message: `User: ${userId} is not registered to property: ${propertyId}!`,
-        },
-      };
-    return { data: data.rows[0], error: undefined };
   }
 
   async getAllPropertyParentDocumentRequirements(

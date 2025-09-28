@@ -4,10 +4,10 @@ import {
   getAllDocumentApprovalRequestsForGivenProperty,
   setPropertyParentDocumentApprovalRequestStatus,
 } from "@/app/actions/compliance";
-import { getPropertyUser } from "@/app/actions/property-management";
+import { getPropertyUser } from "@/app/actions/identity";
 import { getParentDocumentURLByDocumentID } from "@/app/actions/reporting";
 import AdminPropertyParentDocumentTable from "@/components/client/AdminPropertyParentDocumentTable";
-import { PROPERTY_USER_ROLE } from "shared/types/modules/property-management";
+import { PROPERTY_USER_ROLE } from "shared/types/modules/identity";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";

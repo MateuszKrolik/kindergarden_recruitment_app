@@ -1,14 +1,12 @@
 "use server";
 
-import {
-  getAllPropertyChildrenPaged,
-  getPropertyUser,
-} from "@/app/actions/property-management";
+import { getAllPropertyChildrenPaged } from "@/app/actions/property-management";
 import { AdminPropertyChildrenTable } from "@/components/client/AdminPropertyChildrenTable";
-import { PROPERTY_USER_ROLE } from "shared/types/modules/property-management";
+import { PROPERTY_USER_ROLE } from "shared/types/modules/identity";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getPropertyUser } from "@/app/actions/identity";
 
 type PropertyAdminPageProps = {
   params: Promise<{ propertyId: string }>;
