@@ -1,6 +1,7 @@
 import type {
   PropertyParentDocument,
   RequestStatus,
+  PropertyChildDocument,
 } from "shared/types/modules/compliance.ts";
 import { Pool } from "pg";
 import {
@@ -49,6 +50,10 @@ export interface IComplianceRepo {
     userId: string,
     parentDocumentId: string,
   ): ApiResponse<boolean>;
+  getAllDocumentApprovalRequestsForGivenPropertyChild(
+    propertyId: string,
+    childId: string,
+  ): ApiResponse<PropertyChildDocument[]>;
 }
 
 export class ComplianceRepo implements IComplianceRepo {
@@ -402,6 +407,40 @@ export class ComplianceRepo implements IComplianceRepo {
     return result;
   }
 
+  async getAllDocumentApprovalRequestsForGivenPropertyChild(
+    propertyId: string,
+    userId: string,
+  ): ApiResponse<PropertyChildDocument[]> {
+    const cacheKey =
+      this.getAllDocumentApprovalRequestsForGivenPropertyChildCacheKey(
+        propertyId,
+        userId,
+      );
+    return await withCacheAsideRedis(this.redisClient, cacheKey, async () => {
+      const sql = `
+      SELECT *
+      FROM compliance.property_children_documents
+      WHERE property_id = $1 AND child_id = $2;
+      `;
+      const { data, error } = await executeQuery<PropertyChildDocument>(
+        this.pool,
+        sql,
+        [propertyId, userId],
+      );
+      if (error) {
+        this.logger.error(error);
+        return {
+          data: undefined,
+          error: {
+            code: 500,
+            message: error.message,
+          },
+        };
+      }
+      return { data: data.rows, error: undefined };
+    });
+  }
+
   private async invalidatePagedPropertyParentDocRequestsForGivenPropertyCache(
     propertyId: string,
   ) {
@@ -470,5 +509,12 @@ export class ComplianceRepo implements IComplianceRepo {
     parentDocumentId: string,
   ): string {
     return `properties:${propertyId}:parents:${userId}:reqeusts${parentDocumentId}:approved`;
+  }
+
+  private getAllDocumentApprovalRequestsForGivenPropertyChildCacheKey(
+    propertyId: string,
+    childId: string,
+  ): string {
+    return `properties:${propertyId}:children:${childId}:requests`;
   }
 }

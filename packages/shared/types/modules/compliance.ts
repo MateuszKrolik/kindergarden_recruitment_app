@@ -13,3 +13,11 @@ export type PropertyParentDocument = {
   request_status: RequestStatus;
   approved_by?: string;
 };
+
+export type PropertyChildDocument = {
+  property_id: string;
+  child_id: string;
+  child_document_id: string;
+  request_status: RequestStatus;
+  approved_by?: string;
+};

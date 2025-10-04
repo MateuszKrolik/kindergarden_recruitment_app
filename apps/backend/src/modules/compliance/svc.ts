@@ -1,6 +1,7 @@
 import { type RedisClientType } from "../../db/redis-client.ts";
 import {
   type PropertyParentDocument,
+  type PropertyChildDocument,
   REQUEST_STATUS,
   type RequestStatus,
 } from "shared/types/modules/compliance.ts";
@@ -45,6 +46,10 @@ export interface IComplianceSvc {
     userId: string,
     parentDocumentId: string,
   ): ApiResponse<boolean>;
+  getAllDocumentApprovalRequestsForGivenPropertyChild(
+    propertyId: string,
+    childId: string,
+  ): ApiResponse<PropertyChildDocument[]>;
 }
 
 export class ComplianceSvc implements IComplianceSvc {
@@ -188,6 +193,16 @@ export class ComplianceSvc implements IComplianceSvc {
       propertyId,
       userId,
       parentDocumentId,
+    );
+  }
+
+  async getAllDocumentApprovalRequestsForGivenPropertyChild(
+    propertyId: string,
+    childId: string,
+  ): ApiResponse<PropertyChildDocument[]> {
+    return await this.repo.getAllDocumentApprovalRequestsForGivenPropertyChild(
+      propertyId,
+      childId,
     );
   }
 }

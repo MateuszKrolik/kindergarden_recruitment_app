@@ -5,12 +5,15 @@ import {
   PropertyParentDocumentRequirement,
 } from "shared/types/modules/property-management";
 import { ParentDocument, DocumentType } from "shared/types/modules/reporting";
-import { PropertyParentDocument } from "shared/types/modules/compliance";
+import {
+  PropertyChildDocument,
+  PropertyParentDocument,
+} from "shared/types/modules/compliance";
 import { PropertyParentDocumentTabs } from "./PropertyParentDocumentTabs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { PropertyParentChildrenTable } from "./PropertyParentChildrenTable";
 import { getAllPropertyChildrenForGivenParent } from "@/app/actions/property-management";
 import { ApiResponse } from "shared/types/response";
+import { PropertyParentChildrenDocumentTabs } from "./PropertyParentChildrenDocumentTabs";
 
 type PropertyParentPageTabsProps = {
   jwt: string;
@@ -55,6 +58,11 @@ type PropertyParentPageTabsProps = {
     propertyId: string,
     childId: string,
   ): ApiResponse<PropertyChildDocumentRequirement[]>;
+  getAllDocumentApprovalRequestsForGivenPropertyChild(
+    jwt: string,
+    propertyId: string,
+    childId: string,
+  ): ApiResponse<PropertyChildDocument[]>;
 };
 
 export const PropertyParentPageTabs = ({
@@ -69,6 +77,7 @@ export const PropertyParentPageTabs = ({
   saveParentDocument,
   getDocumentURLByFilePath,
   getPropertyChildDocumentRequirements,
+  getAllDocumentApprovalRequestsForGivenPropertyChild,
 }: PropertyParentPageTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
@@ -102,7 +111,7 @@ export const PropertyParentPageTabs = ({
           />
         </TabsContent>
         <TabsContent value="children-documents">
-          <PropertyParentChildrenTable
+          <PropertyParentChildrenDocumentTabs
             jwt={jwt}
             propertyId={propertyId}
             userId={userId}
@@ -111,6 +120,9 @@ export const PropertyParentPageTabs = ({
             }
             getPropertyChildDocumentRequirements={
               getPropertyChildDocumentRequirements
+            }
+            getAllDocumentApprovalRequestsForGivenPropertyChild={
+              getAllDocumentApprovalRequestsForGivenPropertyChild
             }
           />
         </TabsContent>

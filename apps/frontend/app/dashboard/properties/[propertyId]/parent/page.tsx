@@ -4,6 +4,7 @@ import {
   getPropertyParentDocumentApprovalRequestByDocumentId,
   getAllDocumentApprovalRequestsForGivenPropertyParent,
   sendPropertyParentDocumentApprovalRequest,
+  getAllDocumentApprovalRequestsForGivenPropertyChild,
 } from "@/app/actions/compliance";
 import {
   getDocumentRequirementsForGivenPropertyChild,
@@ -67,6 +68,9 @@ export default async function PropertyParentPage({
       getDocumentURLByFilePath={getDocumentURLByFilePath}
       getPropertyChildDocumentRequirements={
         getDocumentRequirementsForGivenPropertyChild
+      }
+      getAllDocumentApprovalRequestsForGivenPropertyChild={
+        getAllDocumentApprovalRequestsForGivenPropertyChild
       }
     />
   );

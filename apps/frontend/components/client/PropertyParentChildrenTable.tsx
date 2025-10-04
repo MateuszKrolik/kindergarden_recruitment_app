@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  PropertyChild,
-  PropertyChildDocumentRequirement,
-} from "shared/types/modules/property-management";
+import { PropertyChild } from "shared/types/modules/property-management";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import {
@@ -32,7 +29,6 @@ import { Tooltip, TooltipContent, TooltipProvider } from "../ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import socket from "@/app/socket";
 import { PROPERTY_MANAGEMENT_EVENTS } from "shared/events/modules/property-management";
-import { ChildrenDocumentRequirementsTable } from "./ChildrenDocumentRequirementsTable";
 import { ApiResponse } from "shared/types/response";
 
 const EMPTY_CHILDREN: PropertyChild[] = [];
@@ -46,11 +42,7 @@ export type PropertyParentChildrenTableProps = {
     propertyId: string,
     parentId: string,
   ): ApiResponse<PropertyChild[]>;
-  getPropertyChildDocumentRequirements(
-    jwt: string,
-    propertyId: string,
-    childId: string,
-  ): ApiResponse<PropertyChildDocumentRequirement[]>;
+  renderCollapsibleContentAction?: (row: PropertyChild) => React.ReactNode;
 };
 
 export const PropertyParentChildrenTable = ({
@@ -58,7 +50,7 @@ export const PropertyParentChildrenTable = ({
   propertyId,
   userId,
   getAllPropertyChildrenForGivenParent,
-  getPropertyChildDocumentRequirements,
+  renderCollapsibleContentAction,
 }: PropertyParentChildrenTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -225,73 +217,66 @@ export const PropertyParentChildrenTable = ({
                         </TableCell>
                       ))}
 
-                      {/* Expand/collapse trigger */}
-                      <TableCell>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-8"
-                                onClick={() =>
-                                  setExpandedRow(isOpen ? null : row.id)
-                                }
-                              >
-                                {isOpen ? (
-                                  <ChevronUp className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDown className="h-4 w-4" />
-                                )}
-                                <span className="sr-only">
-                                  {isOpen
-                                    ? "Close Document Requirements"
-                                    : "Open Document Requirements"}
-                                </span>
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {isOpen
-                                ? "Hide document requirements"
-                                : "Show document requirements"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableCell>
+                      {/* Expand/collapse trigger - only show if renderCollapsibleContent is provided */}
+                      {renderCollapsibleContentAction && (
+                        <TableCell>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-8"
+                                  onClick={() =>
+                                    setExpandedRow(isOpen ? null : row.id)
+                                  }
+                                >
+                                  {isOpen ? (
+                                    <ChevronUp className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronDown className="h-4 w-4" />
+                                  )}
+                                  <span className="sr-only">
+                                    {isOpen ? "Close" : "Open"}
+                                  </span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {isOpen ? "Collapse" : "Expand"}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </TableCell>
+                      )}
                     </TableRow>
 
-                    {/* Collapsible row content */}
-                    <TableRow>
-                      <TableCell colSpan={columns.length + 1} className="p-0">
-                        <Collapsible
-                          open={isOpen}
-                          onOpenChange={(open) =>
-                            setExpandedRow(open ? row.id : null)
-                          }
-                        >
-                          <CollapsibleContent className="p-4 bg-gray-100">
-                            {isOpen && (
-                              <ChildrenDocumentRequirementsTable
-                                jwt={jwt}
-                                propertyId={propertyId}
-                                childId={row.original.child_id}
-                                getPropertyChildDocumentRequirements={
-                                  getPropertyChildDocumentRequirements
-                                }
-                                key={row.original.child_id}
-                              />
-                            )}
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </TableCell>
-                    </TableRow>
+                    {/* Collapsible row content - only render if renderCollapsibleContent is provided */}
+                    {renderCollapsibleContentAction && (
+                      <TableRow>
+                        <TableCell colSpan={columns.length + 1} className="p-0">
+                          <Collapsible
+                            open={isOpen}
+                            onOpenChange={(open) =>
+                              setExpandedRow(open ? row.id : null)
+                            }
+                          >
+                            <CollapsibleContent className="p-4 bg-gray-100">
+                              {isOpen &&
+                                renderCollapsibleContentAction(row.original)}
+                            </CollapsibleContent>
+                          </Collapsible>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </Fragment>
                 );
               })
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={
+                    columns.length + (renderCollapsibleContentAction ? 1 : 0)
+                  }
                   className="h-24 text-center"
                 >
                   No results.

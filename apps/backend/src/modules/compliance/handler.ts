@@ -168,5 +168,28 @@ export class ComplianceHandler {
         res.status(200).json({ data: data });
       },
     );
+
+    this.router.get(
+      "/properties/:propertyId/children/:childId/child-document-requests",
+      this.authenticationMiddleware,
+      async (req: Request, res: Response) => {
+        const { propertyId, childId } = req.params;
+        const { data, error } =
+          await this.svc.getAllDocumentApprovalRequestsForGivenPropertyChild(
+            propertyId,
+            childId,
+          );
+        if (error) {
+          this.logger.error(error.message, {
+            route: req.route?.path,
+            method: req.method,
+            statusCode: error.code,
+          });
+          res.status(error.code).json({ error: error });
+          return;
+        }
+        res.status(200).json({ data: data });
+      },
+    );
   };
 }

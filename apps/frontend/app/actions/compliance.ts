@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  PropertyChildDocument,
   PropertyParentDocument,
   RequestStatus,
 } from "shared/types/modules/compliance";
@@ -16,6 +17,23 @@ export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
 ): ApiResponse<PropertyParentDocument[]> {
   const response = await fetch(
     `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/parent-document-requests`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: jwt,
+      },
+    },
+  );
+  return await response.json();
+}
+
+export async function getAllDocumentApprovalRequestsForGivenPropertyChild(
+  jwt: string,
+  propertyId: string,
+  childId: string,
+): ApiResponse<PropertyChildDocument[]> {
+  const response = await fetch(
+    `${BACKEND_URL}/properties/${propertyId}/children/${childId}/child-document-requests`,
     {
       method: "GET",
       headers: {
