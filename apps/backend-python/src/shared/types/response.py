@@ -1,4 +1,4 @@
-from typing import Generic, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, Optional, TypeVar, Union
 from dataclasses import dataclass
 
 from pydantic import BaseModel
@@ -20,3 +20,5 @@ class ApiResponse(BaseModel, Generic[T]):
 HTTPErrorResponse = Union[tuple[T, None], tuple[None, HTTPError]]
 
 ErrorResponse = Union[tuple[T, None], tuple[None, Exception]]
+
+AuthMiddlewareResponse = HTTPErrorResponse[Dict[str, Any]]

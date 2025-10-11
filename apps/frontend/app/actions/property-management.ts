@@ -17,10 +17,10 @@ export async function getAllProperties(
   pageNumber: number,
 ): ApiResponse<PagedResponse<Property>> {
   const response = await fetch(
-    `${BACKEND_URL}/properties?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+    `${BACKEND_URL}/properties?page_size=${pageSize}&page_number=${pageNumber}`,
     {
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
       method: "GET",
     },
