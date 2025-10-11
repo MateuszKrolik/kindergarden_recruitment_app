@@ -8,7 +8,6 @@ import type { ParentChild } from "shared/types/modules/identity.ts";
 import type { ApiResponse } from "shared/types/response.ts";
 
 export interface IIdentitySvc {
-  doesAccountExist(accountId: string): ApiResponse<boolean>;
   getParentConditionKeys(userId: string): ApiResponse<ParentConditionKeys>;
   getChildConditionKeys(childId: string): ApiResponse<ChildConditionKeys>;
   getAllParentChildren(parentId: string): ApiResponse<ParentChild[]>;
@@ -23,10 +22,6 @@ export class IdentitySvc implements IIdentitySvc {
   private repo: IIdentityRepo;
   constructor(repo: IIdentityRepo) {
     this.repo = repo;
-  }
-
-  async doesAccountExist(accountId: string): ApiResponse<boolean> {
-    return await this.repo.doesAccountExist(accountId);
   }
 
   async getParentConditionKeys(

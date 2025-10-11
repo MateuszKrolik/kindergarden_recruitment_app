@@ -12,7 +12,6 @@ import type { ApiResponse } from "shared/types/response.ts";
 import type { Logger } from "winston";
 
 export interface IIdentityRepo {
-  doesAccountExist(accountId: string): ApiResponse<boolean>;
   getParentConditionKeys(userId: string): ApiResponse<ParentConditionKeys>;
   getChildConditionKeys(childId: string): ApiResponse<ChildConditionKeys>;
   getAllParentChildren(parentId: string): ApiResponse<ParentChild[]>;
@@ -33,36 +32,6 @@ export class IdentityRepo implements IIdentityRepo {
     this.logger = logger.child({
       service: "indentity-repo",
     });
-  }
-
-  async doesAccountExist(accountId: string): ApiResponse<boolean> {
-    const sql = `
-    SELECT EXISTS(SELECT 1 FROM account WHERE id = $1) AS exists;
-    `;
-    const { data, error } = await executeQuery<{ exists: boolean }>(
-      this.pool,
-      sql,
-      [accountId],
-    );
-    if (error) {
-      this.logger.error(error);
-      return {
-        data: undefined,
-        error: {
-          code: 500,
-          message: error.message,
-        },
-      };
-    }
-    if (data.rows.length === 0)
-      return {
-        data: undefined,
-        error: {
-          code: 404,
-          message: `Account with id: ${accountId} does not exist!`,
-        },
-      };
-    return { data: data.rows[0].exists, error: undefined };
   }
 
   async getParentConditionKeys(

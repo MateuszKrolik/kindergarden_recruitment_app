@@ -37,7 +37,7 @@ export async function getPropertyParentDocumentRequirements(
     `${BACKEND_URL}/properties/${propertyId}/users/${userId}/parent-document-requirements`,
     {
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
       method: "GET",
     },

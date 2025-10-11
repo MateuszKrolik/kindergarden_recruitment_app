@@ -2,6 +2,8 @@ import asyncio
 import os
 from asyncpg import create_pool
 from fastapi import FastAPI
+from src.modules.identity.repo import IdentityRepo
+from src.modules.identity.svc import IdentitySvc
 from src.modules.property_management.handler import PropertyManagementHandler
 from src.modules.property_management.repo import PropertyManagementRepo
 from src.modules.property_management.svc import PropertyManagementSvc
@@ -16,9 +18,15 @@ async def main():
         os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost/auth")
     )
 
+    # IDENTITY
+    identity_repo = IdentityRepo(pool=pool)
+    identity_svc = IdentitySvc(repo=identity_repo)
+
     # PROPERTY MANAGEMENT
     property_repo = PropertyManagementRepo(pool=pool)
-    property_svc = PropertyManagementSvc(repo=property_repo)
+    property_svc = PropertyManagementSvc(
+        repo=property_repo, identity_client=identity_svc
+    )
     property_handler = PropertyManagementHandler(
         svc=property_svc, auth_middleware=auth_middleware
     )
