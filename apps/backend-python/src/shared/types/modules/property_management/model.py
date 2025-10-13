@@ -1,8 +1,11 @@
 from pydantic import BaseModel
 from uuid import UUID
 
-from src.modules.property_management.enum import CONDITION_KEY, REQUIREMENT_TYPE
-from src.shared.types.modules.reporting import DOCUMENT_TYPE
+from src.shared.types.modules.property_management.enum import (
+    CONDITION_KEY,
+    REQUIREMENT_TYPE,
+)
+from src.shared.types.modules.reporting.enum import DOCUMENT_TYPE
 
 
 class Property(BaseModel):

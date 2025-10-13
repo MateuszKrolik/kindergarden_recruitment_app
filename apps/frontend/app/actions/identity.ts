@@ -14,7 +14,7 @@ export async function getPropertyUser(
     `${BACKEND_URL}/properties/${propertyId}/users/${userId}`,
     {
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
       method: "GET",
     },

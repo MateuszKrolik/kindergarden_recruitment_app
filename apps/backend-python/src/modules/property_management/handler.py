@@ -1,7 +1,7 @@
 from typing import Callable, List
 from fastapi import APIRouter, Query, Response, Depends
 
-from src.modules.property_management.model import (
+from src.shared.types.modules.property_management.model import (
     Property,
     PropertyParentDocumentRequirement,
 )

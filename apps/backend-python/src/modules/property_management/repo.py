@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 import asyncpg
-from src.modules.property_management.model import (
+from src.shared.types.modules.property_management.model import (
     Property,
     PropertyParentDocumentRequirement,
 )

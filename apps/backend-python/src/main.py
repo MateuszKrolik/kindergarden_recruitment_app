@@ -2,6 +2,7 @@ import asyncio
 import os
 from asyncpg import create_pool
 from fastapi import FastAPI
+from src.modules.identity.handler import IdentityHandler
 from src.modules.identity.repo import IdentityRepo
 from src.modules.identity.svc import IdentitySvc
 from src.modules.property_management.handler import PropertyManagementHandler
@@ -21,6 +22,10 @@ async def main():
     # IDENTITY
     identity_repo = IdentityRepo(pool=pool)
     identity_svc = IdentitySvc(repo=identity_repo)
+    identity_handler = IdentityHandler(
+        svc=identity_svc, auth_middleware=auth_middleware
+    )
+    app.include_router(identity_handler.router)
 
     # PROPERTY MANAGEMENT
     property_repo = PropertyManagementRepo(pool=pool)
@@ -31,7 +36,6 @@ async def main():
         svc=property_svc, auth_middleware=auth_middleware
     )
     app.include_router(property_handler.router)
-    # TODO: rest of modules
 
     config = uvicorn.Config(app, host="0.0.0.0", port=3001)
     server = uvicorn.Server(config)

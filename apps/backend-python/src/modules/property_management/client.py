@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.shared.types.modules.identity import ParentConditionKeys
+from src.shared.types.modules.identity.model import ParentConditionKeys
 from src.shared.types.response import HTTPErrorResponse
 
 

@@ -2,13 +2,16 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import List
 from src.modules.property_management.client import IIdentityClient
-from src.modules.property_management.enum import CONDITION_KEY, REQUIREMENT_TYPE
-from src.modules.property_management.model import (
+from src.shared.types.modules.property_management.enum import (
+    CONDITION_KEY,
+    REQUIREMENT_TYPE,
+)
+from src.shared.types.modules.property_management.model import (
     Property,
     PropertyParentDocumentRequirement,
 )
 from src.modules.property_management.repo import IPropertyManagementRepo
-from src.shared.types.modules.identity import ParentConditionKeys
+from src.shared.types.modules.identity.model import ParentConditionKeys
 from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import HTTPErrorResponse
 
@@ -22,6 +25,7 @@ class IPropertyManagementSvc(ABC):
     ) -> HTTPErrorResponse[PagedResponse[Property]]:
         pass
 
+    @abstractmethod
     async def get_document_requirements_for_given_property_parent(
         self, propertyId: str, userId: str
     ) -> HTTPErrorResponse[List[PropertyParentDocumentRequirement]]:
@@ -52,7 +56,6 @@ class PropertyManagementSvc(IPropertyManagementSvc):
                 property_id=property_id
             ),
             self.identity_client.get_parent_condition_keys(user_id=user_id),
-            return_exceptions=True,
         )
         all_req_task: HTTPErrorResponse[List[PropertyParentDocumentRequirement]] = (
             tasks[0]
@@ -60,10 +63,16 @@ class PropertyManagementSvc(IPropertyManagementSvc):
         all_req_task_result, error = all_req_task
         if error:
             return None, error
+        assert (
+            all_req_task_result is not None
+        )  # since its a union type, the data is guaranteed to be there if there's no error
         condition_key_task: HTTPErrorResponse[ParentConditionKeys] = tasks[1]
         condition_key_task_result, error = condition_key_task
         if error:
             return None, error
+        assert (
+            condition_key_task_result is not None
+        )  # since its a union type, the data is guaranteed to be there if there's no error
         active_reqs: List[PropertyParentDocumentRequirement] = []
         for req in all_req_task_result:
             if self._is_parent_requirement_active(condition_key_task_result, req):
@@ -92,3 +101,4 @@ class PropertyManagementSvc(IPropertyManagementSvc):
                     return cK.resides_in_desired_location
                 case _:
                     return False
+        return False
