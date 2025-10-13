@@ -20,3 +20,10 @@ class PropertyParentDocumentRequirement(BaseModel):
     requirement_type: REQUIREMENT_TYPE
     condition_key: CONDITION_KEY
     point_value: int
+
+
+class PropertyChild(BaseModel):
+    property_id: UUID
+    child_id: UUID
+    points: int
+    approved: bool

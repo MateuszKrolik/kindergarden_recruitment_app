@@ -16,3 +16,8 @@ class PropertyUser(BaseModel):
     property_id: UUID
     user_id: UUID
     role: PROPERTY_USER_ROLE
+
+
+class ParentChild(BaseModel):
+    parent_id: UUID
+    child_id: UUID

@@ -3,11 +3,13 @@ from typing import List
 import asyncpg
 from src.shared.types.modules.property_management.model import (
     Property,
+    PropertyChild,
     PropertyParentDocumentRequirement,
 )
 from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import HTTPError, HTTPErrorResponse
 from src.shared.utils.pagination import calculate_offset, new_paged_response
+from src.shared.utils.query import try_except
 
 
 class IPropertyManagementRepo(ABC):
@@ -26,6 +28,13 @@ class IPropertyManagementRepo(ABC):
     ) -> HTTPErrorResponse[List[PropertyParentDocumentRequirement]]:
         pass
 
+    @abstractmethod
+    async def get_all_property_children(
+        self,
+        property_id: str,
+    ) -> HTTPErrorResponse[List[PropertyChild]]:
+        pass
+
 
 class PropertyManagementRepo(IPropertyManagementRepo):
     def __init__(self, pool: asyncpg.Pool) -> None:
@@ -36,26 +45,30 @@ class PropertyManagementRepo(IPropertyManagementRepo):
         page_size: int,
         page_number: int,
     ) -> HTTPErrorResponse[PagedResponse[Property]]:
+        sql = """
+        SELECT 
+          *,
+          COUNT(*) OVER() as total_count
+        FROM property_management.properties
+        LIMIT $1
+        OFFSET $2;
+        """
         async with self.pool.acquire() as connection:
-            sql = """
-            SELECT 
-              *,
-              COUNT(*) OVER() as total_count
-            FROM property_management.properties
-            LIMIT $1
-            OFFSET $2;
-            """
-            try:
-                rows = await connection.fetch(
-                    sql, page_size, calculate_offset(page_size, page_number)
-                )
-            except Exception as e:
-                return (None, HTTPError(code=500, message=str(e)))
-
+            rows, error = await try_except(
+                connection.fetch,
+                sql,
+                page_size,
+                calculate_offset(page_size, page_number),
+            )
+            if error:
+                return (None, HTTPError(code=500, message=str(error)))
             if not rows:
                 return (
                     new_paged_response(
-                        items=[], total=0, page_number=page_number, page_size=page_size
+                        items=[],
+                        total=0,
+                        page_number=page_number,
+                        page_size=page_size,
                     ),
                     None,
                 )
@@ -76,17 +89,34 @@ class PropertyManagementRepo(IPropertyManagementRepo):
         self,
         property_id: str,
     ) -> HTTPErrorResponse[List[PropertyParentDocumentRequirement]]:
+        sql = """
+          SELECT *
+          FROM property_management.property_parent_document_requirements
+          WHERE property_id = $1;
+          """
         async with self.pool.acquire() as connection:
-            sql = """
-              SELECT *
-              FROM property_management.property_parent_document_requirements
-              WHERE property_id = $1;
-              """
-            try:
-                rows = await connection.fetch(sql, property_id)
-            except Exception as e:
-                return (None, HTTPError(code=500, message=str(e)))
+            rows, error = await try_except(connection.fetch, sql, property_id)
+            if error:
+                return (None, HTTPError(code=500, message=str(error)))
+            assert rows is not None
             requirements = [
                 PropertyParentDocumentRequirement(**dict(row)) for row in rows
             ]
             return requirements, None
+
+    async def get_all_property_children(
+        self,
+        property_id: str,
+    ) -> HTTPErrorResponse[List[PropertyChild]]:
+        sql = """
+        SELECT *
+        FROM property_management.property_children
+        WHERE property_id = $1;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(connection.fetch, sql, property_id)
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            result = [PropertyChild(**row) for row in rows]
+            return result, None

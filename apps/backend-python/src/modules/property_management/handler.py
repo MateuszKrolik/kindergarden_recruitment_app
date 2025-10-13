@@ -3,6 +3,7 @@ from fastapi import APIRouter, Query, Response, Depends
 
 from src.shared.types.modules.property_management.model import (
     Property,
+    PropertyChild,
     PropertyParentDocumentRequirement,
 )
 from src.modules.property_management.svc import IPropertyManagementSvc
@@ -59,6 +60,32 @@ class PropertyManagementHandler:
             ) = await self.svc.get_document_requirements_for_given_property_parent(
                 property_id,
                 user_id,
+            )
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            response.status_code = 200
+            return ApiResponse(data=data)
+
+        @self.router.get(
+            "/properties/{property_id}/parents/{parent_id}/property-children"
+        )
+        async def get_all_property_children_for_given_parent(
+            property_id,
+            parent_id,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> ApiResponse[List[PropertyChild]]:
+            user, error = user_result
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            (
+                data,
+                error,
+            ) = await self.svc.get_all_property_children_for_given_parent(
+                property_id,
+                parent_id,
             )
             if error:
                 response.status_code = error.code

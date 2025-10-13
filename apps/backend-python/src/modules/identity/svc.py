@@ -1,7 +1,12 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 from src.modules.identity.repo import IIdentityRepo
-from src.shared.types.modules.identity.model import ParentConditionKeys, PropertyUser
+from src.shared.types.modules.identity.model import (
+    ParentChild,
+    ParentConditionKeys,
+    PropertyUser,
+)
 from src.shared.types.response import HTTPErrorResponse
 
 
@@ -19,6 +24,13 @@ class IIdentitySvc(ABC):
         property_id: str,
         user_id: str,
     ) -> HTTPErrorResponse[PropertyUser]:
+        pass
+
+    @abstractmethod
+    async def get_all_parent_children(
+        self,
+        parent_id: str,
+    ) -> HTTPErrorResponse[List[ParentChild]]:
         pass
 
 
@@ -40,3 +52,9 @@ class IdentitySvc(IIdentitySvc):
         return await self.repo.get_property_user(
             property_id=property_id, user_id=user_id
         )
+
+    async def get_all_parent_children(
+        self,
+        parent_id: str,
+    ) -> HTTPErrorResponse[List[ParentChild]]:
+        return await self.repo.get_all_parent_children(parent_id=parent_id)

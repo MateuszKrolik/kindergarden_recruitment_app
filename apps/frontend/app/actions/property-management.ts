@@ -54,7 +54,7 @@ export async function getAllPropertyChildrenForGivenParent(
     `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/property-children`,
     {
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
       method: "GET",
     },
