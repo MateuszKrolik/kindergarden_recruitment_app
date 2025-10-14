@@ -11,3 +11,11 @@ class PropertyParentDocument(BaseModel):
     parent_document_id: UUID
     request_status: REQUEST_STATUS
     approved_by: Optional[UUID]
+
+
+class PropertyChildDocument(BaseModel):
+    property_id: UUID
+    child_id: UUID
+    child_document_id: UUID
+    request_status: REQUEST_STATUS
+    approved_by: Optional[UUID]

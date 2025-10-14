@@ -37,7 +37,7 @@ export async function getAllDocumentApprovalRequestsForGivenPropertyChild(
     {
       method: "GET",
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
     },
   );
@@ -55,7 +55,7 @@ export async function getPropertyParentDocumentApprovalRequestByDocumentId(
     {
       method: "GET",
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
     },
   );
