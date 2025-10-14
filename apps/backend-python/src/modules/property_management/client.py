@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from src.shared.types.modules.identity.model import ParentChild, ParentConditionKeys
+from src.shared.types.modules.identity.model import (
+    ChildConditionKeys,
+    ParentChild,
+    ParentConditionKeys,
+)
 from src.shared.types.response import HTTPErrorResponse
 
 
@@ -18,4 +22,11 @@ class IIdentityClient(ABC):
         self,
         parent_id: str,
     ) -> HTTPErrorResponse[List[ParentChild]]:
+        pass
+
+    @abstractmethod
+    async def get_child_condition_keys(
+        self,
+        child_id: str,
+    ) -> HTTPErrorResponse[ChildConditionKeys]:
         pass

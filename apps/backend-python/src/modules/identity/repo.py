@@ -3,6 +3,7 @@ from asyncpg import Pool
 from abc import ABC, abstractmethod
 
 from src.shared.types.modules.identity.model import (
+    ChildConditionKeys,
     ParentChild,
     ParentConditionKeys,
     PropertyUser,
@@ -32,6 +33,13 @@ class IIdentityRepo(ABC):
         self,
         parent_id: str,
     ) -> HTTPErrorResponse[List[ParentChild]]:
+        pass
+
+    @abstractmethod
+    async def get_child_condition_keys(
+        self,
+        child_id: str,
+    ) -> HTTPErrorResponse[ChildConditionKeys]:
         pass
 
 
@@ -103,3 +111,25 @@ class IdentityRepo(IIdentityRepo):
                 return None, HTTPError(code=500, message=str(error))
             assert rows is not None
             return [ParentChild(**row) for row in rows], None
+
+    async def get_child_condition_keys(
+        self,
+        child_id: str,
+    ) -> HTTPErrorResponse[ChildConditionKeys]:
+        sql = """
+        SELECT
+          has_disability
+          -- TODO
+        FROM identity.children
+        WHERE id = $1;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(connection.fetch, sql, child_id)
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            if len(rows) == 0:
+                return None, HTTPError(
+                    code=404, message=f"Child with id: {child_id} does not exist!"
+                )
+            return ChildConditionKeys(**rows[0]), None

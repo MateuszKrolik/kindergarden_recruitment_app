@@ -4,6 +4,7 @@ import asyncpg
 from src.shared.types.modules.property_management.model import (
     Property,
     PropertyChild,
+    PropertyChildDocumentRequirement,
     PropertyParentDocumentRequirement,
 )
 from src.shared.types.pagination import PagedResponse
@@ -33,6 +34,13 @@ class IPropertyManagementRepo(ABC):
         self,
         property_id: str,
     ) -> HTTPErrorResponse[List[PropertyChild]]:
+        pass
+
+    @abstractmethod
+    async def get_all_property_children_document_requirements(
+        self,
+        property_id: str,
+    ) -> HTTPErrorResponse[List[PropertyChildDocumentRequirement]]:
         pass
 
 
@@ -120,3 +128,19 @@ class PropertyManagementRepo(IPropertyManagementRepo):
             assert rows is not None
             result = [PropertyChild(**row) for row in rows]
             return result, None
+
+    async def get_all_property_children_document_requirements(
+        self,
+        property_id: str,
+    ) -> HTTPErrorResponse[List[PropertyChildDocumentRequirement]]:
+        sql = """
+        SELECT *
+        FROM property_management.property_children_document_requirements
+        WHERE property_id = $1;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(connection.fetch, sql, property_id)
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            return [PropertyChildDocumentRequirement(**row) for row in rows], None

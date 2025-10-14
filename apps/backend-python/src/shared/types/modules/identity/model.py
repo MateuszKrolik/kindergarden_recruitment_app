@@ -21,3 +21,7 @@ class PropertyUser(BaseModel):
 class ParentChild(BaseModel):
     parent_id: UUID
     child_id: UUID
+
+
+class ChildConditionKeys(BaseModel):
+    has_disability: bool

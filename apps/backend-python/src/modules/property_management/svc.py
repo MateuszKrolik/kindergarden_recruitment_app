@@ -4,16 +4,22 @@ from typing import List, Set
 from uuid import UUID
 from src.modules.property_management.client import IIdentityClient
 from src.shared.types.modules.property_management.enum import (
+    CHILD_CONDITION_KEY,
     CONDITION_KEY,
     REQUIREMENT_TYPE,
 )
 from src.shared.types.modules.property_management.model import (
     Property,
     PropertyChild,
+    PropertyChildDocumentRequirement,
     PropertyParentDocumentRequirement,
 )
 from src.modules.property_management.repo import IPropertyManagementRepo
-from src.shared.types.modules.identity.model import ParentChild, ParentConditionKeys
+from src.shared.types.modules.identity.model import (
+    ChildConditionKeys,
+    ParentChild,
+    ParentConditionKeys,
+)
 from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import HTTPErrorResponse
 
@@ -44,6 +50,14 @@ class IPropertyManagementSvc(ABC):
         self,
         property_id: str,
     ) -> HTTPErrorResponse[List[PropertyChild]]:
+        pass
+
+    @abstractmethod
+    async def get_document_requirements_for_given_property_child(
+        self,
+        property_id: str,
+        child_id: str,
+    ) -> HTTPErrorResponse[List[PropertyChildDocumentRequirement]]:
         pass
 
 
@@ -118,6 +132,33 @@ class PropertyManagementSvc(IPropertyManagementSvc):
             pc for pc in prop_children_task_result if pc.child_id in parent_child_ids
         ], None
 
+    async def get_document_requirements_for_given_property_child(
+        self,
+        property_id: str,
+        child_id: str,
+    ) -> HTTPErrorResponse[List[PropertyChildDocumentRequirement]]:
+        tasks = await asyncio.gather(
+            self.repo.get_all_property_children_document_requirements(property_id),
+            self.identity_client.get_child_condition_keys(child_id),
+        )
+        all_req_task: HTTPErrorResponse[List[PropertyChildDocumentRequirement]] = tasks[
+            0
+        ]
+        all_req_task_result, error = all_req_task
+        if error:
+            return None, error
+        assert all_req_task_result is not None
+        condition_key_task: HTTPErrorResponse[ChildConditionKeys] = tasks[1]
+        condition_key_task_result, error = condition_key_task
+        if error:
+            return None, error
+        assert condition_key_task_result is not None
+        active_reqs: List[PropertyChildDocumentRequirement] = []
+        for req in all_req_task_result:
+            if self._is_child_requirement_active(condition_key_task_result, req):
+                active_reqs.append(req)
+        return active_reqs, None
+
     def _is_parent_requirement_active(
         self,
         cK: ParentConditionKeys,
@@ -138,6 +179,22 @@ class PropertyManagementSvc(IPropertyManagementSvc):
                     return cK.filed_tax_in_desired_location
                 case CONDITION_KEY.resides_in_desired_location:
                     return cK.resides_in_desired_location
+                case _:
+                    return False
+        return False
+
+    def _is_child_requirement_active(
+        self,
+        cK: ChildConditionKeys,
+        r: PropertyChildDocumentRequirement,
+    ) -> bool:
+        if r.requirement_type == REQUIREMENT_TYPE.always:
+            return True
+
+        if r.requirement_type == REQUIREMENT_TYPE.conditional:
+            match r.condition_key:
+                case CHILD_CONDITION_KEY.has_disability:
+                    return cK.has_disability
                 case _:
                     return False
         return False
