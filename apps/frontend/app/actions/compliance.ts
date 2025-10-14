@@ -20,7 +20,7 @@ export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
     {
       method: "GET",
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
     },
   );
