@@ -43,6 +43,15 @@ class IPropertyManagementRepo(ABC):
     ) -> HTTPErrorResponse[List[PropertyChildDocumentRequirement]]:
         pass
 
+    @abstractmethod
+    async def get_all_property_children_paged(
+        self,
+        property_id: str,
+        page_size: int,
+        page_number: int,
+    ) -> HTTPErrorResponse[PagedResponse[PropertyChild]]:
+        pass
+
 
 class PropertyManagementRepo(IPropertyManagementRepo):
     def __init__(self, pool: asyncpg.Pool) -> None:
@@ -144,3 +153,47 @@ class PropertyManagementRepo(IPropertyManagementRepo):
                 return None, HTTPError(code=500, message=str(error))
             assert rows is not None
             return [PropertyChildDocumentRequirement(**row) for row in rows], None
+
+    async def get_all_property_children_paged(
+        self,
+        property_id: str,
+        page_size: int,
+        page_number: int,
+    ) -> HTTPErrorResponse[PagedResponse[PropertyChild]]:
+        sql = """
+        SELECT 
+          *,
+          COUNT(*) OVER() as total_count
+        FROM property_management.property_children
+        WHERE property_id = $1
+        LIMIT $2
+        OFFSET $3;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(
+                connection.fetch,
+                sql,
+                property_id,
+                page_size,
+                calculate_offset(page_size=page_size, page_number=page_size),
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            if len(rows) == 0:
+                return (
+                    new_paged_response(
+                        [], 0, page_number=page_number, page_size=page_size
+                    ),
+                    None,
+                )
+            total_count = rows[0]["total_count"]
+            return (
+                new_paged_response(
+                    items=[PropertyChild(**row) for row in rows],
+                    total=total_count,
+                    page_size=page_size,
+                    page_number=page_number,
+                ),
+                None,
+            )

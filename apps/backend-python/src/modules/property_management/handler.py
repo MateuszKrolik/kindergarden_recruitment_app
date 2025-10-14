@@ -119,3 +119,24 @@ class PropertyManagementHandler:
                 return ApiResponse(error=error)
             response.status_code = 200
             return ApiResponse(data=data)
+
+        @self.router.get("/properties/{propertyId}/property-children")
+        async def get_all_property_children_paged(
+            response: Response,
+            property_id,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+            page_size: int = Query(1, ge=1),
+            page_number: int = Query(1, ge=1),
+        ) -> ApiResponse[PagedResponse[PropertyChild]]:
+            user, error = user_result
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            data, error = await self.svc.get_all_property_children_paged(
+                property_id=property_id, page_size=page_size, page_number=page_number
+            )
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            response.status_code = 200
+            return ApiResponse(data=data)

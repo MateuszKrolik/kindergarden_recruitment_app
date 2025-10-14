@@ -6,8 +6,8 @@ from src.shared.types.pagination import PagedResponse
 T = TypeVar("T")
 
 
-def calculate_offset(pageSize: int, pageNumber: int) -> int:
-    return (pageNumber - 1) * pageSize
+def calculate_offset(page_size: int, page_number: int) -> int:
+    return (page_number - 1) * page_size
 
 
 def new_paged_response(

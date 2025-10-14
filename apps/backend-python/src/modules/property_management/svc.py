@@ -60,6 +60,15 @@ class IPropertyManagementSvc(ABC):
     ) -> HTTPErrorResponse[List[PropertyChildDocumentRequirement]]:
         pass
 
+    @abstractmethod
+    async def get_all_property_children_paged(
+        self,
+        property_id: str,
+        page_size: int,
+        page_number: int,
+    ) -> HTTPErrorResponse[PagedResponse[PropertyChild]]:
+        pass
+
 
 class PropertyManagementSvc(IPropertyManagementSvc):
     def __init__(
@@ -158,6 +167,16 @@ class PropertyManagementSvc(IPropertyManagementSvc):
             if self._is_child_requirement_active(condition_key_task_result, req):
                 active_reqs.append(req)
         return active_reqs, None
+
+    async def get_all_property_children_paged(
+        self,
+        property_id: str,
+        page_size: int,
+        page_number: int,
+    ) -> HTTPErrorResponse[PagedResponse[PropertyChild]]:
+        return await self.repo.get_all_property_children_paged(
+            property_id=property_id, page_size=page_size, page_number=page_number
+        )
 
     def _is_parent_requirement_active(
         self,
