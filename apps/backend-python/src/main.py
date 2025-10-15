@@ -13,6 +13,7 @@ from src.modules.property_management.repo import PropertyManagementRepo
 from src.modules.property_management.svc import PropertyManagementSvc
 from src.modules.reporting.handler import ReportingHandler
 from src.modules.reporting.repo import ReportingRepo
+from src.modules.reporting.s3 import S3Repository
 from src.modules.reporting.svc import ReportingSvc
 from src.shared.middlewares.auth import auth_middleware
 import uvicorn
@@ -44,8 +45,9 @@ async def main():
     app.include_router(property_handler.router, tags=["property"])
 
     # REPORTING
+    s3_repo = S3Repository()
     reporting_repo = ReportingRepo(pool=pool)
-    reporting_svc = ReportingSvc(repo=reporting_repo)
+    reporting_svc = ReportingSvc(repo=reporting_repo, s3_repo=s3_repo)
     reporting_handler = ReportingHandler(
         svc=reporting_svc, auth_middleware=auth_middleware
     )

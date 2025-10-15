@@ -53,7 +53,7 @@ export async function getDocumentURLByFilePath(
   const response = await fetch(`${BACKEND_URL}/documents/${filePath}`, {
     method: "GET",
     headers: {
-      Authorization: jwt,
+      Authorization: `Bearer ${jwt}`,
     },
   });
   return await response.json();
@@ -68,7 +68,7 @@ export async function getParentDocumentURLByDocumentID(
     {
       method: "GET",
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
     },
   );

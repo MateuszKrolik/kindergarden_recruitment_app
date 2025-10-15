@@ -16,6 +16,13 @@ class IReportingRepo(ABC):
     ) -> HTTPErrorResponse[ParentDocument]:
         pass
 
+    @abstractmethod
+    async def get_parent_document_file_path_by_document_id(
+        self,
+        doc_id: UUID,
+    ) -> HTTPErrorResponse[str]:
+        pass
+
 
 class ReportingRepo(IReportingRepo):
     def __init__(self, pool: Pool) -> None:
@@ -44,3 +51,24 @@ class ReportingRepo(IReportingRepo):
                     message=f"Document with type: ${document_type} does not exist for parent: {user_id}!",
                 )
             return ParentDocument(**rows[0]), None
+
+    async def get_parent_document_file_path_by_document_id(
+        self,
+        doc_id: UUID,
+    ) -> HTTPErrorResponse[str]:
+        sql = """
+        SELECT file_path
+        FROM reporting.parent_documents
+        WHERE id = $1;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(connection.fetch, sql, doc_id)
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            if len(rows) == 0:
+                return None, HTTPError(
+                    code=404,
+                    message=f"Parent document with id: {doc_id} was not found!",
+                )
+            return rows[0]["file_path"], None
