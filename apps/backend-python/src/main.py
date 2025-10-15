@@ -11,6 +11,9 @@ from src.modules.identity.svc import IdentitySvc
 from src.modules.property_management.handler import PropertyManagementHandler
 from src.modules.property_management.repo import PropertyManagementRepo
 from src.modules.property_management.svc import PropertyManagementSvc
+from src.modules.reporting.handler import ReportingHandler
+from src.modules.reporting.repo import ReportingRepo
+from src.modules.reporting.svc import ReportingSvc
 from src.shared.middlewares.auth import auth_middleware
 import uvicorn
 
@@ -28,7 +31,7 @@ async def main():
     identity_handler = IdentityHandler(
         svc=identity_svc, auth_middleware=auth_middleware
     )
-    app.include_router(identity_handler.router)
+    app.include_router(identity_handler.router, tags=["identity"])
 
     # PROPERTY MANAGEMENT
     property_repo = PropertyManagementRepo(pool=pool)
@@ -38,7 +41,15 @@ async def main():
     property_handler = PropertyManagementHandler(
         svc=property_svc, auth_middleware=auth_middleware
     )
-    app.include_router(property_handler.router)
+    app.include_router(property_handler.router, tags=["property"])
+
+    # REPORTING
+    reporting_repo = ReportingRepo(pool=pool)
+    reporting_svc = ReportingSvc(repo=reporting_repo)
+    reporting_handler = ReportingHandler(
+        svc=reporting_svc, auth_middleware=auth_middleware
+    )
+    app.include_router(reporting_handler.router, tags=["reporting"])
 
     # COMPLIANCE
     compliance_repo = ComplianceRepo(pool=pool)
@@ -46,7 +57,7 @@ async def main():
     compliance_handler = ComplianceHandler(
         svc=compliance_svc, auth_middleware=auth_middleware
     )
-    app.include_router(compliance_handler.router)
+    app.include_router(compliance_handler.router, tags=["compliance"])
 
     config = uvicorn.Config(app, host="0.0.0.0", port=3001)
     server = uvicorn.Server(config)

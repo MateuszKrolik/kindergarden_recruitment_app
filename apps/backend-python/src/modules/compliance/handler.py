@@ -121,3 +121,31 @@ class ComplianceHandler:
                 return ApiResponse(error=error)
             response.status_code = 200
             return ApiResponse(data=data)
+
+        @self.router.post(
+            "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_doc_id}"
+        )
+        async def send_property_parent_document_approval_request(
+            property_id,
+            parent_id,
+            parent_doc_id,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> ApiResponse[PropertyParentDocument]:
+            user, error = user_result
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            (
+                data,
+                error,
+            ) = await self.svc.send_property_parent_document_approval_request(
+                property_id=property_id,
+                user_id=parent_id,
+                parent_document_id=parent_doc_id,
+            )
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            response.status_code = 200
+            return ApiResponse(data=data)

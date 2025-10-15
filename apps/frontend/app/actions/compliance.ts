@@ -73,7 +73,7 @@ export async function sendPropertyParentDocumentApprovalRequest(
     {
       method: "POST",
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
     },
   );

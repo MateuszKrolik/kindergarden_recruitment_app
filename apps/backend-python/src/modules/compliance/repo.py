@@ -47,6 +47,15 @@ class IComplianceRepo(ABC):
     ) -> HTTPErrorResponse[PagedResponse[PropertyParentDocument]]:
         pass
 
+    @abstractmethod
+    async def send_property_parent_document_approval_request(
+        self,
+        property_id: str,
+        user_id: str,
+        parent_document_id: str,
+    ) -> HTTPErrorResponse[PropertyParentDocument]:
+        pass
+
 
 class ComplianceRepo(IComplianceRepo):
     def __init__(self, pool: Pool):
@@ -152,3 +161,33 @@ class ComplianceRepo(IComplianceRepo):
                 ),
                 None,
             )
+
+    async def send_property_parent_document_approval_request(
+        self,
+        property_id: str,
+        user_id: str,
+        parent_document_id: str,
+    ) -> HTTPErrorResponse[PropertyParentDocument]:
+        sql = """
+        INSERT INTO compliance.property_parent_documents(
+            property_id,
+            user_id,
+            parent_document_id
+        ) VALUES (
+            $1,
+            $2,
+            $3
+        ) RETURNING *;
+        """
+        async with self.pool.acquire() as connection:
+            row, error = await try_except(
+                connection.fetchrow, sql, property_id, user_id, parent_document_id
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            if row is None:
+                return None, HTTPError(
+                    code=404,
+                    message=f"Approval request: {parent_document_id} was not saved successfully!",
+                )
+            return PropertyParentDocument(**row), None

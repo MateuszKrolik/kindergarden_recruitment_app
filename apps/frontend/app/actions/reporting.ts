@@ -18,7 +18,7 @@ export async function getParentDocumentByType(
     {
       method: "GET",
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
     },
   );

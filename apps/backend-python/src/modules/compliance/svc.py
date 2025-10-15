@@ -45,6 +45,15 @@ class IComplianceSvc(ABC):
     ) -> HTTPErrorResponse[PagedResponse[PropertyParentDocument]]:
         pass
 
+    @abstractmethod
+    async def send_property_parent_document_approval_request(
+        self,
+        property_id: str,
+        user_id: str,
+        parent_document_id: str,
+    ) -> HTTPErrorResponse[PropertyParentDocument]:
+        pass
+
 
 class ComplianceSvc(IComplianceSvc):
     def __init__(self, repo: IComplianceRepo) -> None:
@@ -88,4 +97,16 @@ class ComplianceSvc(IComplianceSvc):
             property_id=property_id,
             page_size=page_size,
             page_number=page_number,
+        )
+
+    async def send_property_parent_document_approval_request(
+        self,
+        property_id: str,
+        user_id: str,
+        parent_document_id: str,
+    ) -> HTTPErrorResponse[PropertyParentDocument]:
+        return await self.repo.send_property_parent_document_approval_request(
+            property_id=property_id,
+            user_id=user_id,
+            parent_document_id=parent_document_id,
         )
