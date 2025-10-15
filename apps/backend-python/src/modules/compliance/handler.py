@@ -1,11 +1,12 @@
 from typing import Callable, List
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Response, Depends, Query
 
 from src.modules.compliance.svc import IComplianceSvc
 from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
     PropertyParentDocument,
 )
+from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import ApiResponse, AuthMiddlewareResponse
 
 
@@ -90,6 +91,30 @@ class ComplianceHandler:
                 error,
             ) = await self.svc.get_property_parent_document_approval_request_by_document_id(
                 property_id=property_id, user_id=parent_id, parent_doc_id=parent_doc_id
+            )
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            response.status_code = 200
+            return ApiResponse(data=data)
+
+        @self.router.get("/properties/{property_id}/parent-document-requests")
+        async def get_all_document_approval_requests_for_given_property(
+            property_id,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+            page_size: int = Query(1, ge=1),
+            page_number: int = Query(1, ge=1),
+        ) -> ApiResponse[PagedResponse[PropertyParentDocument]]:
+            user, error = user_result
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            (
+                data,
+                error,
+            ) = await self.svc.get_all_document_approval_requests_for_given_property(
+                property_id=property_id, page_size=page_size, page_number=page_number
             )
             if error:
                 response.status_code = error.code

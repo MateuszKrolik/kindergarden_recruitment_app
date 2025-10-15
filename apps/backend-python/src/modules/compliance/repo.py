@@ -6,7 +6,9 @@ from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
     PropertyParentDocument,
 )
+from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import HTTPError, HTTPErrorResponse
+from src.shared.utils.pagination import calculate_offset, new_paged_response
 from src.shared.utils.query import try_except
 
 
@@ -34,6 +36,15 @@ class IComplianceRepo(ABC):
         user_id: str,
         parent_doc_id: str,
     ) -> HTTPErrorResponse[PropertyParentDocument]:
+        pass
+
+    @abstractmethod
+    async def get_all_document_approval_requests_for_given_property(
+        self,
+        property_id: str,
+        page_size: int,
+        page_number: int,
+    ) -> HTTPErrorResponse[PagedResponse[PropertyParentDocument]]:
         pass
 
 
@@ -99,3 +110,45 @@ class ComplianceRepo(IComplianceRepo):
                     message=f"Parent document request with id: {parent_doc_id} was not found!",
                 )
             return PropertyParentDocument(**rows[0]), None
+
+    async def get_all_document_approval_requests_for_given_property(
+        self,
+        property_id: str,
+        page_size: int,
+        page_number: int,
+    ) -> HTTPErrorResponse[PagedResponse[PropertyParentDocument]]:
+        sql = """
+        SELECT
+          *,
+          COUNT(*) OVER() AS total_count
+        FROM compliance.property_parent_documents
+        WHERE property_id = $1
+        LIMIT $2
+        OFFSET $3;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(
+                connection.fetch,
+                sql,
+                property_id,
+                page_size,
+                calculate_offset(page_size=page_size, page_number=page_number),
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            if len(rows) == 0:
+                return (
+                    new_paged_response(items=[], total=0, page_size=1, page_number=1),
+                    None,
+                )
+            total_count = rows[0]["total_count"]
+            return (
+                new_paged_response(
+                    items=[PropertyParentDocument(**row) for row in rows],
+                    total=total_count,
+                    page_size=page_size,
+                    page_number=page_size,
+                ),
+                None,
+            )
