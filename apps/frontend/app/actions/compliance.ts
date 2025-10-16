@@ -110,7 +110,7 @@ export async function setPropertyParentDocumentApprovalRequestStatus(
     {
       method: "PATCH",
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
     },
   );

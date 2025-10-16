@@ -1,11 +1,10 @@
-from dataclasses import dataclass
-from typing import List, TypeVar, Generic
+from pydantic import BaseModel
+from typing import List, Generic, TypeVar
 
 T = TypeVar("T")
 
 
-@dataclass
-class PagedResponse(Generic[T]):
+class PagedResponse(BaseModel, Generic[T]):
     items: List[T]
     total: int
     page_number: int

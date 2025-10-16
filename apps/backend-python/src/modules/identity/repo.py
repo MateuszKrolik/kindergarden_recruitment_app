@@ -1,7 +1,9 @@
 from typing import List
+from uuid import UUID
 from asyncpg import Pool
 from abc import ABC, abstractmethod
 
+from src.shared.types.modules.identity.enum import PROPERTY_USER_ROLE
 from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
     ParentChild,
@@ -23,8 +25,8 @@ class IIdentityRepo(ABC):
     @abstractmethod
     async def get_property_user(
         self,
-        property_id: str,
-        user_id: str,
+        property_id: UUID,
+        user_id: UUID,
     ) -> HTTPErrorResponse[PropertyUser]:
         pass
 
@@ -75,8 +77,8 @@ class IdentityRepo(IIdentityRepo):
 
     async def get_property_user(
         self,
-        property_id: str,
-        user_id: str,
+        property_id: UUID,
+        user_id: UUID,
     ) -> HTTPErrorResponse[PropertyUser]:
         sql = """
         SELECT *

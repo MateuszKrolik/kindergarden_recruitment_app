@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List
+from uuid import UUID
 
 from src.modules.identity.repo import IIdentityRepo
+from src.shared.types.modules.identity.enum import PROPERTY_USER_ROLE
 from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
     ParentChild,
@@ -22,8 +24,8 @@ class IIdentitySvc(ABC):
     @abstractmethod
     async def get_property_user(
         self,
-        property_id: str,
-        user_id: str,
+        property_id: UUID,
+        user_id: UUID,
     ) -> HTTPErrorResponse[PropertyUser]:
         pass
 
@@ -41,6 +43,14 @@ class IIdentitySvc(ABC):
     ) -> HTTPErrorResponse[ChildConditionKeys]:
         pass
 
+    @abstractmethod
+    async def is_property_admin(
+        self,
+        property_id: UUID,
+        user_id: UUID,
+    ) -> HTTPErrorResponse[bool]:
+        pass
+
 
 class IdentitySvc(IIdentitySvc):
     def __init__(self, repo: IIdentityRepo) -> None:
@@ -54,8 +64,8 @@ class IdentitySvc(IIdentitySvc):
 
     async def get_property_user(
         self,
-        property_id: str,
-        user_id: str,
+        property_id: UUID,
+        user_id: UUID,
     ) -> HTTPErrorResponse[PropertyUser]:
         return await self.repo.get_property_user(
             property_id=property_id, user_id=user_id
@@ -72,3 +82,16 @@ class IdentitySvc(IIdentitySvc):
         child_id: str,
     ) -> HTTPErrorResponse[ChildConditionKeys]:
         return await self.repo.get_child_condition_keys(child_id=child_id)
+
+    async def is_property_admin(
+        self,
+        property_id: UUID,
+        user_id: UUID,
+    ) -> HTTPErrorResponse[bool]:
+        data, error = await self.repo.get_property_user(
+            property_id=property_id, user_id=user_id
+        )
+        if error:
+            None, error
+        assert data is not None
+        return data.role is PROPERTY_USER_ROLE.admin, None

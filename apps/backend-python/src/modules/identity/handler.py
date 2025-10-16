@@ -1,4 +1,5 @@
 from typing import Callable
+from uuid import UUID
 from fastapi import APIRouter, Response, Depends
 
 from src.modules.identity.svc import IIdentitySvc
@@ -20,8 +21,8 @@ class IdentityHandler:
     def register_routes(self):
         @self.router.get("/properties/{property_id}/users/{user_id}")
         async def get_properties(
-            property_id: str,
-            user_id: str,
+            property_id: UUID,
+            user_id: UUID,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
         ) -> ApiResponse[PropertyUser]:

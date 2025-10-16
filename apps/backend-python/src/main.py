@@ -55,9 +55,10 @@ async def main():
 
     # COMPLIANCE
     compliance_repo = ComplianceRepo(pool=pool)
-    compliance_svc = ComplianceSvc(repo=compliance_repo)
+    compliance_svc = ComplianceSvc(repo=compliance_repo, identity_client=identity_svc)
     compliance_handler = ComplianceHandler(
-        svc=compliance_svc, auth_middleware=auth_middleware
+        svc=compliance_svc,
+        auth_middleware=auth_middleware,
     )
     app.include_router(compliance_handler.router, tags=["compliance"])
 

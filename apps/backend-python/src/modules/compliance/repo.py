@@ -1,7 +1,10 @@
+import logging
 from typing import List
+from uuid import UUID
 from asyncpg import Pool
 from abc import ABC, abstractmethod
 
+from src.shared.types.modules.compliance.enum import REQUEST_STATUS
 from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
     PropertyParentDocument,
@@ -16,32 +19,32 @@ class IComplianceRepo(ABC):
     @abstractmethod
     async def get_all_document_approval_requests_for_given_property_parent(
         self,
-        property_id: str,
-        user_id: str,
+        property_id: UUID,
+        user_id: UUID,
     ) -> HTTPErrorResponse[List[PropertyParentDocument]]:
         pass
 
     @abstractmethod
     async def get_all_document_approval_requests_for_given_property_child(
         self,
-        property_id: str,
-        user_id: str,
+        property_id: UUID,
+        user_id: UUID,
     ) -> HTTPErrorResponse[List[PropertyChildDocument]]:
         pass
 
     @abstractmethod
     async def get_property_parent_document_approval_request_by_document_id(
         self,
-        property_id: str,
-        user_id: str,
-        parent_doc_id: str,
+        property_id: UUID,
+        user_id: UUID,
+        parent_doc_id: UUID,
     ) -> HTTPErrorResponse[PropertyParentDocument]:
         pass
 
     @abstractmethod
     async def get_all_document_approval_requests_for_given_property(
         self,
-        property_id: str,
+        property_id: UUID,
         page_size: int,
         page_number: int,
     ) -> HTTPErrorResponse[PagedResponse[PropertyParentDocument]]:
@@ -50,9 +53,20 @@ class IComplianceRepo(ABC):
     @abstractmethod
     async def send_property_parent_document_approval_request(
         self,
-        property_id: str,
-        user_id: str,
-        parent_document_id: str,
+        property_id: UUID,
+        user_id: UUID,
+        parent_document_id: UUID,
+    ) -> HTTPErrorResponse[PropertyParentDocument]:
+        pass
+
+    @abstractmethod
+    async def set_property_parent_document_request_status(
+        self,
+        property_id: UUID,
+        user_id: UUID,
+        parent_document_id: UUID,
+        request_status: REQUEST_STATUS,
+        admin_id: UUID,
     ) -> HTTPErrorResponse[PropertyParentDocument]:
         pass
 
@@ -60,11 +74,12 @@ class IComplianceRepo(ABC):
 class ComplianceRepo(IComplianceRepo):
     def __init__(self, pool: Pool):
         self.pool = pool
+        self.logger = logging.getLogger(__name__)
 
     async def get_all_document_approval_requests_for_given_property_parent(
         self,
-        property_id: str,
-        user_id: str,
+        property_id: UUID,
+        user_id: UUID,
     ) -> HTTPErrorResponse[List[PropertyParentDocument]]:
         sql = """
         SELECT *
@@ -80,8 +95,8 @@ class ComplianceRepo(IComplianceRepo):
 
     async def get_all_document_approval_requests_for_given_property_child(
         self,
-        property_id: str,
-        child_id: str,
+        property_id: UUID,
+        child_id: UUID,
     ) -> HTTPErrorResponse[List[PropertyChildDocument]]:
         sql = """
           SELECT *
@@ -97,9 +112,9 @@ class ComplianceRepo(IComplianceRepo):
 
     async def get_property_parent_document_approval_request_by_document_id(
         self,
-        property_id: str,
-        user_id: str,
-        parent_doc_id: str,
+        property_id: UUID,
+        user_id: UUID,
+        parent_doc_id: UUID,
     ) -> HTTPErrorResponse[PropertyParentDocument]:
         sql = """
           SELECT *
@@ -122,7 +137,7 @@ class ComplianceRepo(IComplianceRepo):
 
     async def get_all_document_approval_requests_for_given_property(
         self,
-        property_id: str,
+        property_id: UUID,
         page_size: int,
         page_number: int,
     ) -> HTTPErrorResponse[PagedResponse[PropertyParentDocument]]:
@@ -144,8 +159,10 @@ class ComplianceRepo(IComplianceRepo):
                 calculate_offset(page_size=page_size, page_number=page_number),
             )
             if error:
+                self.logger.error(f"Database error: {error}")
                 return None, HTTPError(code=500, message=str(error))
             assert rows is not None
+            self.logger.info(f"Number of rows: {len(rows)}")
             if len(rows) == 0:
                 return (
                     new_paged_response(items=[], total=0, page_size=1, page_number=1),
@@ -164,9 +181,9 @@ class ComplianceRepo(IComplianceRepo):
 
     async def send_property_parent_document_approval_request(
         self,
-        property_id: str,
-        user_id: str,
-        parent_document_id: str,
+        property_id: UUID,
+        user_id: UUID,
+        parent_document_id: UUID,
     ) -> HTTPErrorResponse[PropertyParentDocument]:
         sql = """
         INSERT INTO compliance.property_parent_documents(
@@ -189,5 +206,38 @@ class ComplianceRepo(IComplianceRepo):
                 return None, HTTPError(
                     code=404,
                     message=f"Approval request: {parent_document_id} was not saved successfully!",
+                )
+            return PropertyParentDocument(**row), None
+
+    async def set_property_parent_document_request_status(
+        self,
+        property_id: UUID,
+        user_id: UUID,
+        parent_document_id: UUID,
+        request_status: REQUEST_STATUS,
+        admin_id: UUID,
+    ) -> HTTPErrorResponse[PropertyParentDocument]:
+        sql = """
+        UPDATE compliance.property_parent_documents
+        SET request_status = $1, approved_by = $2
+        WHERE property_id = $3 AND user_id = $4 AND parent_document_id = $5
+        RETURNING *;
+        """
+        async with self.pool.acquire() as connection:
+            row, error = await try_except(
+                connection.fetchrow,
+                sql,
+                request_status,
+                admin_id,
+                property_id,
+                user_id,
+                parent_document_id,
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            if row is None:
+                return None, HTTPError(
+                    code=404,
+                    message=f"Parent document request: ${parent_document_id} was not found!",
                 )
             return PropertyParentDocument(**row), None
