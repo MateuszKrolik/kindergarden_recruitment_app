@@ -13,6 +13,16 @@ class IS3Repository(ABC):
     ) -> HTTPErrorResponse[str]:
         pass
 
+    @abstractmethod
+    async def upload_file(
+        self,
+        key: str,
+        file_content: bytes,
+        bucket: str = "mybucket",
+        content_type: str = "application/octet-stream",
+    ) -> HTTPErrorResponse[str]:
+        pass
+
 
 class S3Repository(IS3Repository):
     def __init__(self):
@@ -39,3 +49,25 @@ class S3Repository(IS3Repository):
             return None, HTTPError(code=500, message=str(error))
         assert url is not None
         return url, None
+
+    async def upload_file(
+        self,
+        key: str,
+        file_content: bytes,
+        bucket: str = "mybucket",
+        content_type: str = "application/octet-stream",
+    ) -> HTTPErrorResponse[str]:
+        def _upload_file():
+            self.client.put_object(
+                Bucket=bucket,
+                Key=key,
+                Body=file_content,
+                ContentType=content_type,
+            )
+            return f"/{bucket}/{key}"
+
+        path, error = await try_except(lambda: asyncio.to_thread(_upload_file))
+        if error:
+            return None, HTTPError(code=500, message=str(error))
+        assert path is not None
+        return path, None

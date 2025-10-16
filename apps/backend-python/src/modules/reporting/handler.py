@@ -1,6 +1,6 @@
 from typing import Callable
 from uuid import UUID
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Response, Depends, UploadFile, File
 
 from src.modules.reporting.svc import IReportingSvc
 from src.shared.types.modules.reporting.enum import DOCUMENT_TYPE
@@ -81,4 +81,30 @@ class ReportingHandler:
                 response.status_code = error.code
                 return ApiResponse(error=error)
             response.status_code = 200
+            return ApiResponse(data=data)
+
+        @self.router.post("/parents/{parent_id}/documents/{document_type}")
+        async def save_parent_document(
+            parent_id: UUID,
+            document_type: DOCUMENT_TYPE,
+            response: Response,
+            file: UploadFile = File(...),
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> ApiResponse[ParentDocument]:
+            if document_type not in DOCUMENT_TYPE:
+                response.status_code = 400
+                return ApiResponse(
+                    error=HTTPError(code=400, message="Invalid document type!")
+                )
+            user, error = user_result
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            data, error = await self.svc.save_parent_document(
+                user_id=parent_id, document_type=document_type, file=file
+            )
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            response.status_code = 201
             return ApiResponse(data=data)

@@ -38,7 +38,7 @@ export async function saveParentDocument(
     {
       method: "POST",
       headers: {
-        Authorization: jwt,
+        Authorization: `Bearer ${jwt}`,
       },
       body: formData,
     },

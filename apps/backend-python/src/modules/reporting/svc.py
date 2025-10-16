@@ -1,5 +1,7 @@
+import os
 from abc import ABC, abstractmethod
 from uuid import UUID
+from fastapi import UploadFile, File
 from src.modules.reporting.repo import IReportingRepo
 from src.modules.reporting.s3 import IS3Repository
 from src.shared.types.modules.reporting.enum import DOCUMENT_TYPE
@@ -27,6 +29,15 @@ class IReportingSvc(ABC):
         self,
         path: str,
     ) -> HTTPErrorResponse[str]:
+        pass
+
+    @abstractmethod
+    async def save_parent_document(
+        self,
+        user_id: UUID,
+        document_type: DOCUMENT_TYPE,
+        file: UploadFile = File(...),
+    ) -> HTTPErrorResponse[ParentDocument]:
         pass
 
 
@@ -60,3 +71,21 @@ class ReportingSvc(IReportingSvc):
         path: str,
     ) -> HTTPErrorResponse[str]:
         return await self.s3_repo.get_document_url_by_file_path(key=path)
+
+    async def save_parent_document(
+        self,
+        user_id: UUID,
+        document_type: DOCUMENT_TYPE,
+        file: UploadFile = File(...),
+    ) -> HTTPErrorResponse[ParentDocument]:
+        _, ext = os.path.splitext(file.filename)
+        file_path = f"parents/{user_id}/documents/{document_type}{ext}"
+        file_content = await file.read()
+        _, error = await self.s3_repo.upload_file(
+            key=file_path, file_content=file_content
+        )
+        if error:
+            return None, error
+        return await self.repo.save_parent_document(
+            user_id=user_id, document_type=document_type, file_path=file_path
+        )
