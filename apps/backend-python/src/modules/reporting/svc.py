@@ -22,6 +22,13 @@ class IReportingSvc(ABC):
     ) -> HTTPErrorResponse[str]:
         pass
 
+    @abstractmethod
+    async def get_document_url_by_file_path(
+        self,
+        path: str,
+    ) -> HTTPErrorResponse[str]:
+        pass
+
 
 class ReportingSvc(IReportingSvc):
     def __init__(self, repo: IReportingRepo, s3_repo: IS3Repository) -> None:
@@ -46,4 +53,10 @@ class ReportingSvc(IReportingSvc):
         if error:
             return None, error
         assert path is not None
+        return await self.get_document_url_by_file_path(path=path)
+
+    async def get_document_url_by_file_path(
+        self,
+        path: str,
+    ) -> HTTPErrorResponse[str]:
         return await self.s3_repo.get_document_url_by_file_path(key=path)

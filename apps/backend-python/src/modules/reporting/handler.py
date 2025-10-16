@@ -65,3 +65,20 @@ class ReportingHandler:
                 return ApiResponse(error=error)
             response.status_code = 200
             return ApiResponse(data=data)
+
+        @self.router.get("/documents/{file_path:path}")
+        async def get_document_url_by_file_path(
+            file_path: str,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> ApiResponse[str]:
+            user, error = user_result
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            data, error = await self.svc.get_document_url_by_file_path(path=file_path)
+            if error:
+                response.status_code = error.code
+                return ApiResponse(error=error)
+            response.status_code = 200
+            return ApiResponse(data=data)
