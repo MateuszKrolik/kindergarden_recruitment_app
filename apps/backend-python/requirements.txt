@@ -5,3 +5,4 @@ asyncpg
 httpx
 PyJWT
 boto3
+redis

@@ -87,7 +87,7 @@ export async function getAllDocumentApprovalRequestsForGivenProperty(
   pageNumber: number,
 ): ApiResponse<PagedResponse<PropertyParentDocument>> {
   const response = await fetch(
-    `${BACKEND_URL}/properties/${propertyId}/parent-document-requests?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+    `${BACKEND_URL}/properties/${propertyId}/parent-document-requests?page_size=${pageSize}&page_number=${pageNumber}`,
     {
       method: "GET",
       headers: {

@@ -1,4 +1,3 @@
-import logging
 from typing import List
 from uuid import UUID
 from asyncpg import Pool
@@ -74,7 +73,6 @@ class IComplianceRepo(ABC):
 class ComplianceRepo(IComplianceRepo):
     def __init__(self, pool: Pool):
         self.pool = pool
-        self.logger = logging.getLogger(__name__)
 
     async def get_all_document_approval_requests_for_given_property_parent(
         self,
@@ -159,10 +157,8 @@ class ComplianceRepo(IComplianceRepo):
                 calculate_offset(page_size=page_size, page_number=page_number),
             )
             if error:
-                self.logger.error(f"Database error: {error}")
                 return None, HTTPError(code=500, message=str(error))
             assert rows is not None
-            self.logger.info(f"Number of rows: {len(rows)}")
             if len(rows) == 0:
                 return (
                     new_paged_response(items=[], total=0, page_size=1, page_number=1),

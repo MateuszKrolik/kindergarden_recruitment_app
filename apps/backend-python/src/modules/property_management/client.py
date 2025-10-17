@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import List
+from uuid import UUID
 
 from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
     ParentChild,
     ParentConditionKeys,
 )
+from src.shared.types.modules.reporting.enum import DOCUMENT_TYPE
 from src.shared.types.response import HTTPErrorResponse
 
 
@@ -29,4 +31,13 @@ class IIdentityClient(ABC):
         self,
         child_id: str,
     ) -> HTTPErrorResponse[ChildConditionKeys]:
+        pass
+
+
+class IReportingClient(ABC):
+    @abstractmethod
+    async def get_parent_document_type_by_document_id(
+        self,
+        parent_document_id: UUID,
+    ) -> HTTPErrorResponse[DOCUMENT_TYPE]:
         pass

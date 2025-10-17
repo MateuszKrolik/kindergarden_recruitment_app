@@ -1,9 +1,12 @@
+from logging import getLogger
+from json import dumps
 from abc import ABC, abstractmethod
 from typing import List
 from uuid import UUID
 
 from src.modules.compliance.client import IIdentityClient
 from src.modules.compliance.repo import IComplianceRepo
+from src.shared.events.modules.compliance import COMPLIANCE_EVENT
 from src.shared.types.modules.compliance.enum import REQUEST_STATUS
 from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
@@ -11,6 +14,7 @@ from src.shared.types.modules.compliance.model import (
 )
 from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import HTTPError, HTTPErrorResponse
+import redis.asyncio as redis
 
 
 class IComplianceSvc(ABC):
@@ -70,9 +74,16 @@ class IComplianceSvc(ABC):
 
 
 class ComplianceSvc(IComplianceSvc):
-    def __init__(self, repo: IComplianceRepo, identity_client: IIdentityClient) -> None:
+    def __init__(
+        self,
+        repo: IComplianceRepo,
+        identity_client: IIdentityClient,
+        redis_client: redis.Redis,
+    ) -> None:
         self.repo = repo
         self.identity_client = identity_client
+        self.redis_client = redis_client
+        self.logger = getLogger(__name__)
 
     async def get_all_document_approval_requests_for_given_property_parent(
         self,
@@ -153,5 +164,14 @@ class ComplianceSvc(IComplianceSvc):
         if error:
             return None, error
         assert data is not None
-        # TODO: Publish event
+        # TODO: Publish proper event
+        event_name = COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED
+        event_data = dumps({"message": "dummy"})
+        try:
+            await self.redis_client.publish(event_name, event_data)
+            self.logger.info(f"Published event '{event_name}': {event_data}")
+        except Exception as e:
+            err_msg = str(e)
+            self.logger.error(f"Error while publishing event '{event_name}': {err_msg}")
+            return None, HTTPError(code=500, message=err_msg)
         return data, None
