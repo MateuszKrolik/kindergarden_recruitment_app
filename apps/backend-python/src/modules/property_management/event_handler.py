@@ -1,3 +1,4 @@
+import json
 from logging import getLogger
 from abc import ABC, abstractmethod
 
@@ -5,7 +6,9 @@ from src.modules.property_management.client import IReportingClient
 from src.modules.property_management.svc import IPropertyManagementSvc
 
 import redis.asyncio as redis
-from src.shared.events.modules.compliance import COMPLIANCE_EVENT
+from src.shared.types.event import EventEnvelope
+from src.shared.types.modules.compliance.event import COMPLIANCE_EVENT
+from src.shared.types.modules.compliance.model import PropertyParentDocument
 
 
 class IPropertyManagementEventHandler(ABC):
@@ -43,5 +46,11 @@ class PropertyManagementEventHandler(IPropertyManagementEventHandler):
         await pubsub.subscribe(event_name)
         async for message in pubsub.listen():
             if message["type"] == "message":
-                event_data = message["data"]
-                self.logger.info(f"Received event '{event_name}': {event_data}")
+                event_dict = json.loads(message["data"])
+                self.logger.info(
+                    f"Received event '{event_name}':\n{json.dumps(event_dict, indent=2)}"
+                )
+                event_envelope: EventEnvelope[PropertyParentDocument] = EventEnvelope(
+                    **event_dict
+                )
+                self.logger.info(f"event_id: {event_envelope.id}")

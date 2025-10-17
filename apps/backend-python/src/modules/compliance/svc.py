@@ -1,3 +1,4 @@
+import json
 from logging import getLogger
 from json import dumps
 from abc import ABC, abstractmethod
@@ -6,7 +7,7 @@ from uuid import UUID
 
 from src.modules.compliance.client import IIdentityClient
 from src.modules.compliance.repo import IComplianceRepo
-from src.shared.events.modules.compliance import COMPLIANCE_EVENT
+from src.shared.types.modules.compliance.event import COMPLIANCE_EVENT
 from src.shared.types.modules.compliance.enum import REQUEST_STATUS
 from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
@@ -15,6 +16,7 @@ from src.shared.types.modules.compliance.model import (
 from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import HTTPError, HTTPErrorResponse
 import redis.asyncio as redis
+from src.shared.utils.event import create_event
 
 
 class IComplianceSvc(ABC):
@@ -166,10 +168,17 @@ class ComplianceSvc(IComplianceSvc):
         assert data is not None
         # TODO: Publish proper event
         event_name = COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED
-        event_data = dumps({"message": "dummy"})
+        event_json = create_event(
+            type=event_name,
+            source=__name__,
+            version="1.0",
+            payload=data,
+        ).model_dump_json()
         try:
-            await self.redis_client.publish(event_name, event_data)
-            self.logger.info(f"Published event '{event_name}': {event_data}")
+            await self.redis_client.publish(event_name, event_json)
+            self.logger.info(
+                f"Published event '{event_name}':\n{json.dumps(json.loads(event_json), indent=2)}"
+            )
         except Exception as e:
             err_msg = str(e)
             self.logger.error(f"Error while publishing event '{event_name}': {err_msg}")
