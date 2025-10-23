@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { PropertyParentDocument } from "shared/types/modules/compliance";
 import { Progress } from "../ui/progress";
 import { ApiResponse } from "shared/types/response";
-import { PropertyParentDocumentRequirement } from "shared/types/modules/property-management";
+import { PropertyParentDocumentRequirement } from "@/api-client";
 
 type ParentDocumentRequirementsTableActionMenuProps = {
   jwt: string;
@@ -75,7 +75,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
       const { data: parentDocResult, error } = await getParentDocumentByType(
         jwt,
         userId,
-        requirement.document_type,
+        requirement.documentType,
       );
       if (error) {
         if (error.code === 404) {
@@ -191,7 +191,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
           const { error } = await saveParentDocument(
             jwt,
             userId,
-            requirement.document_type,
+            requirement.documentType,
             file,
           );
           if (error) {
@@ -199,7 +199,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
             return;
           }
           toast.success(
-            `Document: ${requirement.document_type} uploaded succesfully!`,
+            `Document: ${requirement.documentType} uploaded succesfully!`,
           );
           if (file) setOpen(false);
           // reset input

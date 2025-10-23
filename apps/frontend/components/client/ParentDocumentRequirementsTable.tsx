@@ -27,7 +27,10 @@ import { DocumentType, ParentDocument } from "shared/types/modules/reporting";
 import { ParentDocumentRequirementsTableActionMenu } from "./ParentDocumentRequirementsTableActionMenu";
 import { PropertyParentDocument } from "shared/types/modules/compliance";
 import { ApiResponse } from "shared/types/response";
-import { PropertyParentDocumentRequirement } from "shared/types/modules/property-management";
+import {
+  ApiResponseListPropertyParentDocumentRequirement,
+  PropertyParentDocumentRequirement,
+} from "@/api-client";
 
 export type ParentDocumentRequirementsTableProps = {
   jwt: string;
@@ -37,7 +40,7 @@ export type ParentDocumentRequirementsTableProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): ApiResponse<PropertyParentDocumentRequirement[]>;
+  ): Promise<ApiResponseListPropertyParentDocumentRequirement>;
   getParentDocumentByType(
     jwt: string,
     userId: string,
@@ -80,11 +83,13 @@ export const ParentDocumentRequirementsTable = ({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<PropertyParentDocumentRequirement[]>([]);
+  const [data, setData] = useState<Array<PropertyParentDocumentRequirement>>(
+    [],
+  );
 
   const columns: ColumnDef<PropertyParentDocumentRequirement>[] = [
     {
-      accessorKey: "document_type",
+      accessorKey: "documentType",
       header: ({ column }) => {
         return (
           <Button
@@ -97,11 +102,11 @@ export const ParentDocumentRequirementsTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("document_type")}</div>
+        <div className="lowercase">{row.getValue("documentType")}</div>
       ),
     },
     {
-      accessorKey: "requirement_type",
+      accessorKey: "requirementType",
       header: ({ column }) => {
         return (
           <Button
@@ -114,11 +119,11 @@ export const ParentDocumentRequirementsTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("requirement_type")}</div>
+        <div className="lowercase">{row.getValue("requirementType")}</div>
       ),
     },
     {
-      accessorKey: "condition_key",
+      accessorKey: "conditionKey",
       header: ({ column }) => {
         return (
           <Button
@@ -131,11 +136,11 @@ export const ParentDocumentRequirementsTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("condition_key")}</div>
+        <div className="lowercase">{row.getValue("conditionKey")}</div>
       ),
     },
     {
-      accessorKey: "point_value",
+      accessorKey: "pointValue",
       header: ({ column }) => {
         return (
           <Button
@@ -148,7 +153,7 @@ export const ParentDocumentRequirementsTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("point_value")}</div>
+        <div className="lowercase">{row.getValue("pointValue")}</div>
       ),
     },
     {
@@ -190,6 +195,8 @@ export const ParentDocumentRequirementsTable = ({
       setError(errMsg);
       return;
     }
+
+    if (!data) return;
 
     setData(data);
   }, [jwt, propertyId, userId, getPropertyParentDocumentRequirements]);

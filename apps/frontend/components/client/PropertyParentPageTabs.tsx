@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { getAllPropertyChildrenForGivenParent } from "@/app/actions/property-management";
 import { ApiResponse } from "shared/types/response";
 import { PropertyParentChildrenDocumentTabs } from "./PropertyParentChildrenDocumentTabs";
+import { ApiResponseListPropertyParentDocumentRequirement } from "@/api-client";
 
 type PropertyParentPageTabsProps = {
   jwt: string;
@@ -23,7 +24,7 @@ type PropertyParentPageTabsProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): ApiResponse<PropertyParentDocumentRequirement[]>;
+  ): Promise<ApiResponseListPropertyParentDocumentRequirement>;
   getParentDocumentByType(
     jwt: string,
     userId: string,

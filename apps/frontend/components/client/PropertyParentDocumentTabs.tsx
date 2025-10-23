@@ -1,12 +1,12 @@
 "use client";
 
-import { PropertyParentDocumentRequirement } from "shared/types/modules/property-management";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { ParentDocumentRequirementsTable } from "./ParentDocumentRequirementsTable";
 import { ParentDocument, DocumentType } from "shared/types/modules/reporting";
 import { ParentDocumentApprovalsTable } from "./ParentDocumentApprovalsTable";
 import { PropertyParentDocument } from "shared/types/modules/compliance";
 import { ApiResponse } from "shared/types/response";
+import { ApiResponseListPropertyParentDocumentRequirement } from "@/api-client";
 
 type PropertyParentDocumentTabsProps = {
   jwt: string;
@@ -16,7 +16,7 @@ type PropertyParentDocumentTabsProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): ApiResponse<PropertyParentDocumentRequirement[]>;
+  ): Promise<ApiResponseListPropertyParentDocumentRequirement>;
   getParentDocumentByType(
     jwt: string,
     userId: string,
