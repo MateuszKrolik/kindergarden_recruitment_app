@@ -31,7 +31,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PagedResponse } from "shared/types/pagination";
 import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -39,6 +38,7 @@ import Link from "next/link";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
 import { PropertyTableRowActionMenu } from "./PropertyTableRowActionMenu";
 import { ApiResponse } from "shared/types/response";
+import { ApiResponsePagedResponseProperty } from "@/api-client";
 
 interface PropertiesTableProps {
   jwt: string;
@@ -47,7 +47,7 @@ interface PropertiesTableProps {
     jwt: string,
     pageSize: number,
     pageNumber: number,
-  ): ApiResponse<PagedResponse<Property>>;
+  ): Promise<ApiResponsePagedResponseProperty>;
   getPropertyUser(
     jwt: string,
     propertyId: string,
@@ -90,12 +90,15 @@ export default function PropertyTable({
         setIsLoading(false);
         return;
       }
-
+      if (!result) {
+        setIsLoading(false);
+        return;
+      }
       setResult(result.items);
       setTotalCount(result.total);
-      setHasNextPage(result.has_next_page);
-      setHasPreviousPage(result.has_previous_page);
-      setTotalPages(result.total_pages);
+      setHasNextPage(result.hasNextPage);
+      setHasPreviousPage(result.hasPreviousPage);
+      setTotalPages(result.totalPages);
       setIsLoading(false);
     },
     [jwt, getAllProperties],

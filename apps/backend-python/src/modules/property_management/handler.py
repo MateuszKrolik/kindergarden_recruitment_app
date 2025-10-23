@@ -120,7 +120,7 @@ class PropertyManagementHandler:
             response.status_code = 200
             return ApiResponse(data=data)
 
-        @self.router.get("/properties/{propertyId}/property-children")
+        @self.router.get("/properties/{property_id}/property-children")
         async def get_all_property_children_paged(
             response: Response,
             property_id,

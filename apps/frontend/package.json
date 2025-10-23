@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate-api-client": "openapi-generator-cli generate -i http://localhost:3001/openapi.json -g typescript-fetch -o api-client"
   },
   "type": "module",
   "dependencies": {
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@openapitools/openapi-generator-cli": "^2.25.0",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/node": "^20",
     "@types/pg": "^8.15.5",

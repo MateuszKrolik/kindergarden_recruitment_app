@@ -2,12 +2,13 @@
 
 import { PagedResponse } from "shared/types/pagination";
 import {
-  Property,
   PropertyChild,
   PropertyParentDocumentRequirement,
   PropertyChildDocumentRequirement,
 } from "shared/types/modules/property-management";
 import type { ApiResponse } from "shared/types/response";
+import { ApiResponsePagedResponseProperty } from "@/api-client";
+import { getPropertyApi } from "@/lib/api-client/property";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
 
@@ -15,17 +16,12 @@ export async function getAllProperties(
   jwt: string,
   pageSize: number,
   pageNumber: number,
-): ApiResponse<PagedResponse<Property>> {
-  const response = await fetch(
-    `${BACKEND_URL}/properties?page_size=${pageSize}&page_number=${pageNumber}`,
-    {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-      method: "GET",
-    },
-  );
-  return await response.json();
+): Promise<ApiResponsePagedResponseProperty> {
+  const api = getPropertyApi(jwt);
+  return await api.getPropertiesPropertiesGet({
+    pageSize: pageSize,
+    pageNumber: pageNumber,
+  });
 }
 
 export async function getPropertyParentDocumentRequirements(
