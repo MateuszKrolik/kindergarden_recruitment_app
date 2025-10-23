@@ -40,6 +40,13 @@ class IReportingSvc(ABC):
     ) -> HTTPErrorResponse[ParentDocument]:
         pass
 
+    @abstractmethod
+    async def get_parent_document_type_by_document_id(
+        self,
+        parent_document_id: UUID,
+    ) -> HTTPErrorResponse[DOCUMENT_TYPE]:
+        pass
+
 
 class ReportingSvc(IReportingSvc):
     def __init__(self, repo: IReportingRepo, s3_repo: IS3Repository) -> None:
@@ -88,4 +95,12 @@ class ReportingSvc(IReportingSvc):
             return None, error
         return await self.repo.save_parent_document(
             user_id=user_id, document_type=document_type, file_path=file_path
+        )
+
+    async def get_parent_document_type_by_document_id(
+        self,
+        parent_document_id: UUID,
+    ) -> HTTPErrorResponse[DOCUMENT_TYPE]:
+        return await self.repo.get_parent_document_type_by_document_id(
+            parent_document_id=parent_document_id
         )

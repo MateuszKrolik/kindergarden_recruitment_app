@@ -59,10 +59,9 @@ async def main():
         repo=property_repo, identity_client=identity_svc
     )
     property_event_handler = PropertyManagementEventHandler(
-        svc=property_svc, reporting_client=reporting_handler, redis_client=redis_client
+        svc=property_svc, reporting_client=reporting_svc, redis_client=redis_client
     )
-    # run handler in background
-    asyncio.create_task(property_event_handler.initialize())
+    await property_event_handler.initialize()
     property_handler = PropertyManagementHandler(
         svc=property_svc, auth_middleware=auth_middleware
     )
