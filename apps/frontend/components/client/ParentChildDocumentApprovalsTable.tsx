@@ -26,7 +26,6 @@ import {
 } from "../ui/table";
 import { COMPLIANCE_EVENTS } from "shared/events/modules/compliance";
 import socket from "@/app/socket";
-import { EventEnvelope } from "shared/types/event";
 import { ApiResponse } from "shared/types/response";
 
 type ParentChildDocumentApprovalsTableProps = {
@@ -140,18 +139,18 @@ export const ParentChildDocumentApprovalsTable = ({
   }, [fetchData]);
 
   useEffect(() => {
-    function onRequestApproved(event: EventEnvelope<PropertyChildDocument>) {
+    function onRequestApproved(event: PropertyChildDocument) {
       setData((prev) => {
         const existingIndex = prev.findIndex(
-          (doc) => doc.child_document_id === event.payload.child_document_id,
+          (doc) => doc.child_document_id === event.child_document_id,
         );
 
         if (existingIndex !== -1) {
           const updated = [...prev];
           updated[existingIndex] = {
             ...updated[existingIndex],
-            request_status: event.payload.request_status,
-            approved_by: event.payload.approved_by,
+            request_status: event.request_status,
+            approved_by: event.approved_by,
           };
           return updated;
         }
@@ -160,7 +159,7 @@ export const ParentChildDocumentApprovalsTable = ({
       });
 
       toast.success(
-        `Document: ${event.payload.child_document_id} was just approved! 🎉`,
+        `Document: ${event.child_document_id} was just approved! 🎉`,
       );
     }
 

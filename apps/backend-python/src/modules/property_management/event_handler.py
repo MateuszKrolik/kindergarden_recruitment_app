@@ -9,8 +9,10 @@ import redis.asyncio as redis
 from src.shared.handlers.event_handler import EventHandler
 from src.shared.types.modules.compliance.event import COMPLIANCE_EVENT
 from src.shared.types.modules.compliance.model import PropertyParentDocument
+from src.shared.types.modules.property_management.event import PROPERTY_MANAGEMENT_EVENT
 from src.shared.types.modules.property_management.model import PropertyChild
 from src.shared.types.response import HTTPErrorResponse
+import socketio
 
 
 class PropertyManagementEventHandler(EventHandler):
@@ -23,10 +25,12 @@ class PropertyManagementEventHandler(EventHandler):
         svc: IPropertyManagementSvc,
         reporting_client: IReportingClient,
         redis_client: redis.Redis,
+        socket_server: socketio.AsyncServer,
     ) -> None:
         super().__init__(redis_client)
         self.svc = svc
         self.reporting_client = reporting_client
+        self.socket_server = socket_server
 
     @EventHandler.handle.register
     async def _(self, event: PropertyParentDocument):
@@ -64,7 +68,7 @@ class PropertyManagementEventHandler(EventHandler):
         assert property_children is not None
         children_ids: Set[UUID] = set(pc.child_id for pc in property_children)
         (
-            _,
+            increment_result,
             error,
         ) = await self.svc.increment_property_children_points_for_given_parent(
             property_id=event.property_id,
@@ -74,5 +78,15 @@ class PropertyManagementEventHandler(EventHandler):
         if error:
             self.logger.error(error)
             return
-        # TODO: socket event: COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED
-        # TODO: socket event: PROPERTY_MANAGEMENT_EVENTS.PROPERTY_CHILDREN_UPDATED
+        assert increment_result is not None
+        try:
+            await self.socket_server.emit(
+                COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED,
+                event.model_dump(mode="json"),
+            )
+            await self.socket_server.emit(
+                PROPERTY_MANAGEMENT_EVENT.PROPERTY_CHILDREN_UPDATED,
+                [m.model_dump(mode="json") for m in increment_result],
+            )
+        except Exception as e:
+            self.logger.error(e)

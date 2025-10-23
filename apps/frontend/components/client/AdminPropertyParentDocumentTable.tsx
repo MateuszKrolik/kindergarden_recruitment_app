@@ -41,7 +41,6 @@ import {
   RequestStatus,
 } from "shared/types/modules/compliance";
 import AdminPropertyParentDocumentTableActionMenu from "./AdminPropertyParentDocumentTableActionMenu";
-import { EventEnvelope } from "shared/types/event";
 import { COMPLIANCE_EVENTS } from "shared/events/modules/compliance";
 import socket from "@/app/socket";
 import { ApiResponse } from "shared/types/response";
@@ -232,18 +231,18 @@ export default function AdminPropertyParentDocumentTable({
   }, [loadProperties, pageNumber, pageSize]);
 
   useEffect(() => {
-    function onRequestApproved(event: EventEnvelope<PropertyParentDocument>) {
+    function onRequestApproved(event: PropertyParentDocument) {
       setResult((prev) => {
         const existingIndex = prev.findIndex(
-          (doc) => doc.parent_document_id === event.payload.parent_document_id,
+          (doc) => doc.parent_document_id === event.parent_document_id,
         );
 
         if (existingIndex !== -1) {
           const updated = [...prev];
           updated[existingIndex] = {
             ...updated[existingIndex],
-            request_status: event.payload.request_status,
-            approved_by: event.payload.approved_by,
+            request_status: event.request_status,
+            approved_by: event.approved_by,
           };
           return updated;
         }
@@ -252,7 +251,7 @@ export default function AdminPropertyParentDocumentTable({
       });
 
       toast.success(
-        `Document: ${event.payload.parent_document_id} was just approved! 🎉`,
+        `Document: ${event.parent_document_id} was just approved! 🎉`,
       );
     }
 

@@ -20,10 +20,18 @@ from src.modules.reporting.svc import ReportingSvc
 from src.shared.middlewares.auth import auth_middleware
 import uvicorn
 import redis.asyncio as redis
+import socketio
 
 
 async def main():
     app = FastAPI()
+
+    sio = socketio.AsyncServer(
+        async_mode="asgi",
+        cors_allowed_origins=os.getenv("FRONTEND_URL", "http://localhost:3000"),
+    )
+
+    socket_app = socketio.ASGIApp(sio, app)
 
     pool = await create_pool(
         os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost/auth")
@@ -59,7 +67,10 @@ async def main():
         repo=property_repo, identity_client=identity_svc
     )
     property_event_handler = PropertyManagementEventHandler(
-        svc=property_svc, reporting_client=reporting_svc, redis_client=redis_client
+        svc=property_svc,
+        reporting_client=reporting_svc,
+        redis_client=redis_client,
+        socket_server=sio,
     )
     await property_event_handler.initialize()
     property_handler = PropertyManagementHandler(
@@ -78,7 +89,7 @@ async def main():
     )
     app.include_router(compliance_handler.router, tags=["compliance"])
 
-    config = uvicorn.Config(app, host="0.0.0.0", port=3001, log_level="info")
+    config = uvicorn.Config(socket_app, host="0.0.0.0", port=3001, log_level="info")
     server = uvicorn.Server(config)
     await server.serve()
 
