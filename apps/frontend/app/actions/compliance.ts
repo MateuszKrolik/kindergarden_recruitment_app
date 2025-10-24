@@ -1,47 +1,39 @@
 "use server";
 
-import {
-  PropertyChildDocument,
-  PropertyParentDocument,
-  RequestStatus,
-} from "shared/types/modules/compliance";
-import { ApiResponse } from "shared/types/response";
-import { PagedResponse } from "shared/types/pagination";
-
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
+import { getApiClient } from "@/client";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
 export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
   jwt: string,
   propertyId: string,
   parentId: string,
-): ApiResponse<PropertyParentDocument[]> {
-  const response = await fetch(
-    `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/parent-document-requests`,
+): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"][]>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/properties/{property_id}/parents/{parent_id}/parent-document-requests",
     {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
+      params: { path: { property_id: propertyId, parent_id: parentId } },
     },
   );
-  return await response.json();
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
 }
 
 export async function getAllDocumentApprovalRequestsForGivenPropertyChild(
   jwt: string,
   propertyId: string,
   childId: string,
-): ApiResponse<PropertyChildDocument[]> {
-  const response = await fetch(
-    `${BACKEND_URL}/properties/${propertyId}/children/${childId}/child-document-requests`,
+): Promise<ApiResponse<components["schemas"]["PropertyChildDocument"][]>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/properties/{property_id}/children/{child_id}/child-document-requests",
     {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
+      params: { path: { property_id: propertyId, child_id: childId } },
     },
   );
-  return await response.json();
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
 }
 
 export async function getPropertyParentDocumentApprovalRequestByDocumentId(
@@ -49,17 +41,22 @@ export async function getPropertyParentDocumentApprovalRequestByDocumentId(
   propertyId: string,
   parentId: string,
   parentDocId: string,
-): ApiResponse<PropertyParentDocument> {
-  const response = await fetch(
-    `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocId}`,
+): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_doc_id}",
     {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
+      params: {
+        path: {
+          property_id: propertyId,
+          parent_id: parentId,
+          parent_doc_id: parentDocId,
+        },
       },
     },
   );
-  return await response.json();
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
 }
 
 export async function sendPropertyParentDocumentApprovalRequest(
@@ -67,17 +64,22 @@ export async function sendPropertyParentDocumentApprovalRequest(
   propertyId: string,
   parentId: string,
   parentDocumentId: string,
-): ApiResponse<PropertyParentDocument> {
-  const response = await fetch(
-    `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocumentId}`,
+): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.POST(
+    "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_doc_id}",
     {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
+      params: {
+        path: {
+          property_id: propertyId,
+          parent_id: parentId,
+          parent_doc_id: parentDocumentId,
+        },
       },
     },
   );
-  return await response.json();
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
 }
 
 export async function getAllDocumentApprovalRequestsForGivenProperty(
@@ -85,17 +87,26 @@ export async function getAllDocumentApprovalRequestsForGivenProperty(
   propertyId: string,
   pageSize: number,
   pageNumber: number,
-): ApiResponse<PagedResponse<PropertyParentDocument>> {
-  const response = await fetch(
-    `${BACKEND_URL}/properties/${propertyId}/parent-document-requests?page_size=${pageSize}&page_number=${pageNumber}`,
+): Promise<
+  ApiResponse<components["schemas"]["PagedResponse_PropertyParentDocument_"]>
+> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/properties/{property_id}/parent-document-requests",
     {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
+      params: {
+        path: {
+          property_id: propertyId,
+        },
+        query: {
+          page_size: pageSize,
+          page_number: pageNumber,
+        },
       },
     },
   );
-  return await response.json();
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
 }
 
 export async function setPropertyParentDocumentApprovalRequestStatus(
@@ -103,16 +114,22 @@ export async function setPropertyParentDocumentApprovalRequestStatus(
   propertyId: string,
   parentId: string,
   parentDocumentId: string,
-  requestStatus: RequestStatus,
-): ApiResponse<PropertyParentDocument> {
-  const response = await fetch(
-    `${BACKEND_URL}/properties/${propertyId}/parents/${parentId}/parent-documents/${parentDocumentId}/status/${requestStatus}`,
+  requestStatus: components["schemas"]["REQUEST_STATUS"],
+): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.PATCH(
+    "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/{request_status}",
     {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
+      params: {
+        path: {
+          property_id: propertyId,
+          parent_id: parentId,
+          parent_document_id: parentDocumentId,
+          request_status: requestStatus,
+        },
       },
     },
   );
-  return await response.json();
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
 }

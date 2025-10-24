@@ -1,6 +1,5 @@
 "use client";
 
-import { PropertyChild } from "shared/types/modules/property-management";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import {
@@ -27,11 +26,12 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import { Collapsible, CollapsibleContent } from "../ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider } from "../ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
-import socket from "@/app/socket";
-import { PROPERTY_MANAGEMENT_EVENTS } from "shared/events/modules/property-management";
-import { ApiResponse } from "shared/types/response";
+import socket from "@/socket";
+import { PROPERTY_MANAGEMENT_EVENTS } from "@/socket/events/modules/property-management";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
-const EMPTY_CHILDREN: PropertyChild[] = [];
+const EMPTY_CHILDREN: components["schemas"]["PropertyChild"][] = [];
 
 export type PropertyParentChildrenTableProps = {
   jwt: string;
@@ -41,8 +41,10 @@ export type PropertyParentChildrenTableProps = {
     jwt: string,
     propertyId: string,
     parentId: string,
-  ): ApiResponse<PropertyChild[]>;
-  renderCollapsibleContentAction?: (row: PropertyChild) => React.ReactNode;
+  ): Promise<ApiResponse<components["schemas"]["PropertyChild"][]>>;
+  renderCollapsibleContentAction?: (
+    row: components["schemas"]["PropertyChild"],
+  ) => React.ReactNode;
 };
 
 export const PropertyParentChildrenTable = ({
@@ -57,10 +59,12 @@ export const PropertyParentChildrenTable = ({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<PropertyChild[]>([]);
+  const [data, setData] = useState<components["schemas"]["PropertyChild"][]>(
+    [],
+  );
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
-  const columns: ColumnDef<PropertyChild>[] = [
+  const columns: ColumnDef<components["schemas"]["PropertyChild"]>[] = [
     {
       accessorKey: "child_id",
       header: ({ column }) => {
@@ -136,7 +140,9 @@ export const PropertyParentChildrenTable = ({
   }, [fetchPropertyChildrenForGivenParent]);
 
   useEffect(() => {
-    const onPropertyChildrenUpdated = (updatedChildren: PropertyChild[]) => {
+    const onPropertyChildrenUpdated = (
+      updatedChildren: components["schemas"]["PropertyChild"][],
+    ) => {
       setData((prev) => {
         const prevMap = new Map(prev.map((child) => [child.child_id, child]));
         updatedChildren.forEach((child) => {
@@ -158,7 +164,7 @@ export const PropertyParentChildrenTable = ({
     };
   });
 
-  const table = useReactTable<PropertyChild>({
+  const table = useReactTable<components["schemas"]["PropertyChild"]>({
     data: error ? EMPTY_CHILDREN : data,
     columns,
     onSortingChange: setSorting,

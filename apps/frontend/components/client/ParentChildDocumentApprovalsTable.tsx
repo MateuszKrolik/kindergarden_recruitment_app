@@ -1,6 +1,5 @@
 "use client";
 
-import { PropertyChildDocument } from "shared/types/modules/compliance";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -24,9 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { COMPLIANCE_EVENTS } from "shared/events/modules/compliance";
-import socket from "@/app/socket";
-import { ApiResponse } from "shared/types/response";
+import { COMPLIANCE_EVENTS } from "@/socket/events/modules/compliance";
+import socket from "@/socket";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
 type ParentChildDocumentApprovalsTableProps = {
   jwt: string;
@@ -36,7 +36,7 @@ type ParentChildDocumentApprovalsTableProps = {
     jwt: string,
     propertyId: string,
     childId: string,
-  ): ApiResponse<PropertyChildDocument[]>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyChildDocument"][]>>;
 };
 
 export const ParentChildDocumentApprovalsTable = ({
@@ -50,11 +50,13 @@ export const ParentChildDocumentApprovalsTable = ({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<PropertyChildDocument[]>([]);
+  const [data, setData] = useState<
+    components["schemas"]["PropertyChildDocument"][]
+  >([]);
 
-  const columns: ColumnDef<PropertyChildDocument>[] = [
+  const columns: ColumnDef<components["schemas"]["PropertyChildDocument"]>[] = [
     {
-      accessorKey: "child_document_id",
+      accessorKey: "childDocumentId",
       header: ({ column }) => {
         return (
           <Button
@@ -67,11 +69,11 @@ export const ParentChildDocumentApprovalsTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("child_document_id")}</div>
+        <div className="lowercase">{row.getValue("childDocumentId")}</div>
       ),
     },
     {
-      accessorKey: "request_status",
+      accessorKey: "requestStatus",
       header: ({ column }) => {
         return (
           <Button
@@ -84,11 +86,11 @@ export const ParentChildDocumentApprovalsTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("request_status")}</div>
+        <div className="lowercase">{row.getValue("requestStatus")}</div>
       ),
     },
     {
-      accessorKey: "approved_by",
+      accessorKey: "approvedBy",
       header: ({ column }) => {
         return (
           <Button
@@ -101,7 +103,7 @@ export const ParentChildDocumentApprovalsTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("approved_by")}</div>
+        <div className="lowercase">{row.getValue("approvedBy")}</div>
       ),
     },
   ];
@@ -121,11 +123,6 @@ export const ParentChildDocumentApprovalsTable = ({
       return;
     }
 
-    if (!result) {
-      toast.error(`Error: No data available!`);
-      return;
-    }
-
     setData(result);
   }, [
     jwt,
@@ -139,7 +136,9 @@ export const ParentChildDocumentApprovalsTable = ({
   }, [fetchData]);
 
   useEffect(() => {
-    function onRequestApproved(event: PropertyChildDocument) {
+    function onRequestApproved(
+      event: components["schemas"]["PropertyChildDocument"],
+    ) {
       setData((prev) => {
         const existingIndex = prev.findIndex(
           (doc) => doc.child_document_id === event.child_document_id,
@@ -163,7 +162,9 @@ export const ParentChildDocumentApprovalsTable = ({
       );
     }
 
-    function onRequestSent(event: PropertyChildDocument) {
+    function onRequestSent(
+      event: components["schemas"]["PropertyChildDocument"],
+    ) {
       setData((prev) => [...prev, event]);
     }
 
@@ -189,8 +190,8 @@ export const ParentChildDocumentApprovalsTable = ({
     };
   }, []);
 
-  const table = useReactTable<PropertyChildDocument>({
-    data: error || data instanceof Error ? [] : data,
+  const table = useReactTable<components["schemas"]["PropertyChildDocument"]>({
+    data: error ? [] : data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

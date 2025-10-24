@@ -8,46 +8,44 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
 } from "../ui/dropdown-menu";
-import type {
-  DocumentType as SharedDocumentType,
-  ParentDocument,
-} from "shared/types/modules/reporting";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { PropertyParentDocument } from "shared/types/modules/compliance";
 import { Progress } from "../ui/progress";
-import { ApiResponse } from "shared/types/response";
-import { PropertyParentDocumentRequirement } from "@/api-client";
+import { components } from "@/client/schema";
+import { ApiResponse } from "@/types/response";
 
 type ParentDocumentRequirementsTableActionMenuProps = {
   jwt: string;
   propertyId: string;
   userId: string;
-  requirement: PropertyParentDocumentRequirement;
+  requirement: components["schemas"]["PropertyParentDocumentRequirement"];
   getParentDocumentByType(
     jwt: string,
     userId: string,
-    documentType: SharedDocumentType,
-  ): ApiResponse<ParentDocument>;
+    documentType: components["schemas"]["DOCUMENT_TYPE"],
+  ): Promise<ApiResponse<components["schemas"]["ParentDocument"]>>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): ApiResponse<PropertyParentDocument>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
   sendPropertyParentDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): ApiResponse<PropertyParentDocument>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
   saveParentDocument(
     jwt: string,
     userId: string,
-    documentType: SharedDocumentType,
+    documentType: components["schemas"]["DOCUMENT_TYPE"],
     file: File,
-  ): ApiResponse<ParentDocument>;
-  getDocumentURLByFilePath(jwt: string, key: string): ApiResponse<string>;
+  ): Promise<ApiResponse<components["schemas"]["ParentDocument"]>>;
+  getDocumentURLByFilePath(
+    jwt: string,
+    key: string,
+  ): Promise<ApiResponse<string>>;
 };
 
 export const ParentDocumentRequirementsTableActionMenu = ({
@@ -61,7 +59,9 @@ export const ParentDocumentRequirementsTableActionMenu = ({
   saveParentDocument,
   getDocumentURLByFilePath,
 }: ParentDocumentRequirementsTableActionMenuProps) => {
-  const [parentDoc, setParentDoc] = useState<ParentDocument | null>(null);
+  const [parentDoc, setParentDoc] = useState<
+    components["schemas"]["ParentDocument"] | null
+  >(null);
   const [disableApprovalRequest, setDisableApprovalRequest] =
     useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -75,7 +75,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
       const { data: parentDocResult, error } = await getParentDocumentByType(
         jwt,
         userId,
-        requirement.documentType,
+        requirement.document_type,
       );
       if (error) {
         if (error.code === 404) {
@@ -191,7 +191,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
           const { error } = await saveParentDocument(
             jwt,
             userId,
-            requirement.documentType,
+            requirement.document_type,
             file,
           );
           if (error) {
@@ -199,7 +199,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
             return;
           }
           toast.success(
-            `Document: ${requirement.documentType} uploaded succesfully!`,
+            `Document: ${requirement.document_type} uploaded succesfully!`,
           );
           if (file) setOpen(false);
           // reset input

@@ -30,20 +30,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PagedResponse } from "shared/types/pagination";
 import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
-import {
-  PropertyParentDocument,
-  RequestStatus,
-} from "shared/types/modules/compliance";
 import AdminPropertyParentDocumentTableActionMenu from "./AdminPropertyParentDocumentTableActionMenu";
-import { COMPLIANCE_EVENTS } from "shared/events/modules/compliance";
-import socket from "@/app/socket";
-import { ApiResponse } from "shared/types/response";
+import { COMPLIANCE_EVENTS } from "@/socket/events/modules/compliance";
+import socket from "@/socket";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
 interface AdminPropertyParentDocumentTableProps {
   jwt: string;
@@ -54,18 +50,20 @@ interface AdminPropertyParentDocumentTableProps {
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): ApiResponse<PagedResponse<PropertyParentDocument>>;
+  ): Promise<
+    ApiResponse<components["schemas"]["PagedResponse_PropertyParentDocument_"]>
+  >;
   setPropertyParentDocumentApprovalRequestStatus(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-    requestStatus: RequestStatus,
-  ): ApiResponse<PropertyParentDocument>;
+    requestStatus: components["schemas"]["REQUEST_STATUS"],
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
   getParentDocumentURLByDocumentID(
     jwt: string,
     docId: string,
-  ): ApiResponse<string>;
+  ): Promise<ApiResponse<string>>;
 }
 
 export default function AdminPropertyParentDocumentTable({
@@ -81,7 +79,9 @@ export default function AdminPropertyParentDocumentTable({
   const pageNumber = parseInt(pageNumberParam || "1");
   const pageSizeParam = searchParams.get("pageSize");
   const pageSize = parseInt(pageSizeParam || "1");
-  const [result, setResult] = useState<PropertyParentDocument[]>([]);
+  const [result, setResult] = useState<
+    Array<components["schemas"]["PropertyParentDocument"]>
+  >([]);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -118,97 +118,108 @@ export default function AdminPropertyParentDocumentTable({
     [jwt, propertyId, getAllDocumentApprovalRequestsForGivenProperty],
   );
 
-  const columns: ColumnDef<PropertyParentDocument>[] = [
-    {
-      accessorKey: "user_id",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Parent User ID
-            <ArrowUpDown />
-          </Button>
-        );
+  const columns: ColumnDef<components["schemas"]["PropertyParentDocument"]>[] =
+    [
+      {
+        accessorKey: "user_id",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Parent User ID
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("user_id")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("user_id")}</div>
-      ),
-    },
-    {
-      accessorKey: "parent_document_id",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Parent Document ID
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "parent_document_id",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Parent Document ID
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("parent_document_id")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("parent_document_id")}</div>
-      ),
-    },
-    {
-      accessorKey: "request_status",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Request Status
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "request_status",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Request Status
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("request_status")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("request_status")}</div>
-      ),
-    },
-    {
-      accessorKey: "approved_by",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Approved By
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "approved_by",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Approved By
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("approved_by")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("approved_by")}</div>
-      ),
-    },
-    {
-      id: "actions",
-      enableHiding: false,
-      cell: ({ row }) => {
-        const request = row.original;
+      {
+        id: "actions",
+        enableHiding: false,
+        cell: ({ row }) => {
+          const request = row.original;
 
-        return (
-          <AdminPropertyParentDocumentTableActionMenu
-            jwt={jwt}
-            adminId={adminId}
-            request={request}
-            setPropertyParentDocumentApprovalRequestStatus={
-              setPropertyParentDocumentApprovalRequestStatus
-            }
-            getParentDocumentURLByDocumentID={getParentDocumentURLByDocumentID}
-          />
-        );
+          return (
+            <AdminPropertyParentDocumentTableActionMenu
+              jwt={jwt}
+              adminId={adminId}
+              request={request}
+              setPropertyParentDocumentApprovalRequestStatus={
+                setPropertyParentDocumentApprovalRequestStatus
+              }
+              getParentDocumentURLByDocumentID={
+                getParentDocumentURLByDocumentID
+              }
+            />
+          );
+        },
       },
-    },
-  ];
+    ];
 
-  const table = useReactTable<PropertyParentDocument>({
+  const table = useReactTable<components["schemas"]["PropertyParentDocument"]>({
     data: result,
     columns,
     onSortingChange: setSorting,
@@ -231,7 +242,9 @@ export default function AdminPropertyParentDocumentTable({
   }, [loadProperties, pageNumber, pageSize]);
 
   useEffect(() => {
-    function onRequestApproved(event: PropertyParentDocument) {
+    function onRequestApproved(
+      event: components["schemas"]["PropertyParentDocument"],
+    ) {
       setResult((prev) => {
         const existingIndex = prev.findIndex(
           (doc) => doc.parent_document_id === event.parent_document_id,
@@ -255,7 +268,9 @@ export default function AdminPropertyParentDocumentTable({
       );
     }
 
-    function onRequestSent(event: PropertyParentDocument) {
+    function onRequestSent(
+      event: components["schemas"]["PropertyParentDocument"],
+    ) {
       setResult((prev) => [...prev, event]);
     }
 

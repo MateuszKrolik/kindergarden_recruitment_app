@@ -31,10 +31,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { ApiResponse } from "shared/types/response";
-import { PropertyChildDocumentRequirement } from "shared/types/modules/property-management";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
-const EMPTY_REQUIREMENTS: PropertyChildDocumentRequirement[] = [];
+const EMPTY_REQUIREMENTS: components["schemas"]["PropertyChildDocumentRequirement"][] =
+  [];
 
 export type ChildrenDocumentRequirementsTableProps = {
   jwt: string;
@@ -44,7 +45,9 @@ export type ChildrenDocumentRequirementsTableProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): ApiResponse<PropertyChildDocumentRequirement[]>;
+  ): Promise<
+    ApiResponse<components["schemas"]["PropertyChildDocumentRequirement"][]>
+  >;
 };
 
 export const ChildrenDocumentRequirementsTable = ({
@@ -58,107 +61,111 @@ export const ChildrenDocumentRequirementsTable = ({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<PropertyChildDocumentRequirement[]>([]);
+  const [data, setData] = useState<
+    components["schemas"]["PropertyChildDocumentRequirement"][]
+  >([]);
 
-  const columns: ColumnDef<PropertyChildDocumentRequirement>[] = [
-    {
-      accessorKey: "document_type",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Document Type
-            <ArrowUpDown />
-          </Button>
-        );
+  const columns: ColumnDef<
+    components["schemas"]["PropertyChildDocumentRequirement"]
+  >[] = [
+      {
+        accessorKey: "document_type",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Document Type
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("document_type")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("document_type")}</div>
-      ),
-    },
-    {
-      accessorKey: "requirement_type",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Requirement Type
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "requirement_type",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Requirement Type
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("requirement_type")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("requirement_type")}</div>
-      ),
-    },
-    {
-      accessorKey: "condition_key",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Condition Key
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "condition_key",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Condition Key
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("condition_key")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("condition_key")}</div>
-      ),
-    },
-    {
-      accessorKey: "point_value",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Point Value
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "point_value",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Point Value
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("point_value")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("point_value")}</div>
-      ),
-    },
-    {
-      id: "actions",
-      enableHiding: false,
-      cell: ({ row }) => {
-        const requirement = row.original;
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() =>
-                  navigator.clipboard.writeText(requirement.document_type)
-                }
-              >
-                Copy document type
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>TODO</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
+      {
+        id: "actions",
+        enableHiding: false,
+        cell: ({ row }) => {
+          const requirement = row.original;
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() =>
+                    navigator.clipboard.writeText(requirement.document_type)
+                  }
+                >
+                  Copy document type
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>TODO</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
       },
-    },
-  ];
+    ];
 
   const fetchData = useCallback(async () => {
     setError(null);
@@ -181,7 +188,9 @@ export const ChildrenDocumentRequirementsTable = ({
     fetchData();
   }, [fetchData]);
 
-  const table = useReactTable<PropertyChildDocumentRequirement>({
+  const table = useReactTable<
+    components["schemas"]["PropertyChildDocumentRequirement"]
+  >({
     data: error ? EMPTY_REQUIREMENTS : data,
     columns,
     onSortingChange: setSorting,

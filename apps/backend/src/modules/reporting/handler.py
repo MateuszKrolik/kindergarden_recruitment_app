@@ -1,11 +1,12 @@
 from typing import Callable
 from uuid import UUID
 from fastapi import APIRouter, Response, Depends, UploadFile, File
+from fastapi.responses import JSONResponse
 
 from src.modules.reporting.svc import IReportingSvc
 from src.shared.types.modules.reporting.enum import DOCUMENT_TYPE
 from src.shared.types.modules.reporting.model import ParentDocument
-from src.shared.types.response import ApiResponse, AuthMiddlewareResponse, HTTPError
+from src.shared.types.response import AuthMiddlewareResponse, HTTPError
 
 
 class ReportingHandler:
@@ -20,91 +21,139 @@ class ReportingHandler:
         self.register_routes()
 
     def register_routes(self):
-        @self.router.get("/parents/{parent_id}/documents/{document_type}")
+        @self.router.get(
+            "/parents/{parent_id}/documents/{document_type}",
+            responses={
+                200: {"model": ParentDocument},
+                "default": {"model": HTTPError},
+            },
+        )
         async def get_parent_document_by_type(
             parent_id: UUID,
             document_type,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
-        ) -> ApiResponse[ParentDocument]:
+        ) -> ParentDocument:
             if document_type not in DOCUMENT_TYPE:
-                return ApiResponse(
-                    error=HTTPError(
+                return JSONResponse(
+                    status_code=400,
+                    content=HTTPError(
                         code=400,
                         message="Invalid document type!",
-                    )
+                    ).dict(),
                 )
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             data, error = await self.svc.get_parent_document_by_type(
                 user_id=parent_id, document_type=document_type
             )
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             response.status_code = 200
-            return ApiResponse(data=data)
+            assert data is not None
+            return data
 
-        @self.router.get("/parent-documents/{doc_id}")
+        @self.router.get(
+            "/parent-documents/{doc_id}",
+            responses={
+                200: {"model": str},
+                "default": {"model": HTTPError},
+            },
+        )
         async def get_parent_document_url_by_document_id(
             doc_id: UUID,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
-        ) -> ApiResponse[str]:
+        ) -> str:
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             data, error = await self.svc.get_parent_document_url_by_document_id(
                 doc_id=doc_id
             )
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             response.status_code = 200
-            return ApiResponse(data=data)
+            assert data is not None
+            return data
 
-        @self.router.get("/documents/{file_path:path}")
+        @self.router.get(
+            "/documents/{file_path:path}",
+            responses={
+                200: {"model": str},
+                "default": {"model": HTTPError},
+            },
+        )
         async def get_document_url_by_file_path(
             file_path: str,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
-        ) -> ApiResponse[str]:
+        ) -> str:
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             data, error = await self.svc.get_document_url_by_file_path(path=file_path)
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             response.status_code = 200
-            return ApiResponse(data=data)
+            assert data is not None
+            return data
 
-        @self.router.post("/parents/{parent_id}/documents/{document_type}")
+        @self.router.post(
+            "/parents/{parent_id}/documents/{document_type}",
+            responses={
+                201: {"model": ParentDocument},
+                "default": {"model": HTTPError},
+            },
+        )
         async def save_parent_document(
             parent_id: UUID,
             document_type: DOCUMENT_TYPE,
             response: Response,
             file: UploadFile = File(...),
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
-        ) -> ApiResponse[ParentDocument]:
+        ) -> ParentDocument:
             if document_type not in DOCUMENT_TYPE:
-                response.status_code = 400
-                return ApiResponse(
-                    error=HTTPError(code=400, message="Invalid document type!")
+                return JSONResponse(
+                    status_code=400,
+                    content=HTTPError(
+                        code=400,
+                        message="Invalid document type!",
+                    ).dict(),
                 )
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             data, error = await self.svc.save_parent_document(
                 user_id=parent_id, document_type=document_type, file=file
             )
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             response.status_code = 201
-            return ApiResponse(data=data)
+            assert data is not None
+            return data

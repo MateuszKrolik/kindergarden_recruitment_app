@@ -52,10 +52,8 @@ services:
 
   # backend:
   #   build:
-  #     context: .
-  #     dockerfile: backend.Dockerfile
+  #     context: ./apps/backend
   #   environment:
-  #     - NODE_ENV=production
   #     - FRONTEND_URL=http://frontend:3000
   #   ports:
   #     - 3001:3001

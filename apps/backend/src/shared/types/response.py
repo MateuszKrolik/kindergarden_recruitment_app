@@ -1,13 +1,11 @@
 from typing import Any, Dict, Generic, Optional, TypeVar, Union
-from dataclasses import dataclass
 
 from pydantic import BaseModel
 
 T = TypeVar("T")
 
 
-@dataclass
-class HTTPError:
+class HTTPError(BaseModel):
     code: int
     message: str
 

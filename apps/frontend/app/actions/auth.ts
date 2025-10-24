@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { signInSchema } from "@/types/schema";
 import { z } from "zod";
-import { catchError } from "shared/utils/error";
+import { catchError } from "@/util/error";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 

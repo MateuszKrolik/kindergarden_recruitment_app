@@ -8,12 +8,12 @@ import {
   DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { PropertyUser } from "shared/types/modules/identity";
 import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Progress } from "../ui/progress";
-import { ApiResponse } from "shared/types/response";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
 type PropertyTableRowActionMenuContentProps = {
   jwt: string;
@@ -23,7 +23,7 @@ type PropertyTableRowActionMenuContentProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): ApiResponse<PropertyUser>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyUser"]>>;
 };
 
 export const PropertyTableRowActionMenu = ({
@@ -32,7 +32,9 @@ export const PropertyTableRowActionMenu = ({
   userId,
   getPropertyUser,
 }: PropertyTableRowActionMenuContentProps) => {
-  const [propertyUser, setPropertyUser] = useState<PropertyUser | null>(null);
+  const [propertyUser, setPropertyUser] = useState<
+    components["schemas"]["PropertyUser"] | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleOnOpenChange = async (open: boolean) => {

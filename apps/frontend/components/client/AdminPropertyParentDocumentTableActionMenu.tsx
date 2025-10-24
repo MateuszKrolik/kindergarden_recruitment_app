@@ -8,29 +8,25 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { MoreHorizontal } from "lucide-react";
-import {
-  PropertyParentDocument,
-  RequestStatus,
-  REQUEST_STATUS,
-} from "shared/types/modules/compliance";
 import { toast } from "sonner";
-import { ApiResponse } from "shared/types/response";
+import { components } from "@/client/schema";
+import { ApiResponse } from "@/types/response";
 
 type AdminPropertyParentDocumentTableActionMenuProps = {
   jwt: string;
   adminId: string;
-  request: PropertyParentDocument;
+  request: components["schemas"]["PropertyParentDocument"];
   setPropertyParentDocumentApprovalRequestStatus(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-    requestStatus: RequestStatus,
-  ): ApiResponse<PropertyParentDocument>;
+    requestStatus: components["schemas"]["REQUEST_STATUS"],
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
   getParentDocumentURLByDocumentID(
     jwt: string,
     docId: string,
-  ): ApiResponse<string>;
+  ): Promise<ApiResponse<string>>;
 };
 
 export default function AdminPropertyParentDocumentTableActionMenu({
@@ -69,6 +65,7 @@ export default function AdminPropertyParentDocumentTableActionMenu({
               toast.error(error.message);
               return;
             }
+            if (!data) return;
             window.open(data, "_blank");
           }}
         >
@@ -82,14 +79,14 @@ export default function AdminPropertyParentDocumentTableActionMenu({
 type SetStatusDropdownMenuItemProps = {
   jwt: string;
   adminId: string;
-  request: PropertyParentDocument;
+  request: components["schemas"]["PropertyParentDocument"];
   setPropertyParentDocumentApprovalRequestStatus(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-    requestStatus: RequestStatus,
-  ): ApiResponse<PropertyParentDocument>;
+    requestStatus: components["schemas"]["REQUEST_STATUS"],
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
 };
 
 const SetStatusDropdownMenuItem = ({
@@ -97,7 +94,9 @@ const SetStatusDropdownMenuItem = ({
   request,
   setPropertyParentDocumentApprovalRequestStatus,
 }: SetStatusDropdownMenuItemProps) => {
-  const handleStatusChange = async (status: RequestStatus) => {
+  const handleStatusChange = async (
+    status: components["schemas"]["REQUEST_STATUS"],
+  ) => {
     const { error } = await setPropertyParentDocumentApprovalRequestStatus(
       jwt,
       request.property_id,
@@ -114,18 +113,18 @@ const SetStatusDropdownMenuItem = ({
   return (
     <>
       <DropdownMenuItem
-        disabled={request.request_status === REQUEST_STATUS.APPROVED}
-        onClick={async () => await handleStatusChange(REQUEST_STATUS.APPROVED)}
+        disabled={request.request_status === "approved"}
+        onClick={async () => await handleStatusChange("approved")}
       >
         Approve Request
       </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem
         disabled={
-          request.request_status === REQUEST_STATUS.REJECTED ||
-          request.request_status === REQUEST_STATUS.APPROVED
+          request.request_status === "rejected" ||
+          request.request_status === "approved"
         }
-        onClick={async () => await handleStatusChange(REQUEST_STATUS.REJECTED)}
+        onClick={async () => await handleStatusChange("rejected")}
       >
         Reject Request
       </DropdownMenuItem>

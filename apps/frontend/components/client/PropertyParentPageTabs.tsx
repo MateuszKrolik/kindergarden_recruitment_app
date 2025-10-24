@@ -1,20 +1,11 @@
 "use client";
 
-import {
-  PropertyChildDocumentRequirement,
-  PropertyParentDocumentRequirement,
-} from "shared/types/modules/property-management";
-import { ParentDocument, DocumentType } from "shared/types/modules/reporting";
-import {
-  PropertyChildDocument,
-  PropertyParentDocument,
-} from "shared/types/modules/compliance";
 import { PropertyParentDocumentTabs } from "./PropertyParentDocumentTabs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { getAllPropertyChildrenForGivenParent } from "@/app/actions/property-management";
-import { ApiResponse } from "shared/types/response";
 import { PropertyParentChildrenDocumentTabs } from "./PropertyParentChildrenDocumentTabs";
-import { ApiResponseListPropertyParentDocumentRequirement } from "@/api-client";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
 type PropertyParentPageTabsProps = {
   jwt: string;
@@ -24,46 +15,53 @@ type PropertyParentPageTabsProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): Promise<ApiResponseListPropertyParentDocumentRequirement>;
+  ): Promise<
+    ApiResponse<components["schemas"]["PropertyParentDocumentRequirement"][]>
+  >;
   getParentDocumentByType(
     jwt: string,
     userId: string,
-    documentType: DocumentType,
-  ): ApiResponse<ParentDocument>;
+    documentType: components["schemas"]["DOCUMENT_TYPE"],
+  ): Promise<ApiResponse<components["schemas"]["ParentDocument"]>>;
   getAllDocumentApprovalRequestsForGivenPropertyParent(
     jwt: string,
     propertyId: string,
     userId: string,
-  ): ApiResponse<PropertyParentDocument[]>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"][]>>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
     parentId: string,
     parentDocId: string,
-  ): ApiResponse<PropertyParentDocument>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
   sendPropertyParentDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): ApiResponse<PropertyParentDocument>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
   saveParentDocument(
     jwt: string,
     userId: string,
-    documentType: DocumentType,
+    documentType: components["schemas"]["DOCUMENT_TYPE"],
     file: File,
-  ): ApiResponse<ParentDocument>;
-  getDocumentURLByFilePath(jwt: string, key: string): ApiResponse<string>;
+  ): Promise<ApiResponse<components["schemas"]["ParentDocument"]>>;
+  getDocumentURLByFilePath(
+    jwt: string,
+    key: string,
+  ): Promise<ApiResponse<string>>;
   getPropertyChildDocumentRequirements(
     jwt: string,
     propertyId: string,
     childId: string,
-  ): ApiResponse<PropertyChildDocumentRequirement[]>;
+  ): Promise<
+    ApiResponse<components["schemas"]["PropertyChildDocumentRequirement"][]>
+  >;
   getAllDocumentApprovalRequestsForGivenPropertyChild(
     jwt: string,
     propertyId: string,
     childId: string,
-  ): ApiResponse<PropertyChildDocument[]>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyChildDocument"][]>>;
 };
 
 export const PropertyParentPageTabs = ({

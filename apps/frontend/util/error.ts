@@ -11,3 +11,15 @@ export const getErrorMessage = (error: unknown): string => {
   }
   return message;
 };
+
+export async function catchError<T>(
+  promise: Promise<T>,
+): Promise<{ data: T; error: undefined } | { data: undefined; error: Error }> {
+  return promise
+    .then((data) => {
+      return { data: data, error: undefined };
+    })
+    .catch((error) => {
+      return { data: undefined, error: error };
+    });
+}

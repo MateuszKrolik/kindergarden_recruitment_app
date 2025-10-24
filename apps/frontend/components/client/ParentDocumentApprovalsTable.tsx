@@ -1,6 +1,5 @@
 "use client";
 
-import { PropertyParentDocument } from "shared/types/modules/compliance";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -24,9 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { COMPLIANCE_EVENTS } from "shared/events/modules/compliance";
-import socket from "@/app/socket";
-import { ApiResponse } from "shared/types/response";
+import { COMPLIANCE_EVENTS } from "@/socket/events/modules/compliance";
+import socket from "@/socket";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
 type ParentDocumentApprovalsTableProps = {
   jwt: string;
@@ -36,7 +36,7 @@ type ParentDocumentApprovalsTableProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): ApiResponse<PropertyParentDocument[]>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"][]>>;
 };
 
 export const ParentDocumentApprovalsTable = ({
@@ -50,61 +50,70 @@ export const ParentDocumentApprovalsTable = ({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<PropertyParentDocument[]>([]);
+  const [data, setData] = useState<
+    Array<components["schemas"]["PropertyParentDocument"]>
+  >([]);
 
-  const columns: ColumnDef<PropertyParentDocument>[] = [
-    {
-      accessorKey: "parent_document_id",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Parent Document ID
-            <ArrowUpDown />
-          </Button>
-        );
+  const columns: ColumnDef<components["schemas"]["PropertyParentDocument"]>[] =
+    [
+      {
+        accessorKey: "parent_document_id",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Parent Document ID
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("parent_document_id")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("parent_document_id")}</div>
-      ),
-    },
-    {
-      accessorKey: "request_status",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Request Status
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "request_status",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Request Status
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("request_status")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("request_status")}</div>
-      ),
-    },
-    {
-      accessorKey: "approved_by",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Approved By ID
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "approved_by",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Approved By ID
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("approved_by")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("approved_by")}</div>
-      ),
-    },
-  ];
+    ];
 
   const fetchData = useCallback(async () => {
     const { data: result, error } =
@@ -121,11 +130,6 @@ export const ParentDocumentApprovalsTable = ({
       return;
     }
 
-    if (!result) {
-      toast.error(`Error: No data available!`);
-      return;
-    }
-
     setData(result);
   }, [
     jwt,
@@ -139,7 +143,9 @@ export const ParentDocumentApprovalsTable = ({
   }, [fetchData]);
 
   useEffect(() => {
-    function onRequestApproved(event: PropertyParentDocument) {
+    function onRequestApproved(
+      event: components["schemas"]["PropertyParentDocument"],
+    ) {
       setData((prev) => {
         const existingIndex = prev.findIndex(
           (doc) => doc.parent_document_id === event.parent_document_id,
@@ -163,7 +169,9 @@ export const ParentDocumentApprovalsTable = ({
       );
     }
 
-    function onRequestSent(event: PropertyParentDocument) {
+    function onRequestSent(
+      event: components["schemas"]["PropertyParentDocument"],
+    ) {
       setData((prev) => [...prev, event]);
     }
 
@@ -189,7 +197,7 @@ export const ParentDocumentApprovalsTable = ({
     };
   }, []);
 
-  const table = useReactTable<PropertyParentDocument>({
+  const table = useReactTable<components["schemas"]["PropertyParentDocument"]>({
     data: error || data instanceof Error ? [] : data,
     columns,
     onSortingChange: setSorting,

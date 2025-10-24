@@ -7,3 +7,4 @@ PyJWT
 boto3
 redis
 python-socketio[asyncio]
+cryptography

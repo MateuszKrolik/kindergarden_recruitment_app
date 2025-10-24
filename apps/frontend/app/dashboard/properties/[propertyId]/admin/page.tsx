@@ -2,7 +2,6 @@
 
 import { getAllPropertyChildrenPaged } from "@/app/actions/property-management";
 import { AdminPropertyChildrenTable } from "@/components/client/AdminPropertyChildrenTable";
-import { PROPERTY_USER_ROLE } from "shared/types/modules/identity";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -28,7 +27,7 @@ export default async function PropertyAdminPage({
     console.error(error.message);
     return;
   }
-  if (data?.role != PROPERTY_USER_ROLE.Admin) {
+  if (data.role != "admin") {
     redirect(`/dashboard/properties/${propertyId}/admin/403`);
   }
 

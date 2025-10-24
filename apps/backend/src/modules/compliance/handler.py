@@ -2,6 +2,7 @@ from typing import Callable, List
 from uuid import UUID
 import uuid
 from fastapi import APIRouter, Response, Depends, Query
+from fastapi.responses import JSONResponse
 
 from src.modules.compliance.svc import IComplianceSvc
 from src.shared.types.modules.compliance.enum import REQUEST_STATUS
@@ -10,7 +11,7 @@ from src.shared.types.modules.compliance.model import (
     PropertyParentDocument,
 )
 from src.shared.types.pagination import PagedResponse
-from src.shared.types.response import ApiResponse, AuthMiddlewareResponse, HTTPError
+from src.shared.types.response import AuthMiddlewareResponse, HTTPError
 
 
 class ComplianceHandler:
@@ -26,18 +27,24 @@ class ComplianceHandler:
 
     def register_routes(self):
         @self.router.get(
-            "/properties/{property_id}/parents/{parent_id}/parent-document-requests"
+            "/properties/{property_id}/parents/{parent_id}/parent-document-requests",
+            responses={
+                200: {"model": List[PropertyParentDocument]},
+                "default": {"model": HTTPError},
+            },
         )
-        async def get_properties(
+        async def get_all_document_approval_requests_for_given_property_parent(
             property_id: UUID,
             parent_id: UUID,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
-        ) -> ApiResponse[List[PropertyParentDocument]]:
+        ) -> List[PropertyParentDocument]:
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             (
                 data,
                 error,
@@ -45,24 +52,33 @@ class ComplianceHandler:
                 property_id=property_id, user_id=parent_id
             )
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             response.status_code = 200
-            return ApiResponse(data=data)
+            assert data is not None
+            return data
 
         @self.router.get(
-            "/properties/{property_id}/children/{child_id}/child-document-requests"
+            "/properties/{property_id}/children/{child_id}/child-document-requests",
+            responses={
+                200: {"model": List[PropertyChildDocument]},
+                "default": {"model": HTTPError},
+            },
         )
         async def get_all_document_approval_requests_for_given_property_child(
             property_id: UUID,
             child_id: UUID,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
-        ) -> ApiResponse[List[PropertyChildDocument]]:
+        ) -> List[PropertyChildDocument]:
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             (
                 data,
                 error,
@@ -70,13 +86,20 @@ class ComplianceHandler:
                 property_id=property_id, child_id=child_id
             )
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             response.status_code = 200
-            return ApiResponse(data=data)
+            assert data is not None
+            return data
 
         @self.router.get(
-            "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_doc_id}"
+            "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_doc_id}",
+            responses={
+                200: {"model": PropertyParentDocument},
+                "default": {"model": HTTPError},
+            },
         )
         async def get_property_parent_document_approval_request_by_document_id(
             property_id: UUID,
@@ -84,11 +107,13 @@ class ComplianceHandler:
             parent_doc_id: UUID,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
-        ) -> ApiResponse[PropertyParentDocument]:
+        ) -> PropertyParentDocument:
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             (
                 data,
                 error,
@@ -96,23 +121,34 @@ class ComplianceHandler:
                 property_id=property_id, user_id=parent_id, parent_doc_id=parent_doc_id
             )
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             response.status_code = 200
-            return ApiResponse(data=data)
+            assert data is not None
+            return data
 
-        @self.router.get("/properties/{property_id}/parent-document-requests")
+        @self.router.get(
+            "/properties/{property_id}/parent-document-requests",
+            responses={
+                200: {"model": PagedResponse[PropertyParentDocument]},
+                "default": {"model": HTTPError},
+            },
+        )
         async def get_all_document_approval_requests_for_given_property(
             property_id: UUID,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
             page_size: int = Query(1, ge=1),
             page_number: int = Query(1, ge=1),
-        ) -> ApiResponse[PagedResponse[PropertyParentDocument]]:
+        ) -> PagedResponse[PropertyParentDocument]:
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             (
                 data,
                 error,
@@ -120,13 +156,20 @@ class ComplianceHandler:
                 property_id=property_id, page_size=page_size, page_number=page_number
             )
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             response.status_code = 200
-            return ApiResponse(data=data)
+            assert data is not None
+            return data
 
         @self.router.post(
-            "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_doc_id}"
+            "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_doc_id}",
+            responses={
+                201: {"model": PropertyParentDocument},
+                "default": {"model": HTTPError},
+            },
         )
         async def send_property_parent_document_approval_request(
             property_id: UUID,
@@ -134,11 +177,13 @@ class ComplianceHandler:
             parent_doc_id: UUID,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
-        ) -> ApiResponse[PropertyParentDocument]:
+        ) -> PropertyParentDocument:
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             (
                 data,
                 error,
@@ -148,30 +193,42 @@ class ComplianceHandler:
                 parent_document_id=parent_doc_id,
             )
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
-            response.status_code = 200
-            return ApiResponse(data=data)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 201
+            assert data is not None
+            return data
 
         @self.router.patch(
-            "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/{request_status}"
+            "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/{request_status}",
+            responses={
+                200: {"model": PropertyParentDocument},
+                "default": {"model": HTTPError},
+            },
         )
-        async def sth(
+        async def set_property_parent_document_request_status(
             property_id: UUID,
             parent_id: UUID,
             parent_document_id: UUID,
             request_status: REQUEST_STATUS,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
-        ) -> ApiResponse[PropertyParentDocument]:
+        ) -> PropertyParentDocument:
             if request_status not in REQUEST_STATUS:
-                return ApiResponse(
-                    error=HTTPError(code=400, message="Invalid request status!")
+                return JSONResponse(
+                    status_code=400,
+                    content=HTTPError(
+                        code=400, message="Invalid request status!"
+                    ).dict(),
                 )
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             assert user is not None
             uid = user.get("id")
             (
@@ -185,7 +242,10 @@ class ComplianceHandler:
                 admin_id=uid if uid else uuid.uuid4(),
             )
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             response.status_code = 200
-            return ApiResponse(data=data)
+            assert data is not None
+            return data

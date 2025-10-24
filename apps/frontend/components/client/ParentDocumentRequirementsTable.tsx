@@ -23,14 +23,9 @@ import {
   TableRow,
 } from "../ui/table";
 import { useCallback, useEffect, useState } from "react";
-import { DocumentType, ParentDocument } from "shared/types/modules/reporting";
 import { ParentDocumentRequirementsTableActionMenu } from "./ParentDocumentRequirementsTableActionMenu";
-import { PropertyParentDocument } from "shared/types/modules/compliance";
-import { ApiResponse } from "shared/types/response";
-import {
-  ApiResponseListPropertyParentDocumentRequirement,
-  PropertyParentDocumentRequirement,
-} from "@/api-client";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
 export type ParentDocumentRequirementsTableProps = {
   jwt: string;
@@ -40,31 +35,36 @@ export type ParentDocumentRequirementsTableProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): Promise<ApiResponseListPropertyParentDocumentRequirement>;
+  ): Promise<
+    ApiResponse<components["schemas"]["PropertyParentDocumentRequirement"][]>
+  >;
   getParentDocumentByType(
     jwt: string,
     userId: string,
-    documentType: DocumentType,
-  ): ApiResponse<ParentDocument>;
+    documentType: components["schemas"]["DOCUMENT_TYPE"],
+  ): Promise<ApiResponse<components["schemas"]["ParentDocument"]>>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): ApiResponse<PropertyParentDocument>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
   sendPropertyParentDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): ApiResponse<PropertyParentDocument>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
   saveParentDocument(
     jwt: string,
     userId: string,
-    documentType: DocumentType,
+    documentType: components["schemas"]["DOCUMENT_TYPE"],
     file: File,
-  ): ApiResponse<ParentDocument>;
-  getDocumentURLByFilePath(jwt: string, key: string): ApiResponse<string>;
+  ): Promise<ApiResponse<components["schemas"]["ParentDocument"]>>;
+  getDocumentURLByFilePath(
+    jwt: string,
+    key: string,
+  ): Promise<ApiResponse<string>>;
 };
 
 export const ParentDocumentRequirementsTable = ({
@@ -83,104 +83,106 @@ export const ParentDocumentRequirementsTable = ({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<Array<PropertyParentDocumentRequirement>>(
-    [],
-  );
+  const [data, setData] = useState<
+    Array<components["schemas"]["PropertyParentDocumentRequirement"]>
+  >([]);
 
-  const columns: ColumnDef<PropertyParentDocumentRequirement>[] = [
-    {
-      accessorKey: "documentType",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Document Type
-            <ArrowUpDown />
-          </Button>
-        );
+  const columns: ColumnDef<
+    components["schemas"]["PropertyParentDocumentRequirement"]
+  >[] = [
+      {
+        accessorKey: "document_type",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Document Type
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("document_type")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("documentType")}</div>
-      ),
-    },
-    {
-      accessorKey: "requirementType",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Requirement Type
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "requirement_type",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Requirement Type
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("requirement_type")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("requirementType")}</div>
-      ),
-    },
-    {
-      accessorKey: "conditionKey",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Condition Key
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "condition_key",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Condition Key
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("condition_key")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("conditionKey")}</div>
-      ),
-    },
-    {
-      accessorKey: "pointValue",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Point Value
-            <ArrowUpDown />
-          </Button>
-        );
+      {
+        accessorKey: "point_value",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Point Value
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("point_value")}</div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("pointValue")}</div>
-      ),
-    },
-    {
-      id: "actions",
-      enableHiding: false,
-      cell: ({ row }) => {
-        const requirement = row.original;
-        return (
-          <ParentDocumentRequirementsTableActionMenu
-            jwt={jwt}
-            propertyId={propertyId}
-            userId={userId}
-            getParentDocumentByType={getParentDocumentByType}
-            requirement={requirement}
-            getPropertyParentDocumentApprovalRequestByDocumentId={
-              getPropertyParentDocumentApprovalRequestByDocumentId
-            }
-            sendPropertyParentDocumentApprovalRequest={
-              sendPropertyParentDocumentApprovalRequest
-            }
-            saveParentDocument={saveParentDocument}
-            getDocumentURLByFilePath={getDocumentURLByFilePath}
-          />
-        );
+      {
+        id: "actions",
+        enableHiding: false,
+        cell: ({ row }) => {
+          const requirement = row.original;
+          return (
+            <ParentDocumentRequirementsTableActionMenu
+              jwt={jwt}
+              propertyId={propertyId}
+              userId={userId}
+              getParentDocumentByType={getParentDocumentByType}
+              requirement={requirement}
+              getPropertyParentDocumentApprovalRequestByDocumentId={
+                getPropertyParentDocumentApprovalRequestByDocumentId
+              }
+              sendPropertyParentDocumentApprovalRequest={
+                sendPropertyParentDocumentApprovalRequest
+              }
+              saveParentDocument={saveParentDocument}
+              getDocumentURLByFilePath={getDocumentURLByFilePath}
+            />
+          );
+        },
       },
-    },
-  ];
+    ];
 
   const fetchData = useCallback(async () => {
     const { data, error } = await getPropertyParentDocumentRequirements(
@@ -196,8 +198,6 @@ export const ParentDocumentRequirementsTable = ({
       return;
     }
 
-    if (!data) return;
-
     setData(data);
   }, [jwt, propertyId, userId, getPropertyParentDocumentRequirements]);
 
@@ -205,7 +205,9 @@ export const ParentDocumentRequirementsTable = ({
     fetchData();
   }, [fetchData]);
 
-  const table = useReactTable<PropertyParentDocumentRequirement>({
+  const table = useReactTable<
+    components["schemas"]["PropertyParentDocumentRequirement"]
+  >({
     data: error || data instanceof Error ? [] : data,
     columns,
     onSortingChange: setSorting,

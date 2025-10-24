@@ -17,7 +17,6 @@ import {
   saveParentDocument,
 } from "@/app/actions/reporting";
 import { PropertyParentPageTabs } from "@/components/client/PropertyParentPageTabs";
-import { PROPERTY_USER_ROLE } from "shared/types/modules/identity";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -42,7 +41,7 @@ export default async function PropertyParentPage({
     console.error(error.message);
     return;
   }
-  if (data?.role != PROPERTY_USER_ROLE.Parent) {
+  if (data.role != "parent") {
     redirect(`/dashboard/properties/${propertyId}/parent/403`);
   }
 

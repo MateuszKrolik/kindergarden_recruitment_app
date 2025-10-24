@@ -1,10 +1,11 @@
 from typing import Callable
 from uuid import UUID
 from fastapi import APIRouter, Response, Depends
+from fastapi.responses import JSONResponse
 
 from src.modules.identity.svc import IIdentitySvc
 from src.shared.types.modules.identity.model import PropertyUser
-from src.shared.types.response import ApiResponse, AuthMiddlewareResponse
+from src.shared.types.response import AuthMiddlewareResponse, HTTPError
 
 
 class IdentityHandler:
@@ -19,22 +20,33 @@ class IdentityHandler:
         self.register_routes()
 
     def register_routes(self):
-        @self.router.get("/properties/{property_id}/users/{user_id}")
+        @self.router.get(
+            "/properties/{property_id}/users/{user_id}",
+            responses={
+                200: {"model": PropertyUser},
+                "default": {"model": HTTPError},
+            },
+        )
         async def get_properties(
             property_id: UUID,
             user_id: UUID,
             response: Response,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
-        ) -> ApiResponse[PropertyUser]:
+        ) -> PropertyUser:
             user, error = user_result
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             data, error = await self.svc.get_property_user(
                 property_id=property_id, user_id=user_id
             )
             if error:
-                response.status_code = error.code
-                return ApiResponse(error=error)
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
             response.status_code = 200
-            return ApiResponse(data=data)
+            assert data is not None
+            return data

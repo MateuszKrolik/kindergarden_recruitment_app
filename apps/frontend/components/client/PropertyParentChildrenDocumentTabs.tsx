@@ -1,15 +1,11 @@
 "use client";
 
-import { ApiResponse } from "shared/types/response";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import {
-  PropertyChild,
-  PropertyChildDocumentRequirement,
-} from "shared/types/modules/property-management";
 import { PropertyParentChildrenTable } from "./PropertyParentChildrenTable";
 import { ParentChildDocumentApprovalsTable } from "./ParentChildDocumentApprovalsTable";
-import { PropertyChildDocument } from "shared/types/modules/compliance";
 import { ChildrenDocumentRequirementsTable } from "./ChildrenDocumentRequirementsTable";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
 type PropertyParentChildrenDocumentTabsProps = {
   jwt: string;
@@ -19,17 +15,19 @@ type PropertyParentChildrenDocumentTabsProps = {
     jwt: string,
     propertyId: string,
     parentId: string,
-  ): ApiResponse<PropertyChild[]>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyChild"][]>>;
   getPropertyChildDocumentRequirements(
     jwt: string,
     propertyId: string,
     childId: string,
-  ): ApiResponse<PropertyChildDocumentRequirement[]>;
+  ): Promise<
+    ApiResponse<components["schemas"]["PropertyChildDocumentRequirement"][]>
+  >;
   getAllDocumentApprovalRequestsForGivenPropertyChild(
     jwt: string,
     propertyId: string,
     childId: string,
-  ): ApiResponse<PropertyChildDocument[]>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyChildDocument"][]>>;
 };
 
 export const PropertyParentChildrenDocumentTabs = ({

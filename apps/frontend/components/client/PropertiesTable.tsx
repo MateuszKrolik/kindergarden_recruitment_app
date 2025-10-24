@@ -1,6 +1,4 @@
 "use client";
-import { Property } from "shared/types/modules/property-management";
-import { PropertyUser } from "shared/types/modules/identity";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -37,8 +35,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
 import { PropertyTableRowActionMenu } from "./PropertyTableRowActionMenu";
-import { ApiResponse } from "shared/types/response";
-import { ApiResponsePagedResponseProperty } from "@/api-client";
+import { ApiResponse } from "@/types/response";
+import { components } from "@/client/schema";
 
 interface PropertiesTableProps {
   jwt: string;
@@ -47,12 +45,12 @@ interface PropertiesTableProps {
     jwt: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<ApiResponsePagedResponseProperty>;
+  ): Promise<ApiResponse<components["schemas"]["PagedResponse_Property_"]>>;
   getPropertyUser(
     jwt: string,
     propertyId: string,
     userId: string,
-  ): ApiResponse<PropertyUser>;
+  ): Promise<ApiResponse<components["schemas"]["PropertyUser"]>>;
 }
 
 export default function PropertyTable({
@@ -66,7 +64,7 @@ export default function PropertyTable({
   const pageNumber = parseInt(pageNumberParam || "1");
   const pageSizeParam = searchParams.get("pageSize");
   const pageSize = parseInt(pageSizeParam || "1");
-  const [result, setResult] = useState<Property[]>([]);
+  const [result, setResult] = useState<components["schemas"]["Property"][]>([]);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -90,15 +88,11 @@ export default function PropertyTable({
         setIsLoading(false);
         return;
       }
-      if (!result) {
-        setIsLoading(false);
-        return;
-      }
       setResult(result.items);
       setTotalCount(result.total);
-      setHasNextPage(result.hasNextPage);
-      setHasPreviousPage(result.hasPreviousPage);
-      setTotalPages(result.totalPages);
+      setHasNextPage(result.has_next_page);
+      setHasPreviousPage(result.has_previous_page);
+      setTotalPages(result.total_pages);
       setIsLoading(false);
     },
     [jwt, getAllProperties],
@@ -108,7 +102,7 @@ export default function PropertyTable({
     loadProperties(pageSize, pageNumber);
   }, [loadProperties, pageNumber, pageSize]);
 
-  const columns: ColumnDef<Property>[] = [
+  const columns: ColumnDef<components["schemas"]["Property"]>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => {
@@ -143,7 +137,7 @@ export default function PropertyTable({
     },
   ];
 
-  const table = useReactTable<Property>({
+  const table = useReactTable<components["schemas"]["Property"]>({
     data: result,
     columns,
     onSortingChange: setSorting,

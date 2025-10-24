@@ -7,7 +7,6 @@ import {
 import { getPropertyUser } from "@/app/actions/identity";
 import { getParentDocumentURLByDocumentID } from "@/app/actions/reporting";
 import AdminPropertyParentDocumentTable from "@/components/client/AdminPropertyParentDocumentTable";
-import { PROPERTY_USER_ROLE } from "shared/types/modules/identity";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -30,7 +29,7 @@ export default async function Page({ params }: PageProps) {
     console.error(error.message);
     return;
   }
-  if (data?.role != PROPERTY_USER_ROLE.Admin) {
+  if (data.role != "admin") {
     redirect(`/dashboard/properties/${propertyId}/admin/403`);
   }
 
