@@ -5,7 +5,11 @@ import { PropertyParentChildrenTable } from "./PropertyParentChildrenTable";
 import { ParentChildDocumentApprovalsTable } from "./ParentChildDocumentApprovalsTable";
 import { ChildrenDocumentRequirementsTable } from "./ChildrenDocumentRequirementsTable";
 import { ApiResponse } from "@/types/response";
-import { components } from "@/client/schema";
+import {
+  PropertyChild,
+  PropertyChildDocumentRequirement,
+} from "@/types/modules/property/model";
+import { PropertyChildDocument } from "@/types/modules/compliance/model";
 
 type PropertyParentChildrenDocumentTabsProps = {
   jwt: string;
@@ -15,19 +19,17 @@ type PropertyParentChildrenDocumentTabsProps = {
     jwt: string,
     propertyId: string,
     parentId: string,
-  ): Promise<ApiResponse<components["schemas"]["PropertyChild"][]>>;
+  ): Promise<ApiResponse<PropertyChild[]>>;
   getPropertyChildDocumentRequirements(
     jwt: string,
     propertyId: string,
     childId: string,
-  ): Promise<
-    ApiResponse<components["schemas"]["PropertyChildDocumentRequirement"][]>
-  >;
+  ): Promise<ApiResponse<PropertyChildDocumentRequirement[]>>;
   getAllDocumentApprovalRequestsForGivenPropertyChild(
     jwt: string,
     propertyId: string,
     childId: string,
-  ): Promise<ApiResponse<components["schemas"]["PropertyChildDocument"][]>>;
+  ): Promise<ApiResponse<PropertyChildDocument[]>>;
 };
 
 export const PropertyParentChildrenDocumentTabs = ({

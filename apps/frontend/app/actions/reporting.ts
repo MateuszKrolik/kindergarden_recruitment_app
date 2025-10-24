@@ -1,14 +1,15 @@
 "use server";
 
 import { getApiClient } from "@/client";
-import { components } from "@/client/schema";
+import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
+import { ParentDocument } from "@/types/modules/reporting/model";
 import { ApiResponse } from "@/types/response";
 
 export async function getParentDocumentByType(
   jwt: string,
   parentId: string,
-  documentType: components["schemas"]["DOCUMENT_TYPE"],
-): Promise<ApiResponse<components["schemas"]["ParentDocument"]>> {
+  documentType: DOCUMENT_TYPE,
+): Promise<ApiResponse<ParentDocument>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET(
     "/parents/{parent_id}/documents/{document_type}",
@@ -23,9 +24,9 @@ export async function getParentDocumentByType(
 export async function saveParentDocument(
   jwt: string,
   parentId: string,
-  documentType: components["schemas"]["DOCUMENT_TYPE"],
+  documentType: DOCUMENT_TYPE,
   file: File,
-): Promise<ApiResponse<components["schemas"]["ParentDocument"]>> {
+): Promise<ApiResponse<ParentDocument>> {
   const api = getApiClient(jwt);
   const formData = new FormData();
   formData.append("file", file);

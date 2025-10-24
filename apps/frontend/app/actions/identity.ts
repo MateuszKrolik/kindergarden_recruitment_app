@@ -1,14 +1,14 @@
 "use server";
 
 import { getApiClient } from "@/client";
-import { components } from "@/client/schema";
+import { PropertyUser } from "@/types/modules/identity/model";
 import { ApiResponse } from "@/types/response";
 
 export async function getPropertyUser(
   jwt: string,
   propertyId: string,
   userId: string,
-): Promise<ApiResponse<components["schemas"]["PropertyUser"]>> {
+): Promise<ApiResponse<PropertyUser>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET(
     "/properties/{property_id}/users/{user_id}",

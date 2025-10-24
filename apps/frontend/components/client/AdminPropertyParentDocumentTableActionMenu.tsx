@@ -9,20 +9,21 @@ import {
 import { Button } from "../ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
-import { components } from "@/client/schema";
 import { ApiResponse } from "@/types/response";
+import { PropertyParentDocument } from "@/types/modules/compliance/model";
+import { REQUEST_STATUS } from "@/types/modules/compliance/enum";
 
 type AdminPropertyParentDocumentTableActionMenuProps = {
   jwt: string;
   adminId: string;
-  request: components["schemas"]["PropertyParentDocument"];
+  request: PropertyParentDocument;
   setPropertyParentDocumentApprovalRequestStatus(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-    requestStatus: components["schemas"]["REQUEST_STATUS"],
-  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
+    requestStatus: REQUEST_STATUS,
+  ): Promise<ApiResponse<PropertyParentDocument>>;
   getParentDocumentURLByDocumentID(
     jwt: string,
     docId: string,
@@ -79,14 +80,14 @@ export default function AdminPropertyParentDocumentTableActionMenu({
 type SetStatusDropdownMenuItemProps = {
   jwt: string;
   adminId: string;
-  request: components["schemas"]["PropertyParentDocument"];
+  request: PropertyParentDocument;
   setPropertyParentDocumentApprovalRequestStatus(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-    requestStatus: components["schemas"]["REQUEST_STATUS"],
-  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
+    requestStatus: REQUEST_STATUS,
+  ): Promise<ApiResponse<PropertyParentDocument>>;
 };
 
 const SetStatusDropdownMenuItem = ({
@@ -94,9 +95,7 @@ const SetStatusDropdownMenuItem = ({
   request,
   setPropertyParentDocumentApprovalRequestStatus,
 }: SetStatusDropdownMenuItemProps) => {
-  const handleStatusChange = async (
-    status: components["schemas"]["REQUEST_STATUS"],
-  ) => {
+  const handleStatusChange = async (status: REQUEST_STATUS) => {
     const { error } = await setPropertyParentDocumentApprovalRequestStatus(
       jwt,
       request.property_id,

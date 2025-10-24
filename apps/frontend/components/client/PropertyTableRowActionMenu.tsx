@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Progress } from "../ui/progress";
 import { ApiResponse } from "@/types/response";
-import { components } from "@/client/schema";
+import { PropertyUser } from "@/types/modules/identity/model";
 
 type PropertyTableRowActionMenuContentProps = {
   jwt: string;
@@ -23,7 +23,7 @@ type PropertyTableRowActionMenuContentProps = {
     jwt: string,
     propertyId: string,
     userId: string,
-  ): Promise<ApiResponse<components["schemas"]["PropertyUser"]>>;
+  ): Promise<ApiResponse<PropertyUser>>;
 };
 
 export const PropertyTableRowActionMenu = ({
@@ -32,9 +32,7 @@ export const PropertyTableRowActionMenu = ({
   userId,
   getPropertyUser,
 }: PropertyTableRowActionMenuContentProps) => {
-  const [propertyUser, setPropertyUser] = useState<
-    components["schemas"]["PropertyUser"] | null
-  >(null);
+  const [propertyUser, setPropertyUser] = useState<PropertyUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleOnOpenChange = async (open: boolean) => {

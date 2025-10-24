@@ -11,37 +11,40 @@ import {
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Progress } from "../ui/progress";
-import { components } from "@/client/schema";
 import { ApiResponse } from "@/types/response";
+import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
+import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
+import { ParentDocument } from "@/types/modules/reporting/model";
+import { PropertyParentDocument } from "@/types/modules/compliance/model";
 
 type ParentDocumentRequirementsTableActionMenuProps = {
   jwt: string;
   propertyId: string;
   userId: string;
-  requirement: components["schemas"]["PropertyParentDocumentRequirement"];
+  requirement: PropertyParentDocumentRequirement;
   getParentDocumentByType(
     jwt: string,
     userId: string,
-    documentType: components["schemas"]["DOCUMENT_TYPE"],
-  ): Promise<ApiResponse<components["schemas"]["ParentDocument"]>>;
+    documentType: DOCUMENT_TYPE,
+  ): Promise<ApiResponse<ParentDocument>>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocId: string,
-  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
+  ): Promise<ApiResponse<PropertyParentDocument>>;
   sendPropertyParentDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-  ): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>>;
+  ): Promise<ApiResponse<PropertyParentDocument>>;
   saveParentDocument(
     jwt: string,
     userId: string,
-    documentType: components["schemas"]["DOCUMENT_TYPE"],
+    documentType: DOCUMENT_TYPE,
     file: File,
-  ): Promise<ApiResponse<components["schemas"]["ParentDocument"]>>;
+  ): Promise<ApiResponse<ParentDocument>>;
   getDocumentURLByFilePath(
     jwt: string,
     key: string,
@@ -59,9 +62,7 @@ export const ParentDocumentRequirementsTableActionMenu = ({
   saveParentDocument,
   getDocumentURLByFilePath,
 }: ParentDocumentRequirementsTableActionMenuProps) => {
-  const [parentDoc, setParentDoc] = useState<
-    components["schemas"]["ParentDocument"] | null
-  >(null);
+  const [parentDoc, setParentDoc] = useState<ParentDocument | null>(null);
   const [disableApprovalRequest, setDisableApprovalRequest] =
     useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);

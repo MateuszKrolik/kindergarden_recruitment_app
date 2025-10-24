@@ -29,9 +29,9 @@ import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import socket from "@/socket";
 import { PROPERTY_MANAGEMENT_EVENTS } from "@/socket/events/modules/property-management";
 import { ApiResponse } from "@/types/response";
-import { components } from "@/client/schema";
+import { PropertyChild } from "@/types/modules/property/model";
 
-const EMPTY_CHILDREN: components["schemas"]["PropertyChild"][] = [];
+const EMPTY_CHILDREN: PropertyChild[] = [];
 
 export type PropertyParentChildrenTableProps = {
   jwt: string;
@@ -41,10 +41,8 @@ export type PropertyParentChildrenTableProps = {
     jwt: string,
     propertyId: string,
     parentId: string,
-  ): Promise<ApiResponse<components["schemas"]["PropertyChild"][]>>;
-  renderCollapsibleContentAction?: (
-    row: components["schemas"]["PropertyChild"],
-  ) => React.ReactNode;
+  ): Promise<ApiResponse<PropertyChild[]>>;
+  renderCollapsibleContentAction?: (row: PropertyChild) => React.ReactNode;
 };
 
 export const PropertyParentChildrenTable = ({
@@ -59,12 +57,10 @@ export const PropertyParentChildrenTable = ({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<components["schemas"]["PropertyChild"][]>(
-    [],
-  );
+  const [data, setData] = useState<PropertyChild[]>([]);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
-  const columns: ColumnDef<components["schemas"]["PropertyChild"]>[] = [
+  const columns: ColumnDef<PropertyChild>[] = [
     {
       accessorKey: "child_id",
       header: ({ column }) => {
@@ -140,9 +136,7 @@ export const PropertyParentChildrenTable = ({
   }, [fetchPropertyChildrenForGivenParent]);
 
   useEffect(() => {
-    const onPropertyChildrenUpdated = (
-      updatedChildren: components["schemas"]["PropertyChild"][],
-    ) => {
+    const onPropertyChildrenUpdated = (updatedChildren: PropertyChild[]) => {
       setData((prev) => {
         const prevMap = new Map(prev.map((child) => [child.child_id, child]));
         updatedChildren.forEach((child) => {
@@ -164,7 +158,7 @@ export const PropertyParentChildrenTable = ({
     };
   });
 
-  const table = useReactTable<components["schemas"]["PropertyChild"]>({
+  const table = useReactTable<PropertyChild>({
     data: error ? EMPTY_CHILDREN : data,
     columns,
     onSortingChange: setSorting,

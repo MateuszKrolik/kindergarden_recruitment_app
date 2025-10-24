@@ -2,13 +2,18 @@
 
 import { getApiClient } from "@/client";
 import { ApiResponse } from "@/types/response";
-import { components } from "@/client/schema";
+import {
+  PagedResponse_PropertyParentDocument,
+  PropertyChildDocument,
+  PropertyParentDocument,
+} from "@/types/modules/compliance/model";
+import { REQUEST_STATUS } from "@/types/modules/compliance/enum";
 
 export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
   jwt: string,
   propertyId: string,
   parentId: string,
-): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"][]>> {
+): Promise<ApiResponse<PropertyParentDocument[]>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET(
     "/properties/{property_id}/parents/{parent_id}/parent-document-requests",
@@ -24,7 +29,7 @@ export async function getAllDocumentApprovalRequestsForGivenPropertyChild(
   jwt: string,
   propertyId: string,
   childId: string,
-): Promise<ApiResponse<components["schemas"]["PropertyChildDocument"][]>> {
+): Promise<ApiResponse<PropertyChildDocument[]>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET(
     "/properties/{property_id}/children/{child_id}/child-document-requests",
@@ -41,7 +46,7 @@ export async function getPropertyParentDocumentApprovalRequestByDocumentId(
   propertyId: string,
   parentId: string,
   parentDocId: string,
-): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>> {
+): Promise<ApiResponse<PropertyParentDocument>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET(
     "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_doc_id}",
@@ -64,7 +69,7 @@ export async function sendPropertyParentDocumentApprovalRequest(
   propertyId: string,
   parentId: string,
   parentDocumentId: string,
-): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>> {
+): Promise<ApiResponse<PropertyParentDocument>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.POST(
     "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_doc_id}",
@@ -87,9 +92,7 @@ export async function getAllDocumentApprovalRequestsForGivenProperty(
   propertyId: string,
   pageSize: number,
   pageNumber: number,
-): Promise<
-  ApiResponse<components["schemas"]["PagedResponse_PropertyParentDocument_"]>
-> {
+): Promise<ApiResponse<PagedResponse_PropertyParentDocument>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET(
     "/properties/{property_id}/parent-document-requests",
@@ -114,8 +117,8 @@ export async function setPropertyParentDocumentApprovalRequestStatus(
   propertyId: string,
   parentId: string,
   parentDocumentId: string,
-  requestStatus: components["schemas"]["REQUEST_STATUS"],
-): Promise<ApiResponse<components["schemas"]["PropertyParentDocument"]>> {
+  requestStatus: REQUEST_STATUS,
+): Promise<ApiResponse<PropertyParentDocument>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.PATCH(
     "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/{request_status}",

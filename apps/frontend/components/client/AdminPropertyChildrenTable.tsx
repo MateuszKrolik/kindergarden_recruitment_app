@@ -37,9 +37,12 @@ import {
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ApiResponse } from "@/types/response";
-import { components } from "@/client/schema";
+import {
+  PagedResponse_PropertyChild,
+  PropertyChild,
+} from "@/types/modules/property/model";
 
-const EMPTY_CHILDREN: components["schemas"]["PropertyChild"][] = [];
+const EMPTY_CHILDREN: PropertyChild[] = [];
 
 export type AdminPropertyChildrenTableProps = {
   jwt: string;
@@ -49,9 +52,7 @@ export type AdminPropertyChildrenTableProps = {
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<
-    ApiResponse<components["schemas"]["PagedResponse_PropertyChild_"]>
-  >;
+  ): Promise<ApiResponse<PagedResponse_PropertyChild>>;
 };
 
 export const AdminPropertyChildrenTable = ({
@@ -64,9 +65,7 @@ export const AdminPropertyChildrenTable = ({
   const pageNumber = parseInt(pageNumberParam || "1");
   const pageSizeParam = searchParams.get("pageSize");
   const pageSize = parseInt(pageSizeParam || "1");
-  const [result, setResult] = useState<
-    components["schemas"]["PropertyChild"][]
-  >([]);
+  const [result, setResult] = useState<PropertyChild[]>([]);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -78,7 +77,7 @@ export const AdminPropertyChildrenTable = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const columns: ColumnDef<components["schemas"]["PropertyChild"]>[] = [
+  const columns: ColumnDef<PropertyChild>[] = [
     {
       accessorKey: "child_id",
       header: ({ column }) => {
@@ -193,9 +192,7 @@ export const AdminPropertyChildrenTable = ({
   }, [fetchAllPagedPropertyChildren, propertyId, pageSize, pageNumber]);
 
   useEffect(() => {
-    const onPropertyChildrenUpdated = (
-      updatedChildren: components["schemas"]["PropertyChild"][],
-    ) => {
+    const onPropertyChildrenUpdated = (updatedChildren: PropertyChild[]) => {
       setResult((prev) => {
         const prevMap = new Map(prev.map((child) => [child.child_id, child]));
         updatedChildren.forEach((child) => {
@@ -217,7 +214,7 @@ export const AdminPropertyChildrenTable = ({
     };
   }, []);
 
-  const table = useReactTable<components["schemas"]["PropertyChild"]>({
+  const table = useReactTable<PropertyChild>({
     data: error ? EMPTY_CHILDREN : result,
     columns,
     onSortingChange: setSorting,

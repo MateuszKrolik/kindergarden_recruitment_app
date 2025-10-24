@@ -26,7 +26,7 @@ import {
 import { COMPLIANCE_EVENTS } from "@/socket/events/modules/compliance";
 import socket from "@/socket";
 import { ApiResponse } from "@/types/response";
-import { components } from "@/client/schema";
+import { PropertyChildDocument } from "@/types/modules/compliance/model";
 
 type ParentChildDocumentApprovalsTableProps = {
   jwt: string;
@@ -36,7 +36,7 @@ type ParentChildDocumentApprovalsTableProps = {
     jwt: string,
     propertyId: string,
     childId: string,
-  ): Promise<ApiResponse<components["schemas"]["PropertyChildDocument"][]>>;
+  ): Promise<ApiResponse<PropertyChildDocument[]>>;
 };
 
 export const ParentChildDocumentApprovalsTable = ({
@@ -50,11 +50,9 @@ export const ParentChildDocumentApprovalsTable = ({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<
-    components["schemas"]["PropertyChildDocument"][]
-  >([]);
+  const [data, setData] = useState<PropertyChildDocument[]>([]);
 
-  const columns: ColumnDef<components["schemas"]["PropertyChildDocument"]>[] = [
+  const columns: ColumnDef<PropertyChildDocument>[] = [
     {
       accessorKey: "childDocumentId",
       header: ({ column }) => {
@@ -136,9 +134,7 @@ export const ParentChildDocumentApprovalsTable = ({
   }, [fetchData]);
 
   useEffect(() => {
-    function onRequestApproved(
-      event: components["schemas"]["PropertyChildDocument"],
-    ) {
+    function onRequestApproved(event: PropertyChildDocument) {
       setData((prev) => {
         const existingIndex = prev.findIndex(
           (doc) => doc.child_document_id === event.child_document_id,
@@ -162,9 +158,7 @@ export const ParentChildDocumentApprovalsTable = ({
       );
     }
 
-    function onRequestSent(
-      event: components["schemas"]["PropertyChildDocument"],
-    ) {
+    function onRequestSent(event: PropertyChildDocument) {
       setData((prev) => [...prev, event]);
     }
 
@@ -190,7 +184,7 @@ export const ParentChildDocumentApprovalsTable = ({
     };
   }, []);
 
-  const table = useReactTable<components["schemas"]["PropertyChildDocument"]>({
+  const table = useReactTable<PropertyChildDocument>({
     data: error ? [] : data,
     columns,
     onSortingChange: setSorting,

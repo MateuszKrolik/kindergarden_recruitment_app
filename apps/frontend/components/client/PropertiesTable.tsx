@@ -36,7 +36,11 @@ import Link from "next/link";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
 import { PropertyTableRowActionMenu } from "./PropertyTableRowActionMenu";
 import { ApiResponse } from "@/types/response";
-import { components } from "@/client/schema";
+import {
+  PagedResponse_Property,
+  Property,
+} from "@/types/modules/property/model";
+import { PropertyUser } from "@/types/modules/identity/model";
 
 interface PropertiesTableProps {
   jwt: string;
@@ -45,12 +49,12 @@ interface PropertiesTableProps {
     jwt: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<ApiResponse<components["schemas"]["PagedResponse_Property_"]>>;
+  ): Promise<ApiResponse<PagedResponse_Property>>;
   getPropertyUser(
     jwt: string,
     propertyId: string,
     userId: string,
-  ): Promise<ApiResponse<components["schemas"]["PropertyUser"]>>;
+  ): Promise<ApiResponse<PropertyUser>>;
 }
 
 export default function PropertyTable({
@@ -64,7 +68,7 @@ export default function PropertyTable({
   const pageNumber = parseInt(pageNumberParam || "1");
   const pageSizeParam = searchParams.get("pageSize");
   const pageSize = parseInt(pageSizeParam || "1");
-  const [result, setResult] = useState<components["schemas"]["Property"][]>([]);
+  const [result, setResult] = useState<Property[]>([]);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -102,7 +106,7 @@ export default function PropertyTable({
     loadProperties(pageSize, pageNumber);
   }, [loadProperties, pageNumber, pageSize]);
 
-  const columns: ColumnDef<components["schemas"]["Property"]>[] = [
+  const columns: ColumnDef<Property>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => {
@@ -137,7 +141,7 @@ export default function PropertyTable({
     },
   ];
 
-  const table = useReactTable<components["schemas"]["Property"]>({
+  const table = useReactTable<Property>({
     data: result,
     columns,
     onSortingChange: setSorting,

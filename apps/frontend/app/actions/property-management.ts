@@ -1,14 +1,20 @@
 "use server";
 
 import { getApiClient } from "@/client";
-import { components } from "@/client/schema";
+import {
+  PagedResponse_Property,
+  PagedResponse_PropertyChild,
+  PropertyChild,
+  PropertyChildDocumentRequirement,
+  PropertyParentDocumentRequirement,
+} from "@/types/modules/property/model";
 import { ApiResponse } from "@/types/response";
 
 export async function getAllProperties(
   jwt: string,
   pageSize: number,
   pageNumber: number,
-): Promise<ApiResponse<components["schemas"]["PagedResponse_Property_"]>> {
+): Promise<ApiResponse<PagedResponse_Property>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET("/properties", {
     params: { query: { page_size: pageSize, page_number: pageNumber } },
@@ -21,9 +27,7 @@ export async function getPropertyParentDocumentRequirements(
   jwt: string,
   propertyId: string,
   userId: string,
-): Promise<
-  ApiResponse<components["schemas"]["PropertyParentDocumentRequirement"][]>
-> {
+): Promise<ApiResponse<PropertyParentDocumentRequirement[]>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET(
     "/properties/{property_id}/users/{user_id}/parent-document-requirements",
@@ -39,7 +43,7 @@ export async function getAllPropertyChildrenForGivenParent(
   jwt: string,
   propertyId: string,
   parentId: string,
-): Promise<ApiResponse<components["schemas"]["PropertyChild"][]>> {
+): Promise<ApiResponse<PropertyChild[]>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET(
     "/properties/{property_id}/parents/{parent_id}/property-children",
@@ -55,9 +59,7 @@ export async function getDocumentRequirementsForGivenPropertyChild(
   jwt: string,
   propertyId: string,
   childId: string,
-): Promise<
-  ApiResponse<components["schemas"]["PropertyChildDocumentRequirement"][]>
-> {
+): Promise<ApiResponse<PropertyChildDocumentRequirement[]>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET(
     "/properties/{property_id}/children/{child_id}/document-requirements",
@@ -72,7 +74,7 @@ export async function getAllPropertyChildrenPaged(
   propertyId: string,
   pageSize: number,
   pageNumber: number,
-): Promise<ApiResponse<components["schemas"]["PagedResponse_PropertyChild_"]>> {
+): Promise<ApiResponse<PagedResponse_PropertyChild>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.GET(
     "/properties/{property_id}/property-children",
