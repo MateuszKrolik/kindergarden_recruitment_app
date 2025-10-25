@@ -20,7 +20,7 @@ from src.shared.types.modules.identity.model import (
     ParentChild,
     ParentConditionKeys,
 )
-from src.shared.types.modules.reporting.enum import DOCUMENT_TYPE
+from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
 from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import HTTPErrorResponse
 
@@ -79,12 +79,28 @@ class IPropertyManagementSvc(ABC):
         pass
 
     @abstractmethod
+    async def get_point_value_for_given_property_child_document_by_document_type(
+        self,
+        property_id: UUID,
+        document_type: CHILD_DOCUMENT_TYPE,
+    ) -> HTTPErrorResponse[int]:
+        pass
+
+    @abstractmethod
     async def increment_property_children_points_for_given_parent(
         self,
         property_id: UUID,
         children_ids: List[UUID],
         point_value: int,
     ) -> HTTPErrorResponse[List[PropertyChild]]:
+        pass
+
+    @abstractmethod
+    async def get_property_child_by_id(
+        self,
+        property_id: UUID,
+        child_id: UUID,
+    ) -> HTTPErrorResponse[PropertyChild]:
         pass
 
 
@@ -216,6 +232,25 @@ class PropertyManagementSvc(IPropertyManagementSvc):
             property_id=property_id, point_value=point_value, children_ids=children_ids
         )
 
+    async def get_point_value_for_given_property_child_document_by_document_type(
+        self,
+        property_id: UUID,
+        document_type: CHILD_DOCUMENT_TYPE,
+    ) -> HTTPErrorResponse[int]:
+        return await self.repo.get_point_value_for_given_property_child_document_by_document_type(
+            property_id=property_id,
+            document_type=document_type,
+        )
+
+    async def get_property_child_by_id(
+        self,
+        property_id: UUID,
+        child_id: UUID,
+    ) -> HTTPErrorResponse[PropertyChild]:
+        return await self.repo.get_property_child_by_id(
+            property_id=property_id, child_id=child_id
+        )
+
     def _is_parent_requirement_active(
         self,
         cK: ParentConditionKeys,
@@ -252,6 +287,8 @@ class PropertyManagementSvc(IPropertyManagementSvc):
             match r.condition_key:
                 case CHILD_CONDITION_KEY.has_disability:
                     return cK.has_disability
+                case CHILD_CONDITION_KEY.is_from_single_parent_family:
+                    return cK.is_from_single_parent_family
                 case _:
                     return False
         return False

@@ -8,7 +8,10 @@ from src.modules.property_management.svc import IPropertyManagementSvc
 import redis.asyncio as redis
 from src.shared.handlers.event_handler import EventHandler
 from src.shared.types.modules.compliance.event import COMPLIANCE_EVENT
-from src.shared.types.modules.compliance.model import PropertyParentDocument
+from src.shared.types.modules.compliance.model import (
+    PropertyChildDocument,
+    PropertyParentDocument,
+)
 from src.shared.types.modules.property_management.event import PROPERTY_MANAGEMENT_EVENT
 from src.shared.types.modules.property_management.model import PropertyChild
 from src.shared.types.response import HTTPErrorResponse
@@ -17,7 +20,8 @@ import socketio
 
 class PropertyManagementEventHandler(EventHandler):
     EVENT_MAP = {
-        COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED: PropertyParentDocument
+        COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED: PropertyParentDocument,
+        COMPLIANCE_EVENT.PROPERTY_CHILD_DOCUMENT_APPROVED: PropertyChildDocument,
     }
 
     def __init__(
@@ -82,6 +86,64 @@ class PropertyManagementEventHandler(EventHandler):
         try:
             await self.socket_server.emit(
                 COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED,
+                event.model_dump(mode="json"),
+            )
+            await self.socket_server.emit(
+                PROPERTY_MANAGEMENT_EVENT.PROPERTY_CHILDREN_UPDATED,
+                [m.model_dump(mode="json") for m in increment_result],
+            )
+        except Exception as e:
+            self.logger.error(e)
+
+    @EventHandler.handle.register
+    async def _(self, event: PropertyChildDocument):
+        (
+            document_type,
+            error,
+        ) = await self.reporting_client.get_child_document_type_by_document_id(
+            child_document_id=event.child_document_id
+        )
+        if error:
+            self.logger.error(error)
+            return
+        assert document_type is not None
+        tasks = await asyncio.gather(
+            self.svc.get_point_value_for_given_property_child_document_by_document_type(
+                event.property_id,
+                document_type,
+            ),
+            self.svc.get_property_child_by_id(
+                event.property_id,
+                event.child_id,
+            ),
+        )
+        points_task: HTTPErrorResponse[int] = tasks[0]
+        points, error = points_task
+        if error:
+            self.logger.error(error)
+            return
+        assert points is not None
+        property_child_task: HTTPErrorResponse[PropertyChild] = tasks[1]
+        property_child, error = property_child_task
+        if error:
+            self.logger.error(error)
+            return
+        assert property_child is not None
+        (
+            increment_result,
+            error,
+        ) = await self.svc.increment_property_children_points_for_given_parent(
+            property_id=event.property_id,
+            point_value=points,
+            children_ids=[property_child.child_id],
+        )
+        if error:
+            self.logger.error(error)
+            return
+        assert increment_result is not None
+        try:
+            await self.socket_server.emit(
+                COMPLIANCE_EVENT.PROPERTY_CHILD_DOCUMENT_APPROVED,
                 event.model_dump(mode="json"),
             )
             await self.socket_server.emit(

@@ -25,3 +25,4 @@ class ParentChild(BaseModel):
 
 class ChildConditionKeys(BaseModel):
     has_disability: bool
+    is_from_single_parent_family: bool

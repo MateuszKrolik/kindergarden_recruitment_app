@@ -37,9 +37,11 @@ INSERT INTO identity.parent_user_details(
 
 INSERT INTO identity.children(
   id,
-  has_disability
+  has_disability,
+  is_from_single_parent_family
 ) VALUES (
   '9e4f732a-3f0d-4348-8ade-b83e1e9a6346',
+  true,
   true
 );
 
@@ -53,9 +55,11 @@ INSERT INTO identity.parent_children(
 
 INSERT INTO identity.children(
   id,
-  has_disability
+  has_disability,
+  is_from_single_parent_family
 ) VALUES (
   'd6b6c283-fdaa-4379-b7fd-b431fd668656',
+  true,
   false
 );
 

@@ -16,4 +16,15 @@ CREATE TABLE IF NOT EXISTS reporting.parent_documents(
   PRIMARY KEY (id)
 );
 
+CREATE TABLE IF NOT EXISTS reporting.children_documents(
+  id uuid DEFAULT gen_random_uuid(),
+  child_id uuid NOT NULL,
+  document_type TEXT CHECK (document_type IN (
+    'disability_proof',
+    'single_parent_family_proof'
+  )),
+  file_path VARCHAR NOT NULL,
+  PRIMARY KEY (id)
+);
+
 COMMIT;

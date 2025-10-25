@@ -11,3 +11,4 @@ class DOCUMENT_TYPE(StrEnum):
 
 class CHILD_DOCUMENT_TYPE(StrEnum):
     disability_proof = "disability_proof"
+    single_parent_family_proof = "single_parent_family_proof"

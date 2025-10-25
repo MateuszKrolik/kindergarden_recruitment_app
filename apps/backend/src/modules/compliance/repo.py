@@ -27,7 +27,7 @@ class IComplianceRepo(ABC):
     async def get_all_document_approval_requests_for_given_property_child(
         self,
         property_id: UUID,
-        user_id: UUID,
+        child_id: UUID,
     ) -> HTTPErrorResponse[List[PropertyChildDocument]]:
         pass
 
@@ -67,6 +67,44 @@ class IComplianceRepo(ABC):
         request_status: REQUEST_STATUS,
         admin_id: UUID,
     ) -> HTTPErrorResponse[PropertyParentDocument]:
+        pass
+
+    @abstractmethod
+    async def get_all_child_document_approval_requests_for_given_property(
+        self,
+        property_id: UUID,
+        page_size: int,
+        page_number: int,
+    ) -> HTTPErrorResponse[PagedResponse[PropertyChildDocument]]:
+        pass
+
+    @abstractmethod
+    async def send_property_child_document_approval_request(
+        self,
+        property_id: UUID,
+        child_id: UUID,
+        child_document_id: UUID,
+    ) -> HTTPErrorResponse[PropertyChildDocument]:
+        pass
+
+    @abstractmethod
+    async def get_property_child_document_approval_request_by_document_id(
+        self,
+        property_id: UUID,
+        child_id: UUID,
+        child_document_id: UUID,
+    ) -> HTTPErrorResponse[PropertyChildDocument]:
+        pass
+
+    @abstractmethod
+    async def set_property_child_document_request_status(
+        self,
+        property_id: UUID,
+        child_id: UUID,
+        child_document_id: UUID,
+        request_status: REQUEST_STATUS,
+        admin_id: UUID,
+    ) -> HTTPErrorResponse[PropertyChildDocument]:
         pass
 
 
@@ -237,3 +275,133 @@ class ComplianceRepo(IComplianceRepo):
                     message=f"Parent document request: ${parent_document_id} was not found!",
                 )
             return PropertyParentDocument(**row), None
+
+    async def get_all_child_document_approval_requests_for_given_property(
+        self,
+        property_id: UUID,
+        page_size: int,
+        page_number: int,
+    ) -> HTTPErrorResponse[PagedResponse[PropertyChildDocument]]:
+        sql = """
+        SELECT
+          *,
+          COUNT(*) OVER() AS total_count
+        FROM compliance.property_children_documents
+        WHERE property_id = $1
+        LIMIT $2
+        OFFSET $3;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(
+                connection.fetch,
+                sql,
+                property_id,
+                page_size,
+                calculate_offset(page_size=page_size, page_number=page_number),
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            if len(rows) == 0:
+                return (
+                    new_paged_response(items=[], total=0, page_size=1, page_number=1),
+                    None,
+                )
+            total_count = rows[0]["total_count"]
+            return (
+                new_paged_response(
+                    items=[PropertyChildDocument(**row) for row in rows],
+                    total=total_count,
+                    page_size=page_size,
+                    page_number=page_size,
+                ),
+                None,
+            )
+
+    async def send_property_child_document_approval_request(
+        self,
+        property_id: UUID,
+        child_id: UUID,
+        child_document_id: UUID,
+    ) -> HTTPErrorResponse[PropertyChildDocument]:
+        sql = """
+        INSERT INTO compliance.property_children_documents(
+            property_id,
+            child_id,
+            child_document_id
+        ) VALUES (
+            $1,
+            $2,
+            $3
+        ) RETURNING *;
+        """
+        async with self.pool.acquire() as connection:
+            row, error = await try_except(
+                connection.fetchrow, sql, property_id, child_id, child_document_id
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            if row is None:
+                return None, HTTPError(
+                    code=404,
+                    message=f"Approval request: {child_document_id} was not saved successfully!",
+                )
+            return PropertyChildDocument(**row), None
+
+    async def get_property_child_document_approval_request_by_document_id(
+        self,
+        property_id: UUID,
+        child_id: UUID,
+        child_document_id: UUID,
+    ) -> HTTPErrorResponse[PropertyChildDocument]:
+        sql = """
+          SELECT *
+          FROM compliance.property_children_documents
+          WHERE property_id = $1 AND child_id = $2 AND child_document_id = $3;
+          """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(
+                connection.fetch, sql, property_id, child_id, child_document_id
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            if len(rows) == 0:
+                return None, HTTPError(
+                    code=404,
+                    message=f"Child document request with id: {child_document_id} was not found!",
+                )
+            return PropertyChildDocument(**rows[0]), None
+
+    async def set_property_child_document_request_status(
+        self,
+        property_id: UUID,
+        child_id: UUID,
+        child_document_id: UUID,
+        request_status: REQUEST_STATUS,
+        admin_id: UUID,
+    ) -> HTTPErrorResponse[PropertyChildDocument]:
+        sql = """
+        UPDATE compliance.property_children_documents
+        SET request_status = $1, approved_by = $2
+        WHERE property_id = $3 AND child_id = $4 AND child_document_id = $5
+        RETURNING *;
+        """
+        async with self.pool.acquire() as connection:
+            row, error = await try_except(
+                connection.fetchrow,
+                sql,
+                request_status,
+                admin_id,
+                property_id,
+                child_id,
+                child_document_id,
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            if row is None:
+                return None, HTTPError(
+                    code=404,
+                    message=f"Child document request: ${child_document_id} was not found!",
+                )
+            return PropertyChildDocument(**row), None

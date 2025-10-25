@@ -54,7 +54,7 @@ export const ParentChildDocumentApprovalsTable = ({
 
   const columns: ColumnDef<PropertyChildDocument>[] = [
     {
-      accessorKey: "childDocumentId",
+      accessorKey: "child_document_id",
       header: ({ column }) => {
         return (
           <Button
@@ -67,11 +67,11 @@ export const ParentChildDocumentApprovalsTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("childDocumentId")}</div>
+        <div className="lowercase">{row.getValue("child_document_id")}</div>
       ),
     },
     {
-      accessorKey: "requestStatus",
+      accessorKey: "request_status",
       header: ({ column }) => {
         return (
           <Button
@@ -84,11 +84,11 @@ export const ParentChildDocumentApprovalsTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("requestStatus")}</div>
+        <div className="lowercase">{row.getValue("request_status")}</div>
       ),
     },
     {
-      accessorKey: "approvedBy",
+      accessorKey: "approved_by",
       header: ({ column }) => {
         return (
           <Button
@@ -101,7 +101,7 @@ export const ParentChildDocumentApprovalsTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("approvedBy")}</div>
+        <div className="lowercase">{row.getValue("approved_by")}</div>
       ),
     },
   ];
@@ -163,22 +163,22 @@ export const ParentChildDocumentApprovalsTable = ({
     }
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+      COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_APPROVED,
       onRequestApproved,
     );
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
+      COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_REQUESTED,
       onRequestSent,
     );
 
     return () => {
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
+        COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_APPROVED,
         onRequestApproved,
       );
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
+        COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_REQUESTED,
         onRequestSent,
       );
     };

@@ -16,3 +16,4 @@ class CONDITION_KEY(StrEnum):
 
 class CHILD_CONDITION_KEY(StrEnum):
     has_disability = "has_disability"
+    is_from_single_parent_family = "is_from_single_parent_family"

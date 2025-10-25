@@ -2,7 +2,9 @@ import logging
 import asyncio
 import os
 from asyncpg import create_pool
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from src.modules.compliance.handler import ComplianceHandler
 from src.modules.compliance.repo import ComplianceRepo
 from src.modules.compliance.svc import ComplianceSvc
@@ -18,6 +20,7 @@ from src.modules.reporting.repo import ReportingRepo
 from src.modules.reporting.s3 import S3Repository
 from src.modules.reporting.svc import ReportingSvc
 from src.shared.middlewares.auth import auth_middleware
+from src.shared.types.response import HTTPError
 import uvicorn
 import redis.asyncio as redis
 import socketio
@@ -25,6 +28,36 @@ import socketio
 
 async def main():
     app = FastAPI()
+
+    @app.exception_handler(HTTPException)
+    async def fastapi_http_exception_handler(request: Request, exc: HTTPException):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=HTTPError(
+                code=exc.status_code, message=str(exc.detail)
+            ).model_dump(),
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ):
+        return JSONResponse(
+            status_code=422,
+            content=HTTPError(
+                code=422,
+                message=f"Validation failed:\n{exc.errors()}",
+            ).model_dump(),
+        )
+
+    @app.exception_handler(Exception)
+    async def unhandled_exception_handler(request: Request, exc: Exception):
+        return JSONResponse(
+            status_code=500,
+            content=HTTPError(
+                code=500, message=f"Unhandled exception occurred:\n{str(exc)}"
+            ).model_dump(),
+        )
 
     sio = socketio.AsyncServer(
         async_mode="asgi",
@@ -81,7 +114,10 @@ async def main():
     # COMPLIANCE
     compliance_repo = ComplianceRepo(pool=pool)
     compliance_svc = ComplianceSvc(
-        repo=compliance_repo, identity_client=identity_svc, redis_client=redis_client
+        repo=compliance_repo,
+        identity_client=identity_svc,
+        redis_client=redis_client,
+        socket_server=sio,
     )
     compliance_handler = ComplianceHandler(
         svc=compliance_svc,

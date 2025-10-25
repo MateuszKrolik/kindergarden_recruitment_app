@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS identity.parent_user_details(
 
 CREATE TABLE IF NOT EXISTS identity.children(
   id uuid DEFAULT gen_random_uuid() primary key,
-  has_disability BOOLEAN
+  has_disability BOOLEAN,
+  is_from_single_parent_family BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS identity.parent_children(

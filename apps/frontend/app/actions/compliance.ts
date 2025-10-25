@@ -3,6 +3,7 @@
 import { getApiClient } from "@/client";
 import { ApiResponse } from "@/types/response";
 import {
+  PagedResponse_PropertyChildDocument,
   PagedResponse_PropertyParentDocument,
   PropertyChildDocument,
   PropertyParentDocument,
@@ -128,6 +129,102 @@ export async function setPropertyParentDocumentApprovalRequestStatus(
           property_id: propertyId,
           parent_id: parentId,
           parent_document_id: parentDocumentId,
+          request_status: requestStatus,
+        },
+      },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function getAllChildDocumentApprovalRequestsForGivenProperty(
+  jwt: string,
+  propertyId: string,
+  pageSize: number,
+  pageNumber: number,
+): Promise<ApiResponse<PagedResponse_PropertyChildDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/properties/{property_id}/child-document-requests",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+        },
+        query: {
+          page_size: pageSize,
+          page_number: pageNumber,
+        },
+      },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function sendPropertyChildDocumentApprovalRequest(
+  jwt: string,
+  propertyId: string,
+  childId: string,
+  childDocumentId: string,
+): Promise<ApiResponse<PropertyChildDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.POST(
+    "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+          child_id: childId,
+          child_document_id: childDocumentId,
+        },
+      },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function getPropertyChildDocumentApprovalRequestByDocumentId(
+  jwt: string,
+  propertyId: string,
+  childId: string,
+  childDocId: string,
+): Promise<ApiResponse<PropertyChildDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/properties/{property_id}/children/{child_id}/child-documents/{child_document_id}",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+          child_id: childId,
+          child_document_id: childDocId,
+        },
+      },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function setPropertyChildDocumentApprovalRequestStatus(
+  jwt: string,
+  propertyId: string,
+  childId: string,
+  childDocumentId: string,
+  requestStatus: REQUEST_STATUS,
+): Promise<ApiResponse<PropertyChildDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.PATCH(
+    "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/{request_status}",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+          child_id: childId,
+          child_document_id: childDocumentId,
           request_status: requestStatus,
         },
       },

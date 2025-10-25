@@ -120,7 +120,8 @@ class IdentityRepo(IIdentityRepo):
     ) -> HTTPErrorResponse[ChildConditionKeys]:
         sql = """
         SELECT
-          has_disability
+          has_disability,
+          is_from_single_parent_family
           -- TODO
         FROM identity.children
         WHERE id = $1;

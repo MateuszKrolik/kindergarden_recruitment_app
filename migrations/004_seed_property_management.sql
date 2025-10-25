@@ -121,4 +121,18 @@ INSERT INTO property_management.property_children_document_requirements(
   11
 );
 
+INSERT INTO property_management.property_children_document_requirements(
+  property_id,
+  document_type,
+  requirement_type,
+  condition_key, 
+  point_value
+) VALUES (
+  'b2979118-9963-4b97-aa56-c9d25a8b4acf',
+  'single_parent_family_proof',
+  'conditional',
+  'is_from_single_parent_family',
+  20
+);
+
 COMMIT;

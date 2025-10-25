@@ -10,6 +10,8 @@ import {
   PropertyChildDocumentRequirement,
 } from "@/types/modules/property/model";
 import { PropertyChildDocument } from "@/types/modules/compliance/model";
+import { CHILD_DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
+import { ChildDocument } from "@/types/modules/reporting/model";
 
 type PropertyParentChildrenDocumentTabsProps = {
   jwt: string;
@@ -30,6 +32,33 @@ type PropertyParentChildrenDocumentTabsProps = {
     propertyId: string,
     childId: string,
   ): Promise<ApiResponse<PropertyChildDocument[]>>;
+  getChildDocumentByType(
+    jwt: string,
+    childId: string,
+    documentType: CHILD_DOCUMENT_TYPE,
+  ): Promise<ApiResponse<ChildDocument>>;
+  getPropertyChildDocumentApprovalRequestByDocumentId(
+    jwt: string,
+    propertyId: string,
+    childId: string,
+    childDocId: string,
+  ): Promise<ApiResponse<PropertyChildDocument>>;
+  sendPropertyChildDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    childId: string,
+    childDocumentId: string,
+  ): Promise<ApiResponse<PropertyChildDocument>>;
+  saveChildDocument(
+    jwt: string,
+    childId: string,
+    documentType: CHILD_DOCUMENT_TYPE,
+    file: File,
+  ): Promise<ApiResponse<ChildDocument>>;
+  getDocumentURLByFilePath(
+    jwt: string,
+    key: string,
+  ): Promise<ApiResponse<string>>;
 };
 
 export const PropertyParentChildrenDocumentTabs = ({
@@ -39,6 +68,11 @@ export const PropertyParentChildrenDocumentTabs = ({
   getAllPropertyChildrenForGivenParent,
   getPropertyChildDocumentRequirements,
   getAllDocumentApprovalRequestsForGivenPropertyChild,
+  getChildDocumentByType,
+  getPropertyChildDocumentApprovalRequestByDocumentId,
+  sendPropertyChildDocumentApprovalRequest,
+  saveChildDocument,
+  getDocumentURLByFilePath,
 }: PropertyParentChildrenDocumentTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
@@ -66,6 +100,15 @@ export const PropertyParentChildrenDocumentTabs = ({
                   getPropertyChildDocumentRequirements
                 }
                 key={row.child_id}
+                getChildDocumentByType={getChildDocumentByType}
+                getPropertyChildDocumentApprovalRequestByDocumentId={
+                  getPropertyChildDocumentApprovalRequestByDocumentId
+                }
+                sendPropertyChildDocumentApprovalRequest={
+                  sendPropertyChildDocumentApprovalRequest
+                }
+                saveChildDocument={saveChildDocument}
+                getDocumentURLByFilePath={getDocumentURLByFilePath}
               />
             )}
           />

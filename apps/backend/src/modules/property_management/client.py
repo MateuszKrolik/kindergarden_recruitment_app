@@ -7,7 +7,7 @@ from src.shared.types.modules.identity.model import (
     ParentChild,
     ParentConditionKeys,
 )
-from src.shared.types.modules.reporting.enum import DOCUMENT_TYPE
+from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
 from src.shared.types.response import HTTPErrorResponse
 
 
@@ -40,4 +40,11 @@ class IReportingClient(ABC):
         self,
         parent_document_id: UUID,
     ) -> HTTPErrorResponse[DOCUMENT_TYPE]:
+        pass
+
+    @abstractmethod
+    async def get_child_document_type_by_document_id(
+        self,
+        child_document_id: UUID,
+    ) -> HTTPErrorResponse[CHILD_DOCUMENT_TYPE]:
         pass

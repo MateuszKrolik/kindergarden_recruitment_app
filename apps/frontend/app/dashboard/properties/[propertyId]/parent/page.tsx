@@ -5,6 +5,8 @@ import {
   getAllDocumentApprovalRequestsForGivenPropertyParent,
   sendPropertyParentDocumentApprovalRequest,
   getAllDocumentApprovalRequestsForGivenPropertyChild,
+  sendPropertyChildDocumentApprovalRequest,
+  getPropertyChildDocumentApprovalRequestByDocumentId,
 } from "@/app/actions/compliance";
 import {
   getDocumentRequirementsForGivenPropertyChild,
@@ -12,8 +14,10 @@ import {
 } from "@/app/actions/property-management";
 import { getPropertyUser } from "@/app/actions/identity";
 import {
+  getChildDocumentByType,
   getDocumentURLByFilePath,
   getParentDocumentByType,
+  saveChildDocument,
   saveParentDocument,
 } from "@/app/actions/reporting";
 import { PropertyParentPageTabs } from "@/components/client/PropertyParentPageTabs";
@@ -71,6 +75,14 @@ export default async function PropertyParentPage({
       getAllDocumentApprovalRequestsForGivenPropertyChild={
         getAllDocumentApprovalRequestsForGivenPropertyChild
       }
+      getChildDocumentByType={getChildDocumentByType}
+      sendPropertyChildDocumentApprovalRequest={
+        sendPropertyChildDocumentApprovalRequest
+      }
+      getPropertyChildDocumentApprovalRequestByDocumentId={
+        getPropertyChildDocumentApprovalRequestByDocumentId
+      }
+      saveChildDocument={saveChildDocument}
     />
   );
 }

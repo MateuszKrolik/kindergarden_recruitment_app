@@ -239,7 +239,165 @@ class ComplianceHandler:
                 user_id=parent_id,
                 parent_document_id=parent_document_id,
                 request_status=request_status,
-                admin_id=uid if uid else uuid.uuid4(),
+                admin_id=uid if uid else uuid.UUID(int=0),
+            )
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 200
+            assert data is not None
+            return data
+
+        @self.router.get(
+            "/properties/{property_id}/child-document-requests",
+            responses={
+                200: {"model": PagedResponse[PropertyChildDocument]},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def get_all_child_document_approval_requests_for_given_property(
+            property_id: UUID,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+            page_size: int = Query(1, ge=1),
+            page_number: int = Query(1, ge=1),
+        ) -> PagedResponse[PropertyChildDocument]:
+            user, error = user_result
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            (
+                data,
+                error,
+            ) = await self.svc.get_all_child_document_approval_requests_for_given_property(
+                property_id=property_id, page_size=page_size, page_number=page_number
+            )
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 200
+            assert data is not None
+            return data
+
+        @self.router.post(
+            "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}",
+            responses={
+                201: {"model": PropertyChildDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def send_property_child_document_approval_request(
+            property_id: UUID,
+            child_id: UUID,
+            child_document_id: UUID,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> PropertyChildDocument:
+            user, error = user_result
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            (
+                data,
+                error,
+            ) = await self.svc.send_property_child_document_approval_request(
+                property_id=property_id,
+                child_id=child_id,
+                child_document_id=child_document_id,
+            )
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 201
+            assert data is not None
+            return data
+
+        @self.router.get(
+            "/properties/{property_id}/children/{child_id}/child-documents/{child_document_id}",
+            responses={
+                200: {"model": PropertyChildDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def get_property_child_document_approval_request_by_document_id(
+            property_id: UUID,
+            child_id: UUID,
+            child_document_id: UUID,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> PropertyChildDocument:
+            user, error = user_result
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            (
+                data,
+                error,
+            ) = await self.svc.get_property_child_document_approval_request_by_document_id(
+                property_id=property_id,
+                child_id=child_id,
+                child_document_id=child_document_id,
+            )
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 200
+            assert data is not None
+            return data
+
+        @self.router.patch(
+            "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/{request_status}",
+            responses={
+                200: {"model": PropertyChildDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def set_property_child_document_request_status(
+            property_id: UUID,
+            child_id: UUID,
+            child_document_id: UUID,
+            request_status: REQUEST_STATUS,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> PropertyChildDocument:
+            if request_status not in REQUEST_STATUS:
+                return JSONResponse(
+                    status_code=400,
+                    content=HTTPError(
+                        code=400, message="Invalid request status!"
+                    ).dict(),
+                )
+            user, error = user_result
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            assert user is not None
+            uid = user.get("id")
+            (
+                data,
+                error,
+            ) = await self.svc.set_property_child_document_request_status(
+                property_id=property_id,
+                child_id=child_id,
+                child_document_id=child_document_id,
+                request_status=request_status,
+                admin_id=uid if uid else uuid.UUID(int=0),
             )
             if error:
                 return JSONResponse(

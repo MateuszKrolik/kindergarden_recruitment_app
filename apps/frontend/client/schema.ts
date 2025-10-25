@@ -73,6 +73,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/children/{child_id}/documents/{document_type}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Child Document By Type */
+        get: operations["get_child_document_by_type_children__child_id__documents__document_type__get"];
+        put?: never;
+        /** Save Child Document */
+        post: operations["save_child_document_children__child_id__documents__document_type__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/children-documents/{doc_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Child Document Url By Document Id */
+        get: operations["get_child_document_url_by_document_id_children_documents__doc_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/properties": {
         parameters: {
             query?: never;
@@ -244,10 +279,86 @@ export interface paths {
         patch: operations["set_property_parent_document_request_status_properties__property_id__parents__parent_id__parent_documents__parent_document_id__status__request_status__patch"];
         trace?: never;
     };
+    "/properties/{property_id}/child-document-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get All Child Document Approval Requests For Given Property */
+        get: operations["get_all_child_document_approval_requests_for_given_property_properties__property_id__child_document_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send Property Child Document Approval Request */
+        post: operations["send_property_child_document_approval_request_properties__property_id__children__child_id__children_documents__child_document_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/properties/{property_id}/children/{child_id}/child-documents/{child_document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Property Child Document Approval Request By Document Id */
+        get: operations["get_property_child_document_approval_request_by_document_id_properties__property_id__children__child_id__child_documents__child_document_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/{request_status}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set Property Child Document Request Status */
+        patch: operations["set_property_child_document_request_status_properties__property_id__children__child_id__children_documents__child_document_id__status__request_status__patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Body_save_child_document_children__child_id__documents__document_type__post */
+        Body_save_child_document_children__child_id__documents__document_type__post: {
+            /**
+             * File
+             * Format: binary
+             */
+            file: string;
+        };
         /** Body_save_parent_document_parents__parent_id__documents__document_type__post */
         Body_save_parent_document_parents__parent_id__documents__document_type__post: {
             /**
@@ -260,17 +371,33 @@ export interface components {
          * CHILD_CONDITION_KEY
          * @enum {string}
          */
-        CHILD_CONDITION_KEY: "has_disability";
+        CHILD_CONDITION_KEY: "has_disability" | "is_from_single_parent_family";
         /**
          * CHILD_DOCUMENT_TYPE
          * @enum {string}
          */
-        CHILD_DOCUMENT_TYPE: "disability_proof";
+        CHILD_DOCUMENT_TYPE: "disability_proof" | "single_parent_family_proof";
         /**
          * CONDITION_KEY
          * @enum {string}
          */
         CONDITION_KEY: "is_employed" | "is_self_employed" | "is_student" | "filed_tax_in_desired_location" | "resides_in_desired_location";
+        /** ChildDocument */
+        ChildDocument: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Child Id
+             * Format: uuid
+             */
+            child_id: string;
+            document_type: components["schemas"]["CHILD_DOCUMENT_TYPE"];
+            /** File Path */
+            file_path: string;
+        };
         /**
          * DOCUMENT_TYPE
          * @enum {string}
@@ -288,6 +415,23 @@ export interface components {
          * @enum {string}
          */
         PROPERTY_USER_ROLE: "admin" | "parent";
+        /** PagedResponse[PropertyChildDocument] */
+        PagedResponse_PropertyChildDocument_: {
+            /** Items */
+            items: components["schemas"]["PropertyChildDocument"][];
+            /** Total */
+            total: number;
+            /** Page Number */
+            page_number: number;
+            /** Page Size */
+            page_size: number;
+            /** Has Next Page */
+            has_next_page: boolean;
+            /** Has Previous Page */
+            has_previous_page: boolean;
+            /** Total Pages */
+            total_pages: number;
+        };
         /** PagedResponse[PropertyChild] */
         PagedResponse_PropertyChild_: {
             /** Items */
@@ -631,6 +775,114 @@ export interface operations {
             header?: never;
             path: {
                 file_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    get_child_document_by_type_children__child_id__documents__document_type__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                child_id: string;
+                document_type: components["schemas"]["CHILD_DOCUMENT_TYPE"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDocument"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    save_child_document_children__child_id__documents__document_type__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                child_id: string;
+                document_type: components["schemas"]["CHILD_DOCUMENT_TYPE"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_save_child_document_children__child_id__documents__document_type__post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDocument"];
+                };
+            };
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDocument"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    get_child_document_url_by_document_id_children_documents__doc_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
             };
             cookie?: never;
         };
@@ -1012,6 +1264,149 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PropertyParentDocument"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    get_all_child_document_approval_requests_for_given_property_properties__property_id__child_document_requests_get: {
+        parameters: {
+            query?: {
+                page_size?: number;
+                page_number?: number;
+            };
+            header?: never;
+            path: {
+                property_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagedResponse_PropertyChildDocument_"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    send_property_child_document_approval_request_properties__property_id__children__child_id__children_documents__child_document_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                property_id: string;
+                child_id: string;
+                child_document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyChildDocument"];
+                };
+            };
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyChildDocument"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    get_property_child_document_approval_request_by_document_id_properties__property_id__children__child_id__child_documents__child_document_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                property_id: string;
+                child_id: string;
+                child_document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyChildDocument"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    set_property_child_document_request_status_properties__property_id__children__child_id__children_documents__child_document_id__status__request_status__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                property_id: string;
+                child_id: string;
+                child_document_id: string;
+                request_status: components["schemas"]["REQUEST_STATUS"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyChildDocument"];
                 };
             };
             /** @description Default Response */

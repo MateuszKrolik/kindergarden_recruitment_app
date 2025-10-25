@@ -6,5 +6,8 @@ export type PropertyParentDocument =
 export type PropertyChildDocument =
   components["schemas"]["PropertyChildDocument"];
 
+export type PagedResponse_PropertyChildDocument =
+  components["schemas"]["PagedResponse_PropertyChildDocument_"];
+
 export type PagedResponse_PropertyParentDocument =
   components["schemas"]["PagedResponse_PropertyParentDocument_"];
