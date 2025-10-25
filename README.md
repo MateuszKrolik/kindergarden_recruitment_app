@@ -2,7 +2,7 @@
 flowchart TB
     subgraph IDENTITY["🪪 identity"]
     parent_user_details["parent_user_details<br/>- user_id (PK)<br/>- first_name<br/>- last_name<br/>- phone<br/>- pesel<br/>- birth_date<br/>- home_address<br/>- workplace<br/>- gender<br/>- condition flags..."]
-    children_tbl["children<br/>- id (PK)<br/>- has_disability"]
+    children_tbl["children<br/>- id (PK)<br/>- has_disability<br/>- is_from_single_parent_family"]
     parent_children["parent_children<br/>- parent_id (PK)<br/>- child_id (PK)"]
     property_users["property_users<br/>- property_id (PK)<br/>- user_id (PK)<br/>- role"]
     end
@@ -24,6 +24,7 @@ flowchart TB
 
     subgraph REPORTING["📊 reporting"]
     parent_documents["parent_documents<br/>- id (PK)<br/>- user_id<br/>- document_type<br/>- file_path"]
+    children_documents["children_documents<br/>- id (PK)<br/>- child_id<br/>- document_type<br/>- file_path"]
     end
 
     subgraph COMPLIANCE["🧾 compliance"]
