@@ -5,7 +5,11 @@ from fastapi import UploadFile, File
 from src.modules.reporting.repo import IReportingRepo
 from src.modules.reporting.s3 import IS3Repository
 from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
-from src.shared.types.modules.reporting.model import ChildDocument, ParentDocument
+from src.shared.types.modules.reporting.model import (
+    ChildDocument,
+    ParentDocument,
+    ParentPartnerDocument,
+)
 from src.shared.types.response import HTTPErrorResponse
 
 
@@ -61,6 +65,14 @@ class IReportingSvc(ABC):
     async def get_child_document_url_by_document_id(
         self, doc_id: UUID
     ) -> HTTPErrorResponse[str]:
+        pass
+
+    @abstractmethod
+    async def get_parent_partner_document_by_type(
+        self,
+        partner_id: UUID,
+        document_type: DOCUMENT_TYPE,
+    ) -> HTTPErrorResponse[ParentPartnerDocument]:
         pass
 
 
@@ -150,3 +162,12 @@ class ReportingSvc(IReportingSvc):
             return None, error
         assert path is not None
         return await self.get_document_url_by_file_path(path=path)
+
+    async def get_parent_partner_document_by_type(
+        self,
+        partner_id: UUID,
+        document_type: DOCUMENT_TYPE,
+    ) -> HTTPErrorResponse[ParentPartnerDocument]:
+        return await self.repo.get_parent_partner_document_by_type(
+            partner_id=partner_id, document_type=document_type
+        )

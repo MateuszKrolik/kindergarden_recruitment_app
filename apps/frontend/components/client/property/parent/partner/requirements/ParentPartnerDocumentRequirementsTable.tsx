@@ -27,7 +27,10 @@ import { ParentPartnerDocumentRequirementsTableActionMenu } from "./ParentPartne
 import { ApiResponse } from "@/types/response";
 import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
 import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
-import { ParentDocument } from "@/types/modules/reporting/model";
+import {
+  ParentDocument,
+  ParentPartnerDocument,
+} from "@/types/modules/reporting/model";
 import { PropertyParentDocument } from "@/types/modules/compliance/model";
 import { PropertyParentDocumentRequest } from "@/types/modules/compliance/dto";
 
@@ -40,11 +43,11 @@ export type ParentPartnerDocumentRequirementsTableProps = {
     propertyId: string,
     partnerId: string,
   ): Promise<ApiResponse<PropertyParentDocumentRequirement[]>>;
-  getParentDocumentByType(
+  getParentPartnerDocumentByType(
     jwt: string,
-    userId: string,
+    partnerId: string,
     documentType: DOCUMENT_TYPE,
-  ): Promise<ApiResponse<ParentDocument>>;
+  ): Promise<ApiResponse<ParentPartnerDocument>>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
@@ -75,7 +78,7 @@ export const ParentPartnerDocumentRequirementsTable = ({
   propertyId,
   userId,
   getPropertyParentPartnerDocumentRequirements,
-  getParentDocumentByType,
+  getParentPartnerDocumentByType,
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
   saveParentDocument,
@@ -169,7 +172,7 @@ export const ParentPartnerDocumentRequirementsTable = ({
             jwt={jwt}
             propertyId={propertyId}
             userId={userId}
-            getParentDocumentByType={getParentDocumentByType}
+            getParentPartnerDocumentByType={getParentPartnerDocumentByType}
             requirement={requirement}
             getPropertyParentDocumentApprovalRequestByDocumentId={
               getPropertyParentDocumentApprovalRequestByDocumentId

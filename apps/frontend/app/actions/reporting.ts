@@ -5,7 +5,11 @@ import {
   CHILD_DOCUMENT_TYPE,
   DOCUMENT_TYPE,
 } from "@/types/modules/reporting/enum";
-import { ChildDocument, ParentDocument } from "@/types/modules/reporting/model";
+import {
+  ChildDocument,
+  ParentDocument,
+  ParentPartnerDocument,
+} from "@/types/modules/reporting/model";
 import { ApiResponse } from "@/types/response";
 
 export async function getParentDocumentByType(
@@ -112,6 +116,22 @@ export async function getChildDocumentURLByDocumentID(
   const { data, error } = await api.GET("/children-documents/{doc_id}", {
     params: { path: { doc_id: documentId } },
   });
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function getParentPartnerDocumentByType(
+  jwt: string,
+  partnerId: string,
+  documentType: DOCUMENT_TYPE,
+): Promise<ApiResponse<ParentPartnerDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/parent-partners/{partner_id}/documents/{document_type}",
+    {
+      params: { path: { partner_id: partnerId, document_type: documentType } },
+    },
+  );
   if (error) return { data: undefined, error: error };
   return { data: data, error: undefined };
 }

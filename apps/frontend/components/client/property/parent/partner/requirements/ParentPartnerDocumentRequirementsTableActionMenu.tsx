@@ -14,7 +14,10 @@ import { Progress } from "@/components/ui/progress";
 import { ApiResponse } from "@/types/response";
 import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
 import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
-import { ParentDocument } from "@/types/modules/reporting/model";
+import {
+  ParentDocument,
+  ParentPartnerDocument,
+} from "@/types/modules/reporting/model";
 import { PropertyParentDocument } from "@/types/modules/compliance/model";
 import { PropertyParentDocumentRequest } from "@/types/modules/compliance/dto";
 
@@ -23,11 +26,11 @@ type ParentPartnerDocumentRequirementsTableActionMenuProps = {
   propertyId: string;
   userId: string;
   requirement: PropertyParentDocumentRequirement;
-  getParentDocumentByType(
+  getParentPartnerDocumentByType(
     jwt: string,
-    userId: string,
+    partnerId: string,
     documentType: DOCUMENT_TYPE,
-  ): Promise<ApiResponse<ParentDocument>>;
+  ): Promise<ApiResponse<ParentPartnerDocument>>;
   getPropertyParentDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
@@ -58,13 +61,15 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
   propertyId,
   userId,
   requirement,
-  getParentDocumentByType,
+  getParentPartnerDocumentByType,
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
   saveParentDocument,
   getDocumentURLByFilePath,
 }: ParentPartnerDocumentRequirementsTableActionMenuProps) => {
-  const [parentDoc, setParentDoc] = useState<ParentDocument | null>(null);
+  const [partnerDoc, setPartnerDoc] = useState<ParentPartnerDocument | null>(
+    null,
+  );
   const [disableApprovalRequest, setDisableApprovalRequest] =
     useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -75,29 +80,30 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
     setOpen(nextOpen);
     if (nextOpen) {
       setIsLoading(true);
-      const { data: parentDocResult, error } = await getParentDocumentByType(
-        jwt,
-        userId,
-        requirement.document_type,
-      );
+      const { data: partnerDocResult, error } =
+        await getParentPartnerDocumentByType(
+          jwt,
+          userId,
+          requirement.document_type,
+        );
       if (error) {
         if (error.code === 404) {
-          setParentDoc(null);
+          setPartnerDoc(null);
           setIsLoading(false);
           return;
         }
         toast.error(error.message);
-        setParentDoc(null);
+        setPartnerDoc(null);
         setIsLoading(false);
         return;
       }
-      setParentDoc(parentDocResult);
+      setPartnerDoc(partnerDocResult);
       const { error: approvalReqError } =
         await getPropertyParentDocumentApprovalRequestByDocumentId(
           jwt,
           propertyId,
           userId,
-          parentDocResult.id,
+          partnerDocResult.id,
         );
       if (approvalReqError) {
         if (approvalReqError.code === 404) {
@@ -130,7 +136,7 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
             <DropdownMenuItem>
               <Progress value={33} />
             </DropdownMenuItem>
-          ) : parentDoc ? (
+          ) : partnerDoc ? (
             <>
               <DropdownMenuItem
                 disabled={disableApprovalRequest}
@@ -140,9 +146,9 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
                       jwt,
                       propertyId,
                       userId,
-                      parentDoc.id,
+                      partnerDoc.id,
                       {
-                        document_type: parentDoc.document_type,
+                        document_type: partnerDoc.document_type,
                       },
                     );
                   if (error) {
@@ -150,7 +156,7 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
                     return;
                   }
                   toast.success(
-                    `Successfully sent approval request for document: ${parentDoc.document_type}!`,
+                    `Successfully sent approval request for document: ${partnerDoc.document_type}!`,
                   );
                 }}
               >
@@ -161,7 +167,7 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
                 onClick={async () => {
                   const { data, error } = await getDocumentURLByFilePath(
                     jwt,
-                    parentDoc.file_path,
+                    partnerDoc.file_path,
                   );
                   if (error) {
                     toast.error(error.message);

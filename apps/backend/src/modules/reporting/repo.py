@@ -2,7 +2,11 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 from asyncpg import Pool
 from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
-from src.shared.types.modules.reporting.model import ChildDocument, ParentDocument
+from src.shared.types.modules.reporting.model import (
+    ChildDocument,
+    ParentDocument,
+    ParentPartnerDocument,
+)
 from src.shared.types.response import HTTPError, HTTPErrorResponse
 from src.shared.utils.query import try_except
 
@@ -54,6 +58,14 @@ class IReportingRepo(ABC):
         self,
         doc_id: UUID,
     ) -> HTTPErrorResponse[str]:
+        pass
+
+    @abstractmethod
+    async def get_parent_partner_document_by_type(
+        self,
+        partner_id: UUID,
+        document_type: DOCUMENT_TYPE,
+    ) -> HTTPErrorResponse[ParentPartnerDocument]:
         pass
 
 
@@ -204,3 +216,27 @@ class ReportingRepo(IReportingRepo):
                     message=f"Child document with id: {doc_id} was not found!",
                 )
             return rows[0]["file_path"], None
+
+    async def get_parent_partner_document_by_type(
+        self,
+        partner_id: UUID,
+        document_type: DOCUMENT_TYPE,
+    ) -> HTTPErrorResponse[ParentPartnerDocument]:
+        sql = """
+        SELECT *
+        FROM reporting.parent_partner_documents
+        WHERE partner_id = $1 AND document_type = $2;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(
+                connection.fetch, sql, partner_id, document_type
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            if len(rows) == 0:
+                return None, HTTPError(
+                    code=404,
+                    message=f"Document with type: ${document_type} does not exist for parent partner: {partner_id}!",
+                )
+            return ParentPartnerDocument(**rows[0]), None

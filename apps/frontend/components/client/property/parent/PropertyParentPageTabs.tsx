@@ -13,7 +13,11 @@ import {
   CHILD_DOCUMENT_TYPE,
   DOCUMENT_TYPE,
 } from "@/types/modules/reporting/enum";
-import { ChildDocument, ParentDocument } from "@/types/modules/reporting/model";
+import {
+  ChildDocument,
+  ParentDocument,
+  ParentPartnerDocument,
+} from "@/types/modules/reporting/model";
 import {
   PropertyChildDocument,
   PropertyParentDocument,
@@ -105,6 +109,11 @@ type PropertyParentPageTabsProps = {
     propertyId: string,
     partnerId: string,
   ): Promise<ApiResponse<PropertyParentDocumentRequirement[]>>;
+  getParentPartnerDocumentByType(
+    jwt: string,
+    partnerId: string,
+    documentType: DOCUMENT_TYPE,
+  ): Promise<ApiResponse<ParentPartnerDocument>>;
 };
 
 export const PropertyParentPageTabs = ({
@@ -125,6 +134,7 @@ export const PropertyParentPageTabs = ({
   getPropertyChildDocumentApprovalRequestByDocumentId,
   saveChildDocument,
   getPropertyParentPartnerDocumentRequirements,
+  getParentPartnerDocumentByType,
 }: PropertyParentPageTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
@@ -163,7 +173,7 @@ export const PropertyParentPageTabs = ({
             jwt={jwt}
             propertyId={propertyId}
             userId={userId}
-            getParentDocumentByType={getParentDocumentByType}
+            getParentPartnerDocumentByType={getParentPartnerDocumentByType}
             getPropertyParentPartnerDocumentRequirements={
               getPropertyParentPartnerDocumentRequirements
             }

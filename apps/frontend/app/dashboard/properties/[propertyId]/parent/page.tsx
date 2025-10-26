@@ -18,6 +18,7 @@ import {
   getChildDocumentByType,
   getDocumentURLByFilePath,
   getParentDocumentByType,
+  getParentPartnerDocumentByType,
   saveChildDocument,
   saveParentDocument,
 } from "@/app/actions/reporting";
@@ -87,6 +88,7 @@ export default async function PropertyParentPage({
       getPropertyParentPartnerDocumentRequirements={
         getPropertyParentPartnerDocumentRequirements
       }
+      getParentPartnerDocumentByType={getParentPartnerDocumentByType}
     />
   );
 }

@@ -5,7 +5,11 @@ from fastapi.responses import JSONResponse
 
 from src.modules.reporting.svc import IReportingSvc
 from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
-from src.shared.types.modules.reporting.model import ChildDocument, ParentDocument
+from src.shared.types.modules.reporting.model import (
+    ChildDocument,
+    ParentDocument,
+    ParentPartnerDocument,
+)
 from src.shared.types.response import AuthMiddlewareResponse, HTTPError
 
 
@@ -257,6 +261,45 @@ class ReportingHandler:
                 )
             data, error = await self.svc.get_child_document_url_by_document_id(
                 doc_id=doc_id
+            )
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 200
+            assert data is not None
+            return data
+
+        @self.router.get(
+            "/parent-partners/{partner_id}/documents/{document_type}",
+            responses={
+                200: {"model": ParentPartnerDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def get_parent_partner_document_by_type(
+            partner_id: UUID,
+            document_type,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> ParentPartnerDocument:
+            if document_type not in DOCUMENT_TYPE:
+                return JSONResponse(
+                    status_code=400,
+                    content=HTTPError(
+                        code=400,
+                        message="Invalid document type!",
+                    ).dict(),
+                )
+            user, error = user_result
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            data, error = await self.svc.get_parent_partner_document_by_type(
+                partner_id=partner_id, document_type=document_type
             )
             if error:
                 return JSONResponse(

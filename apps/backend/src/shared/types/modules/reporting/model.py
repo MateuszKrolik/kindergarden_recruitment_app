@@ -16,3 +16,10 @@ class ChildDocument(BaseModel):
     child_id: UUID
     document_type: CHILD_DOCUMENT_TYPE
     file_path: str
+
+
+class ParentPartnerDocument(BaseModel):
+    id: UUID
+    partner_id: UUID
+    document_type: DOCUMENT_TYPE
+    file_path: str

@@ -5,7 +5,10 @@ import { ParentDocumentApprovalsTable } from "../approvals/ParentDocumentApprova
 import { ApiResponse } from "@/types/response";
 import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
 import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
-import { ParentDocument } from "@/types/modules/reporting/model";
+import {
+  ParentDocument,
+  ParentPartnerDocument,
+} from "@/types/modules/reporting/model";
 import { PropertyParentDocument } from "@/types/modules/compliance/model";
 import { PropertyParentDocumentRequest } from "@/types/modules/compliance/dto";
 import { ParentPartnerDocumentRequirementsTable } from "./requirements/ParentPartnerDocumentRequirementsTable";
@@ -19,11 +22,11 @@ type PropertyParentPartnerDocumentTabsProps = {
     propertyId: string,
     partnerId: string,
   ): Promise<ApiResponse<PropertyParentDocumentRequirement[]>>;
-  getParentDocumentByType(
+  getParentPartnerDocumentByType(
     jwt: string,
-    userId: string,
+    partnerId: string,
     documentType: DOCUMENT_TYPE,
-  ): Promise<ApiResponse<ParentDocument>>;
+  ): Promise<ApiResponse<ParentPartnerDocument>>;
   getAllDocumentApprovalRequestsForGivenPropertyParent(
     jwt: string,
     propertyId: string,
@@ -58,7 +61,7 @@ export const PropertyParentPartnerDocumentTabs = ({
   jwt,
   propertyId,
   userId,
-  getParentDocumentByType,
+  getParentPartnerDocumentByType,
   getPropertyParentPartnerDocumentRequirements,
   getAllDocumentApprovalRequestsForGivenPropertyParent,
   getPropertyParentDocumentApprovalRequestByDocumentId,
@@ -80,7 +83,7 @@ export const PropertyParentPartnerDocumentTabs = ({
             jwt={jwt}
             propertyId={propertyId}
             userId={userId}
-            getParentDocumentByType={getParentDocumentByType}
+            getParentPartnerDocumentByType={getParentPartnerDocumentByType}
             getPropertyParentPartnerDocumentRequirements={
               getPropertyParentPartnerDocumentRequirements
             }

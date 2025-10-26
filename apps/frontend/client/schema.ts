@@ -108,6 +108,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/parent-partners/{partner_id}/documents/{document_type}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Parent Partner Document By Type */
+        get: operations["get_parent_partner_document_by_type_parent_partners__partner_id__documents__document_type__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/properties": {
         parameters: {
             query?: never;
@@ -512,6 +529,22 @@ export interface components {
              * Format: uuid
              */
             user_id: string;
+            document_type: components["schemas"]["DOCUMENT_TYPE"];
+            /** File Path */
+            file_path: string;
+        };
+        /** ParentPartnerDocument */
+        ParentPartnerDocument: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Partner Id
+             * Format: uuid
+             */
+            partner_id: string;
             document_type: components["schemas"]["DOCUMENT_TYPE"];
             /** File Path */
             file_path: string;
@@ -922,6 +955,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": string;
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    get_parent_partner_document_by_type_parent_partners__partner_id__documents__document_type__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partner_id: string;
+                document_type: unknown;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParentPartnerDocument"];
                 };
             };
             /** @description Default Response */
