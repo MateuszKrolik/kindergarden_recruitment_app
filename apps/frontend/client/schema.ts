@@ -118,7 +118,8 @@ export interface paths {
         /** Get Parent Partner Document By Type */
         get: operations["get_parent_partner_document_by_type_parent_partners__partner_id__documents__document_type__get"];
         put?: never;
-        post?: never;
+        /** Save Parent Partner Document */
+        post: operations["save_parent_partner_document_parent_partners__partner_id__documents__document_type__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -395,6 +396,14 @@ export interface components {
         };
         /** Body_save_parent_document_parents__parent_id__documents__document_type__post */
         Body_save_parent_document_parents__parent_id__documents__document_type__post: {
+            /**
+             * File
+             * Format: binary
+             */
+            file: string;
+        };
+        /** Body_save_parent_partner_document_parent_partners__partner_id__documents__document_type__post */
+        Body_save_parent_partner_document_parent_partners__partner_id__documents__document_type__post: {
             /**
              * File
              * Format: binary
@@ -982,6 +991,51 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParentPartnerDocument"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    save_parent_partner_document_parent_partners__partner_id__documents__document_type__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partner_id: string;
+                document_type: components["schemas"]["DOCUMENT_TYPE"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_save_parent_partner_document_parent_partners__partner_id__documents__document_type__post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParentPartnerDocument"];
+                };
+            };
+            /** @description Created */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };

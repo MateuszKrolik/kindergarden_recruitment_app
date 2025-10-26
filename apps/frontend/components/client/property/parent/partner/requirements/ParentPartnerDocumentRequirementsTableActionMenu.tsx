@@ -14,10 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { ApiResponse } from "@/types/response";
 import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
 import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
-import {
-  ParentDocument,
-  ParentPartnerDocument,
-} from "@/types/modules/reporting/model";
+import { ParentPartnerDocument } from "@/types/modules/reporting/model";
 import { PropertyParentDocument } from "@/types/modules/compliance/model";
 import { PropertyParentDocumentRequest } from "@/types/modules/compliance/dto";
 
@@ -44,12 +41,12 @@ type ParentPartnerDocumentRequirementsTableActionMenuProps = {
     parentDocumentId: string,
     body: PropertyParentDocumentRequest,
   ): Promise<ApiResponse<PropertyParentDocument>>;
-  saveParentDocument(
+  saveParentPartnerDocument(
     jwt: string,
-    userId: string,
+    partnerId: string,
     documentType: DOCUMENT_TYPE,
     file: File,
-  ): Promise<ApiResponse<ParentDocument>>;
+  ): Promise<ApiResponse<ParentPartnerDocument>>;
   getDocumentURLByFilePath(
     jwt: string,
     key: string,
@@ -64,7 +61,7 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
   getParentPartnerDocumentByType,
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
-  saveParentDocument,
+  saveParentPartnerDocument,
   getDocumentURLByFilePath,
 }: ParentPartnerDocumentRequirementsTableActionMenuProps) => {
   const [partnerDoc, setPartnerDoc] = useState<ParentPartnerDocument | null>(
@@ -200,7 +197,7 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
         onChange={async (e) => {
           const file = e.target.files?.[0];
           if (!file) return;
-          const { error } = await saveParentDocument(
+          const { error } = await saveParentPartnerDocument(
             jwt,
             userId,
             requirement.document_type,

@@ -21,6 +21,7 @@ import {
   getParentPartnerDocumentByType,
   saveChildDocument,
   saveParentDocument,
+  saveParentPartnerDocument,
 } from "@/app/actions/reporting";
 import { PropertyParentPageTabs } from "@/components/client/property/parent/PropertyParentPageTabs";
 import { auth } from "@/lib/auth";
@@ -89,6 +90,7 @@ export default async function PropertyParentPage({
         getPropertyParentPartnerDocumentRequirements
       }
       getParentPartnerDocumentByType={getParentPartnerDocumentByType}
+      saveParentPartnerDocument={saveParentPartnerDocument}
     />
   );
 }

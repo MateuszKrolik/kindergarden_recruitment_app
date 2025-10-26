@@ -309,3 +309,43 @@ class ReportingHandler:
             response.status_code = 200
             assert data is not None
             return data
+
+        @self.router.post(
+            "/parent-partners/{partner_id}/documents/{document_type}",
+            responses={
+                201: {"model": ParentPartnerDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def save_parent_partner_document(
+            partner_id: UUID,
+            document_type: DOCUMENT_TYPE,
+            response: Response,
+            file: UploadFile = File(...),
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> ParentPartnerDocument:
+            if document_type not in DOCUMENT_TYPE:
+                return JSONResponse(
+                    status_code=400,
+                    content=HTTPError(
+                        code=400,
+                        message="Invalid document type!",
+                    ).dict(),
+                )
+            user, error = user_result
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            data, error = await self.svc.save_parent_partner_document(
+                partner_id=partner_id, document_type=document_type, file=file
+            )
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 201
+            assert data is not None
+            return data

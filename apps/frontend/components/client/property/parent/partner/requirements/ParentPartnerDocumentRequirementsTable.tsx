@@ -61,12 +61,12 @@ export type ParentPartnerDocumentRequirementsTableProps = {
     parentDocumentId: string,
     body: PropertyParentDocumentRequest,
   ): Promise<ApiResponse<PropertyParentDocument>>;
-  saveParentDocument(
+  saveParentPartnerDocument(
     jwt: string,
-    userId: string,
+    partnerId: string,
     documentType: DOCUMENT_TYPE,
     file: File,
-  ): Promise<ApiResponse<ParentDocument>>;
+  ): Promise<ApiResponse<ParentPartnerDocument>>;
   getDocumentURLByFilePath(
     jwt: string,
     key: string,
@@ -81,7 +81,7 @@ export const ParentPartnerDocumentRequirementsTable = ({
   getParentPartnerDocumentByType,
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
-  saveParentDocument,
+  saveParentPartnerDocument,
   getDocumentURLByFilePath,
 }: ParentPartnerDocumentRequirementsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -180,7 +180,7 @@ export const ParentPartnerDocumentRequirementsTable = ({
             sendPropertyParentDocumentApprovalRequest={
               sendPropertyParentDocumentApprovalRequest
             }
-            saveParentDocument={saveParentDocument}
+            saveParentPartnerDocument={saveParentPartnerDocument}
             getDocumentURLByFilePath={getDocumentURLByFilePath}
           />
         );

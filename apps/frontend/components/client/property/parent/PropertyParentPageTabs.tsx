@@ -114,6 +114,12 @@ type PropertyParentPageTabsProps = {
     partnerId: string,
     documentType: DOCUMENT_TYPE,
   ): Promise<ApiResponse<ParentPartnerDocument>>;
+  saveParentPartnerDocument(
+    jwt: string,
+    partnerId: string,
+    documentType: DOCUMENT_TYPE,
+    file: File,
+  ): Promise<ApiResponse<ParentPartnerDocument>>;
 };
 
 export const PropertyParentPageTabs = ({
@@ -135,6 +141,7 @@ export const PropertyParentPageTabs = ({
   saveChildDocument,
   getPropertyParentPartnerDocumentRequirements,
   getParentPartnerDocumentByType,
+  saveParentPartnerDocument,
 }: PropertyParentPageTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
@@ -186,7 +193,7 @@ export const PropertyParentPageTabs = ({
             sendPropertyParentDocumentApprovalRequest={
               sendPropertyParentDocumentApprovalRequest
             }
-            saveParentDocument={saveParentDocument}
+            saveParentPartnerDocument={saveParentPartnerDocument}
             getDocumentURLByFilePath={getDocumentURLByFilePath}
           />
         </TabsContent>

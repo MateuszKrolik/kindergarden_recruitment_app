@@ -75,6 +75,15 @@ class IReportingSvc(ABC):
     ) -> HTTPErrorResponse[ParentPartnerDocument]:
         pass
 
+    @abstractmethod
+    async def save_parent_partner_document(
+        self,
+        partner_id: UUID,
+        document_type: DOCUMENT_TYPE,
+        file: UploadFile = File(...),
+    ) -> HTTPErrorResponse[ParentPartnerDocument]:
+        pass
+
 
 class ReportingSvc(IReportingSvc):
     def __init__(self, repo: IReportingRepo, s3_repo: IS3Repository) -> None:
@@ -170,4 +179,22 @@ class ReportingSvc(IReportingSvc):
     ) -> HTTPErrorResponse[ParentPartnerDocument]:
         return await self.repo.get_parent_partner_document_by_type(
             partner_id=partner_id, document_type=document_type
+        )
+
+    async def save_parent_partner_document(
+        self,
+        partner_id: UUID,
+        document_type: DOCUMENT_TYPE,
+        file: UploadFile = File(...),
+    ) -> HTTPErrorResponse[ParentPartnerDocument]:
+        _, ext = os.path.splitext(file.filename)
+        file_path = f"parents/partners/{partner_id}/documents/{document_type}{ext}"
+        file_content = await file.read()
+        _, error = await self.s3_repo.upload_file(
+            key=file_path, file_content=file_content
+        )
+        if error:
+            return None, error
+        return await self.repo.save_parent_partner_document(
+            partner_id=partner_id, document_type=document_type, file_path=file_path
         )

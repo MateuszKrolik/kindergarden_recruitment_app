@@ -135,3 +135,23 @@ export async function getParentPartnerDocumentByType(
   if (error) return { data: undefined, error: error };
   return { data: data, error: undefined };
 }
+
+export async function saveParentPartnerDocument(
+  jwt: string,
+  partnerId: string,
+  documentType: DOCUMENT_TYPE,
+  file: File,
+): Promise<ApiResponse<ParentPartnerDocument>> {
+  const api = getApiClient(jwt);
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data, error } = await api.POST(
+    "/parent-partners/{partner_id}/documents/{document_type}",
+    {
+      params: { path: { partner_id: partnerId, document_type: documentType } },
+      body: formData as unknown as { file: string },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}

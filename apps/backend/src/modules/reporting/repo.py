@@ -68,6 +68,15 @@ class IReportingRepo(ABC):
     ) -> HTTPErrorResponse[ParentPartnerDocument]:
         pass
 
+    @abstractmethod
+    async def save_parent_partner_document(
+        self,
+        partner_id: UUID,
+        document_type: DOCUMENT_TYPE,
+        file_path: str,
+    ) -> HTTPErrorResponse[ParentPartnerDocument]:
+        pass
+
 
 class ReportingRepo(IReportingRepo):
     def __init__(self, pool: Pool) -> None:
@@ -240,3 +249,30 @@ class ReportingRepo(IReportingRepo):
                     message=f"Document with type: ${document_type} does not exist for parent partner: {partner_id}!",
                 )
             return ParentPartnerDocument(**rows[0]), None
+
+    async def save_parent_partner_document(
+        self,
+        partner_id: UUID,
+        document_type: DOCUMENT_TYPE,
+        file_path: str,
+    ) -> HTTPErrorResponse[ParentPartnerDocument]:
+        sql = """
+        INSERT INTO reporting.parent_partner_documents(
+          partner_id,
+          document_type,
+          file_path)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+        """
+        async with self.pool.acquire() as connection:
+            row, error = await try_except(
+                connection.fetchrow, sql, partner_id, document_type, file_path
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            if row is None:
+                return None, HTTPError(
+                    code=404,
+                    message=f"Document: ${document_type} was NOT saved successfully for parent partner: ${partner_id}!",
+                )
+            return ParentPartnerDocument(**row), None
