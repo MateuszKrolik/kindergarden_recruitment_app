@@ -12,6 +12,7 @@ import {
 import { PropertyChildDocument } from "@/types/modules/compliance/model";
 import { CHILD_DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
 import { ChildDocument } from "@/types/modules/reporting/model";
+import { PropertyChildDocumentRequest } from "@/types/modules/compliance/dto";
 
 type PropertyParentChildrenDocumentTabsProps = {
   jwt: string;
@@ -48,6 +49,7 @@ type PropertyParentChildrenDocumentTabsProps = {
     propertyId: string,
     childId: string,
     childDocumentId: string,
+    body: PropertyChildDocumentRequest,
   ): Promise<ApiResponse<PropertyChildDocument>>;
   saveChildDocument(
     jwt: string,

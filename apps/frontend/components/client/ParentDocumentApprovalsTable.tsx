@@ -61,13 +61,30 @@ export const ParentDocumentApprovalsTable = ({
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Parent Document ID
+            Document ID
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
         <div className="lowercase">{row.getValue("parent_document_id")}</div>
+      ),
+    },
+    {
+      accessorKey: "document_type",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Document Type
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("document_type")}</div>
       ),
     },
     {

@@ -41,13 +41,6 @@ class IReportingSvc(ABC):
         pass
 
     @abstractmethod
-    async def get_parent_document_type_by_document_id(
-        self,
-        parent_document_id: UUID,
-    ) -> HTTPErrorResponse[DOCUMENT_TYPE]:
-        pass
-
-    @abstractmethod
     async def get_child_document_by_type(
         self,
         child_id: UUID,
@@ -68,13 +61,6 @@ class IReportingSvc(ABC):
     async def get_child_document_url_by_document_id(
         self, doc_id: UUID
     ) -> HTTPErrorResponse[str]:
-        pass
-
-    @abstractmethod
-    async def get_child_document_type_by_document_id(
-        self,
-        child_document_id: UUID,
-    ) -> HTTPErrorResponse[CHILD_DOCUMENT_TYPE]:
         pass
 
 
@@ -127,14 +113,6 @@ class ReportingSvc(IReportingSvc):
             user_id=user_id, document_type=document_type, file_path=file_path
         )
 
-    async def get_parent_document_type_by_document_id(
-        self,
-        parent_document_id: UUID,
-    ) -> HTTPErrorResponse[DOCUMENT_TYPE]:
-        return await self.repo.get_parent_document_type_by_document_id(
-            parent_document_id=parent_document_id
-        )
-
     async def get_child_document_by_type(
         self,
         child_id: UUID,
@@ -172,11 +150,3 @@ class ReportingSvc(IReportingSvc):
             return None, error
         assert path is not None
         return await self.get_document_url_by_file_path(path=path)
-
-    async def get_child_document_type_by_document_id(
-        self,
-        child_document_id: UUID,
-    ) -> HTTPErrorResponse[CHILD_DOCUMENT_TYPE]:
-        return await self.repo.get_child_document_type_by_document_id(
-            child_document_id=child_document_id
-        )

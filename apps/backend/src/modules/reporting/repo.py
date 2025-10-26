@@ -33,13 +33,6 @@ class IReportingRepo(ABC):
         pass
 
     @abstractmethod
-    async def get_parent_document_type_by_document_id(
-        self,
-        parent_document_id: UUID,
-    ) -> HTTPErrorResponse[DOCUMENT_TYPE]:
-        pass
-
-    @abstractmethod
     async def get_child_document_by_type(
         self,
         child_id: UUID,
@@ -61,13 +54,6 @@ class IReportingRepo(ABC):
         self,
         doc_id: UUID,
     ) -> HTTPErrorResponse[str]:
-        pass
-
-    @abstractmethod
-    async def get_child_document_type_by_document_id(
-        self,
-        child_document_id: UUID,
-    ) -> HTTPErrorResponse[CHILD_DOCUMENT_TYPE]:
         pass
 
 
@@ -147,27 +133,6 @@ class ReportingRepo(IReportingRepo):
                 )
             return ParentDocument(**row), None
 
-    async def get_parent_document_type_by_document_id(
-        self,
-        parent_document_id: UUID,
-    ) -> HTTPErrorResponse[DOCUMENT_TYPE]:
-        sql = """
-        SELECT document_type
-        FROM reporting.parent_documents
-        WHERE id = $1;
-        """
-        async with self.pool.acquire() as connection:
-            rows, error = await try_except(connection.fetch, sql, parent_document_id)
-            if error:
-                return None, HTTPError(code=500, message=str(error))
-            assert rows is not None
-            if len(rows) == 0:
-                return None, HTTPError(
-                    code=404,
-                    message=f"Parent document with id: {parent_document_id} was not found!",
-                )
-            return rows[0]["document_type"], None
-
     async def get_child_document_by_type(
         self,
         child_id: UUID,
@@ -239,24 +204,3 @@ class ReportingRepo(IReportingRepo):
                     message=f"Child document with id: {doc_id} was not found!",
                 )
             return rows[0]["file_path"], None
-
-    async def get_child_document_type_by_document_id(
-        self,
-        child_document_id: UUID,
-    ) -> HTTPErrorResponse[CHILD_DOCUMENT_TYPE]:
-        sql = """
-        SELECT document_type
-        FROM reporting.children_documents
-        WHERE id = $1;
-        """
-        async with self.pool.acquire() as connection:
-            rows, error = await try_except(connection.fetch, sql, child_document_id)
-            if error:
-                return None, HTTPError(code=500, message=str(error))
-            assert rows is not None
-            if len(rows) == 0:
-                return None, HTTPError(
-                    code=404,
-                    message=f"Child document with id: {child_document_id} was not found!",
-                )
-            return rows[0]["document_type"], None

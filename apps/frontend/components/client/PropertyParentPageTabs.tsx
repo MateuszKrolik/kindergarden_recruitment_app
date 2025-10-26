@@ -18,6 +18,10 @@ import {
   PropertyChildDocument,
   PropertyParentDocument,
 } from "@/types/modules/compliance/model";
+import {
+  PropertyChildDocumentRequest,
+  PropertyParentDocumentRequest,
+} from "@/types/modules/compliance/dto";
 
 type PropertyParentPageTabsProps = {
   jwt: string;
@@ -47,8 +51,9 @@ type PropertyParentPageTabsProps = {
   sendPropertyParentDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
-    userId: string,
+    parentId: string,
     parentDocumentId: string,
+    body: PropertyParentDocumentRequest,
   ): Promise<ApiResponse<PropertyParentDocument>>;
   saveParentDocument(
     jwt: string,
@@ -80,6 +85,7 @@ type PropertyParentPageTabsProps = {
     propertyId: string,
     childId: string,
     childDocumentId: string,
+    body: PropertyChildDocumentRequest,
   ): Promise<ApiResponse<PropertyChildDocument>>;
   getPropertyChildDocumentApprovalRequestByDocumentId(
     jwt: string,

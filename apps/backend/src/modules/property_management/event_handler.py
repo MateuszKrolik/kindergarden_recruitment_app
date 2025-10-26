@@ -2,7 +2,6 @@ import asyncio
 from typing import List, Set
 from uuid import UUID
 
-from src.modules.property_management.client import IReportingClient
 from src.modules.property_management.svc import IPropertyManagementSvc
 
 import redis.asyncio as redis
@@ -27,31 +26,19 @@ class PropertyManagementEventHandler(EventHandler):
     def __init__(
         self,
         svc: IPropertyManagementSvc,
-        reporting_client: IReportingClient,
         redis_client: redis.Redis,
         socket_server: socketio.AsyncServer,
     ) -> None:
         super().__init__(redis_client)
         self.svc = svc
-        self.reporting_client = reporting_client
         self.socket_server = socket_server
 
     @EventHandler.handle.register
     async def _(self, event: PropertyParentDocument):
-        (
-            document_type,
-            error,
-        ) = await self.reporting_client.get_parent_document_type_by_document_id(
-            parent_document_id=event.parent_document_id
-        )
-        if error:
-            self.logger.error(error)
-            return
-        assert document_type is not None
         tasks = await asyncio.gather(
             self.svc.get_point_value_for_given_property_parent_document_by_document_type(
                 event.property_id,
-                document_type,
+                event.document_type,
             ),
             self.svc.get_all_property_children_for_given_parent(
                 event.property_id,
@@ -97,20 +84,10 @@ class PropertyManagementEventHandler(EventHandler):
 
     @EventHandler.handle.register
     async def _(self, event: PropertyChildDocument):
-        (
-            document_type,
-            error,
-        ) = await self.reporting_client.get_child_document_type_by_document_id(
-            child_document_id=event.child_document_id
-        )
-        if error:
-            self.logger.error(error)
-            return
-        assert document_type is not None
         tasks = await asyncio.gather(
             self.svc.get_point_value_for_given_property_child_document_by_document_type(
                 event.property_id,
-                document_type,
+                event.document_type,
             ),
             self.svc.get_property_child_by_id(
                 event.property_id,

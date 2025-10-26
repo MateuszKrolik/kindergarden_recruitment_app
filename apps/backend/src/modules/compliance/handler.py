@@ -4,6 +4,10 @@ import uuid
 from fastapi import APIRouter, Response, Depends, Query
 from fastapi.responses import JSONResponse
 
+from src.modules.compliance.dto import (
+    PropertyChildDocumentRequest,
+    PropertyParentDocumentRequest,
+)
 from src.modules.compliance.svc import IComplianceSvc
 from src.shared.types.modules.compliance.enum import REQUEST_STATUS
 from src.shared.types.modules.compliance.model import (
@@ -176,6 +180,7 @@ class ComplianceHandler:
             parent_id: UUID,
             parent_doc_id: UUID,
             response: Response,
+            body: PropertyParentDocumentRequest,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
         ) -> PropertyParentDocument:
             user, error = user_result
@@ -191,6 +196,7 @@ class ComplianceHandler:
                 property_id=property_id,
                 user_id=parent_id,
                 parent_document_id=parent_doc_id,
+                document_type=body.document_type,
             )
             if error:
                 return JSONResponse(
@@ -297,6 +303,7 @@ class ComplianceHandler:
             child_id: UUID,
             child_document_id: UUID,
             response: Response,
+            body: PropertyChildDocumentRequest,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
         ) -> PropertyChildDocument:
             user, error = user_result
@@ -312,6 +319,7 @@ class ComplianceHandler:
                 property_id=property_id,
                 child_id=child_id,
                 child_document_id=child_document_id,
+                document_type=body.document_type,
             )
             if error:
                 return JSONResponse(

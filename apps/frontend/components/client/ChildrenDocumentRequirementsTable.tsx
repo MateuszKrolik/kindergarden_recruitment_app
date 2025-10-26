@@ -29,6 +29,7 @@ import { ChildrenDocumentRequirementsTableActionMenu } from "./ChildrenDocumentR
 import { CHILD_DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
 import { ChildDocument } from "@/types/modules/reporting/model";
 import { PropertyChildDocument } from "@/types/modules/compliance/model";
+import { PropertyChildDocumentRequest } from "@/types/modules/compliance/dto";
 
 const EMPTY_REQUIREMENTS: PropertyChildDocumentRequirement[] = [];
 
@@ -57,6 +58,7 @@ export type ChildrenDocumentRequirementsTableProps = {
     propertyId: string,
     childId: string,
     childDocumentId: string,
+    body: PropertyChildDocumentRequest,
   ): Promise<ApiResponse<PropertyChildDocument>>;
   saveChildDocument(
     jwt: string,

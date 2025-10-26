@@ -13,6 +13,7 @@ from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
     PropertyParentDocument,
 )
+from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
 from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import HTTPError, HTTPErrorResponse
 import redis.asyncio as redis
@@ -62,6 +63,7 @@ class IComplianceSvc(ABC):
         property_id: UUID,
         user_id: UUID,
         parent_document_id: UUID,
+        document_type: DOCUMENT_TYPE,
     ) -> HTTPErrorResponse[PropertyParentDocument]:
         pass
 
@@ -91,6 +93,7 @@ class IComplianceSvc(ABC):
         property_id: UUID,
         child_id: UUID,
         child_document_id: UUID,
+        document_type: CHILD_DOCUMENT_TYPE,
     ) -> HTTPErrorResponse[PropertyChildDocument]:
         pass
 
@@ -176,11 +179,13 @@ class ComplianceSvc(IComplianceSvc):
         property_id: UUID,
         user_id: UUID,
         parent_document_id: UUID,
+        document_type: DOCUMENT_TYPE,
     ) -> HTTPErrorResponse[PropertyParentDocument]:
         data, error = await self.repo.send_property_parent_document_approval_request(
             property_id=property_id,
             user_id=user_id,
             parent_document_id=parent_document_id,
+            document_type=document_type,
         )
         if error:
             return None, error
@@ -247,11 +252,13 @@ class ComplianceSvc(IComplianceSvc):
         property_id: UUID,
         child_id: UUID,
         child_document_id: UUID,
+        document_type: CHILD_DOCUMENT_TYPE,
     ) -> HTTPErrorResponse[PropertyChildDocument]:
         data, error = await self.repo.send_property_child_document_approval_request(
             property_id=property_id,
             child_id=child_id,
             child_document_id=child_document_id,
+            document_type=document_type,
         )
         if error:
             return None, error

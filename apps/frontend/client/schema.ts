@@ -548,6 +548,11 @@ export interface components {
             request_status: components["schemas"]["REQUEST_STATUS"];
             /** Approved By */
             approved_by: string | null;
+            document_type: components["schemas"]["CHILD_DOCUMENT_TYPE"];
+        };
+        /** PropertyChildDocumentRequest */
+        PropertyChildDocumentRequest: {
+            document_type: components["schemas"]["CHILD_DOCUMENT_TYPE"];
         };
         /** PropertyChildDocumentRequirement */
         PropertyChildDocumentRequirement: {
@@ -582,6 +587,11 @@ export interface components {
             request_status: components["schemas"]["REQUEST_STATUS"];
             /** Approved By */
             approved_by: string | null;
+            document_type: components["schemas"]["DOCUMENT_TYPE"];
+        };
+        /** PropertyParentDocumentRequest */
+        PropertyParentDocumentRequest: {
+            document_type: components["schemas"]["DOCUMENT_TYPE"];
         };
         /** PropertyParentDocumentRequirement */
         PropertyParentDocumentRequirement: {
@@ -1178,7 +1188,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PropertyParentDocumentRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -1322,7 +1336,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PropertyChildDocumentRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

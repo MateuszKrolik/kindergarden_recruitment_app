@@ -8,6 +8,7 @@ from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
     PropertyParentDocument,
 )
+from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
 from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import HTTPError, HTTPErrorResponse
 from src.shared.utils.pagination import calculate_offset, new_paged_response
@@ -55,6 +56,7 @@ class IComplianceRepo(ABC):
         property_id: UUID,
         user_id: UUID,
         parent_document_id: UUID,
+        document_type: DOCUMENT_TYPE,
     ) -> HTTPErrorResponse[PropertyParentDocument]:
         pass
 
@@ -84,6 +86,7 @@ class IComplianceRepo(ABC):
         property_id: UUID,
         child_id: UUID,
         child_document_id: UUID,
+        document_type: CHILD_DOCUMENT_TYPE,
     ) -> HTTPErrorResponse[PropertyChildDocument]:
         pass
 
@@ -218,21 +221,29 @@ class ComplianceRepo(IComplianceRepo):
         property_id: UUID,
         user_id: UUID,
         parent_document_id: UUID,
+        document_type: DOCUMENT_TYPE,
     ) -> HTTPErrorResponse[PropertyParentDocument]:
         sql = """
         INSERT INTO compliance.property_parent_documents(
             property_id,
             user_id,
-            parent_document_id
+            parent_document_id,
+            document_type
         ) VALUES (
             $1,
             $2,
-            $3
+            $3,
+            $4
         ) RETURNING *;
         """
         async with self.pool.acquire() as connection:
             row, error = await try_except(
-                connection.fetchrow, sql, property_id, user_id, parent_document_id
+                connection.fetchrow,
+                sql,
+                property_id,
+                user_id,
+                parent_document_id,
+                document_type,
             )
             if error:
                 return None, HTTPError(code=500, message=str(error))
@@ -323,21 +334,29 @@ class ComplianceRepo(IComplianceRepo):
         property_id: UUID,
         child_id: UUID,
         child_document_id: UUID,
+        document_type: CHILD_DOCUMENT_TYPE,
     ) -> HTTPErrorResponse[PropertyChildDocument]:
         sql = """
         INSERT INTO compliance.property_children_documents(
             property_id,
             child_id,
-            child_document_id
+            child_document_id,
+            document_type
         ) VALUES (
             $1,
             $2,
-            $3
+            $3,
+            $4
         ) RETURNING *;
         """
         async with self.pool.acquire() as connection:
             row, error = await try_except(
-                connection.fetchrow, sql, property_id, child_id, child_document_id
+                connection.fetchrow,
+                sql,
+                property_id,
+                child_id,
+                child_document_id,
+                document_type,
             )
             if error:
                 return None, HTTPError(code=500, message=str(error))

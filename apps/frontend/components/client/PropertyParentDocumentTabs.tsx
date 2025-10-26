@@ -8,6 +8,7 @@ import { PropertyParentDocumentRequirement } from "@/types/modules/property/mode
 import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
 import { ParentDocument } from "@/types/modules/reporting/model";
 import { PropertyParentDocument } from "@/types/modules/compliance/model";
+import { PropertyParentDocumentRequest } from "@/types/modules/compliance/dto";
 
 type PropertyParentDocumentTabsProps = {
   jwt: string;
@@ -37,8 +38,9 @@ type PropertyParentDocumentTabsProps = {
   sendPropertyParentDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
-    userId: string,
+    parentId: string,
     parentDocumentId: string,
+    body: PropertyParentDocumentRequest,
   ): Promise<ApiResponse<PropertyParentDocument>>;
   saveParentDocument(
     jwt: string,

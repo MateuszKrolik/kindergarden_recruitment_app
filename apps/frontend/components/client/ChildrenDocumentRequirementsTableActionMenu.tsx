@@ -16,6 +16,7 @@ import { PropertyChildDocumentRequirement } from "@/types/modules/property/model
 import { CHILD_DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
 import { ChildDocument } from "@/types/modules/reporting/model";
 import { PropertyChildDocument } from "@/types/modules/compliance/model";
+import { PropertyChildDocumentRequest } from "@/types/modules/compliance/dto";
 
 type ChildrenDocumentRequirementsTableActionMenuProps = {
   jwt: string;
@@ -38,6 +39,7 @@ type ChildrenDocumentRequirementsTableActionMenuProps = {
     propertyId: string,
     childId: string,
     childDocumentId: string,
+    body: PropertyChildDocumentRequest,
   ): Promise<ApiResponse<PropertyChildDocument>>;
   saveChildDocument(
     jwt: string,
@@ -139,6 +141,9 @@ export const ChildrenDocumentRequirementsTableActionMenu = ({
                       propertyId,
                       childId,
                       childDoc.id,
+                      {
+                        document_type: childDoc.document_type,
+                      },
                     );
                   if (error) {
                     toast.error(error.message);

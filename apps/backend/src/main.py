@@ -101,7 +101,6 @@ async def main():
     )
     property_event_handler = PropertyManagementEventHandler(
         svc=property_svc,
-        reporting_client=reporting_svc,
         redis_client=redis_client,
         socket_server=sio,
     )

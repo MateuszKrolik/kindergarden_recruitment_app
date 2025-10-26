@@ -9,6 +9,10 @@ import {
   PropertyParentDocument,
 } from "@/types/modules/compliance/model";
 import { REQUEST_STATUS } from "@/types/modules/compliance/enum";
+import {
+  PropertyChildDocumentRequest,
+  PropertyParentDocumentRequest,
+} from "@/types/modules/compliance/dto";
 
 export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
   jwt: string,
@@ -70,6 +74,7 @@ export async function sendPropertyParentDocumentApprovalRequest(
   propertyId: string,
   parentId: string,
   parentDocumentId: string,
+  body: PropertyParentDocumentRequest,
 ): Promise<ApiResponse<PropertyParentDocument>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.POST(
@@ -82,6 +87,7 @@ export async function sendPropertyParentDocumentApprovalRequest(
           parent_doc_id: parentDocumentId,
         },
       },
+      body: body,
     },
   );
   if (error) return { data: undefined, error: error };
@@ -168,6 +174,7 @@ export async function sendPropertyChildDocumentApprovalRequest(
   propertyId: string,
   childId: string,
   childDocumentId: string,
+  body: PropertyChildDocumentRequest,
 ): Promise<ApiResponse<PropertyChildDocument>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.POST(
@@ -180,6 +187,7 @@ export async function sendPropertyChildDocumentApprovalRequest(
           child_document_id: childDocumentId,
         },
       },
+      body: body,
     },
   );
   if (error) return { data: undefined, error: error };
