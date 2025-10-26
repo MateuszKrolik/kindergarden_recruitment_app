@@ -1,9 +1,9 @@
 "use client";
 
 import { PropertyParentDocumentTabs } from "./PropertyParentDocumentTabs";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAllPropertyChildrenForGivenParent } from "@/app/actions/property-management";
-import { PropertyParentChildrenDocumentTabs } from "./PropertyParentChildrenDocumentTabs";
+import { PropertyParentChildrenDocumentTabs } from "./child/PropertyParentChildrenDocumentTabs";
 import { ApiResponse } from "@/types/response";
 import {
   PropertyChildDocumentRequirement,
@@ -22,6 +22,7 @@ import {
   PropertyChildDocumentRequest,
   PropertyParentDocumentRequest,
 } from "@/types/modules/compliance/dto";
+import { PropertyParentPartnerDocumentTabs } from "./partner/PropertyParentPartnerDocumentTabs";
 
 type PropertyParentPageTabsProps = {
   jwt: string;
@@ -124,12 +125,35 @@ export const PropertyParentPageTabs = ({
       <Tabs defaultValue="my-documents">
         <TabsList className="mx-auto">
           <TabsTrigger value="my-documents">My Documents</TabsTrigger>
+          <TabsTrigger value="partner-documents">Partner Documents</TabsTrigger>
           <TabsTrigger value="children-documents">
             Children Documents
           </TabsTrigger>
         </TabsList>
         <TabsContent value="my-documents">
           <PropertyParentDocumentTabs
+            jwt={jwt}
+            propertyId={propertyId}
+            userId={userId}
+            getParentDocumentByType={getParentDocumentByType}
+            getPropertyParentDocumentRequirements={
+              getPropertyParentDocumentRequirements
+            }
+            getAllDocumentApprovalRequestsForGivenPropertyParent={
+              getAllDocumentApprovalRequestsForGivenPropertyParent
+            }
+            getPropertyParentDocumentApprovalRequestByDocumentId={
+              getPropertyParentDocumentApprovalRequestByDocumentId
+            }
+            sendPropertyParentDocumentApprovalRequest={
+              sendPropertyParentDocumentApprovalRequest
+            }
+            saveParentDocument={saveParentDocument}
+            getDocumentURLByFilePath={getDocumentURLByFilePath}
+          />
+        </TabsContent>
+        <TabsContent value="partner-documents">
+          <PropertyParentPartnerDocumentTabs
             jwt={jwt}
             propertyId={propertyId}
             userId={userId}

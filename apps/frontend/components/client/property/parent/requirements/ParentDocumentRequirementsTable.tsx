@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -21,76 +21,76 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
+} from "@/components/ui/table";
 import { useCallback, useEffect, useState } from "react";
+import { ParentDocumentRequirementsTableActionMenu } from "./ParentDocumentRequirementsTableActionMenu";
 import { ApiResponse } from "@/types/response";
-import { PropertyChildDocumentRequirement } from "@/types/modules/property/model";
-import { ChildrenDocumentRequirementsTableActionMenu } from "./ChildrenDocumentRequirementsTableActionMenu";
-import { CHILD_DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
-import { ChildDocument } from "@/types/modules/reporting/model";
-import { PropertyChildDocument } from "@/types/modules/compliance/model";
-import { PropertyChildDocumentRequest } from "@/types/modules/compliance/dto";
+import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
+import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
+import { ParentDocument } from "@/types/modules/reporting/model";
+import { PropertyParentDocument } from "@/types/modules/compliance/model";
+import { PropertyParentDocumentRequest } from "@/types/modules/compliance/dto";
 
-const EMPTY_REQUIREMENTS: PropertyChildDocumentRequirement[] = [];
-
-export type ChildrenDocumentRequirementsTableProps = {
+export type ParentDocumentRequirementsTableProps = {
   jwt: string;
   propertyId: string;
-  childId: string;
-  getPropertyChildDocumentRequirements(
+  userId: string;
+  getPropertyParentDocumentRequirements(
     jwt: string,
     propertyId: string,
     userId: string,
-  ): Promise<ApiResponse<PropertyChildDocumentRequirement[]>>;
-  getChildDocumentByType(
+  ): Promise<ApiResponse<PropertyParentDocumentRequirement[]>>;
+  getParentDocumentByType(
     jwt: string,
-    childId: string,
-    documentType: CHILD_DOCUMENT_TYPE,
-  ): Promise<ApiResponse<ChildDocument>>;
-  getPropertyChildDocumentApprovalRequestByDocumentId(
-    jwt: string,
-    propertyId: string,
-    childId: string,
-    childDocId: string,
-  ): Promise<ApiResponse<PropertyChildDocument>>;
-  sendPropertyChildDocumentApprovalRequest(
+    userId: string,
+    documentType: DOCUMENT_TYPE,
+  ): Promise<ApiResponse<ParentDocument>>;
+  getPropertyParentDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
-    childId: string,
-    childDocumentId: string,
-    body: PropertyChildDocumentRequest,
-  ): Promise<ApiResponse<PropertyChildDocument>>;
-  saveChildDocument(
+    userId: string,
+    parentDocId: string,
+  ): Promise<ApiResponse<PropertyParentDocument>>;
+  sendPropertyParentDocumentApprovalRequest(
     jwt: string,
-    childId: string,
-    documentType: CHILD_DOCUMENT_TYPE,
+    propertyId: string,
+    parentId: string,
+    parentDocumentId: string,
+    body: PropertyParentDocumentRequest,
+  ): Promise<ApiResponse<PropertyParentDocument>>;
+  saveParentDocument(
+    jwt: string,
+    userId: string,
+    documentType: DOCUMENT_TYPE,
     file: File,
-  ): Promise<ApiResponse<ChildDocument>>;
+  ): Promise<ApiResponse<ParentDocument>>;
   getDocumentURLByFilePath(
     jwt: string,
     key: string,
   ): Promise<ApiResponse<string>>;
 };
 
-export const ChildrenDocumentRequirementsTable = ({
+export const ParentDocumentRequirementsTable = ({
   jwt,
   propertyId,
-  childId,
-  getPropertyChildDocumentRequirements,
-  getChildDocumentByType,
-  getPropertyChildDocumentApprovalRequestByDocumentId,
-  sendPropertyChildDocumentApprovalRequest,
-  saveChildDocument,
+  userId,
+  getPropertyParentDocumentRequirements,
+  getParentDocumentByType,
+  getPropertyParentDocumentApprovalRequestByDocumentId,
+  sendPropertyParentDocumentApprovalRequest,
+  saveParentDocument,
   getDocumentURLByFilePath,
-}: ChildrenDocumentRequirementsTableProps) => {
+}: ParentDocumentRequirementsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<PropertyChildDocumentRequirement[]>([]);
+  const [data, setData] = useState<Array<PropertyParentDocumentRequirement>>(
+    [],
+  );
 
-  const columns: ColumnDef<PropertyChildDocumentRequirement>[] = [
+  const columns: ColumnDef<PropertyParentDocumentRequirement>[] = [
     {
       accessorKey: "document_type",
       header: ({ column }) => {
@@ -165,19 +165,19 @@ export const ChildrenDocumentRequirementsTable = ({
       cell: ({ row }) => {
         const requirement = row.original;
         return (
-          <ChildrenDocumentRequirementsTableActionMenu
+          <ParentDocumentRequirementsTableActionMenu
             jwt={jwt}
             propertyId={propertyId}
-            childId={childId}
-            getChildDocumentByType={getChildDocumentByType}
+            userId={userId}
+            getParentDocumentByType={getParentDocumentByType}
             requirement={requirement}
-            getPropertyChildDocumentApprovalRequestByDocumentId={
-              getPropertyChildDocumentApprovalRequestByDocumentId
+            getPropertyParentDocumentApprovalRequestByDocumentId={
+              getPropertyParentDocumentApprovalRequestByDocumentId
             }
-            sendPropertyChildDocumentApprovalRequest={
-              sendPropertyChildDocumentApprovalRequest
+            sendPropertyParentDocumentApprovalRequest={
+              sendPropertyParentDocumentApprovalRequest
             }
-            saveChildDocument={saveChildDocument}
+            saveParentDocument={saveParentDocument}
             getDocumentURLByFilePath={getDocumentURLByFilePath}
           />
         );
@@ -186,28 +186,28 @@ export const ChildrenDocumentRequirementsTable = ({
   ];
 
   const fetchData = useCallback(async () => {
-    setError(null);
-    const { data, error: fetchErr } =
-      await getPropertyChildDocumentRequirements(jwt, propertyId, childId);
+    const { data, error } = await getPropertyParentDocumentRequirements(
+      jwt,
+      propertyId,
+      userId,
+    );
 
-    if (fetchErr) {
-      const errMsg = fetchErr.message;
+    if (error) {
+      const errMsg = error.message;
       toast.error(errMsg);
       setError(errMsg);
-      console.error(fetchErr);
       return;
     }
 
     setData(data);
-    setError(null);
-  }, [jwt, propertyId, childId, getPropertyChildDocumentRequirements]);
+  }, [jwt, propertyId, userId, getPropertyParentDocumentRequirements]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const table = useReactTable<PropertyChildDocumentRequirement>({
-    data: error ? EMPTY_REQUIREMENTS : data,
+  const table = useReactTable<PropertyParentDocumentRequirement>({
+    data: error || data instanceof Error ? [] : data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -238,9 +238,9 @@ export const ChildrenDocumentRequirementsTable = ({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}

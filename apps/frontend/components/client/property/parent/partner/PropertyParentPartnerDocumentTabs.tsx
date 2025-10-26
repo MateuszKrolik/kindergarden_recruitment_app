@@ -1,8 +1,8 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { ParentDocumentRequirementsTable } from "./ParentDocumentRequirementsTable";
-import { ParentDocumentApprovalsTable } from "./ParentDocumentApprovalsTable";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ParentDocumentRequirementsTable } from "../requirements/ParentDocumentRequirementsTable";
+import { ParentDocumentApprovalsTable } from "../approvals/ParentDocumentApprovalsTable";
 import { ApiResponse } from "@/types/response";
 import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
 import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
@@ -10,7 +10,7 @@ import { ParentDocument } from "@/types/modules/reporting/model";
 import { PropertyParentDocument } from "@/types/modules/compliance/model";
 import { PropertyParentDocumentRequest } from "@/types/modules/compliance/dto";
 
-type PropertyParentDocumentTabsProps = {
+type PropertyParentPartnerDocumentTabsProps = {
   jwt: string;
   propertyId: string;
   userId: string;
@@ -54,7 +54,7 @@ type PropertyParentDocumentTabsProps = {
   ): Promise<ApiResponse<string>>;
 };
 
-export const PropertyParentDocumentTabs = ({
+export const PropertyParentPartnerDocumentTabs = ({
   jwt,
   propertyId,
   userId,
@@ -65,7 +65,7 @@ export const PropertyParentDocumentTabs = ({
   sendPropertyParentDocumentApprovalRequest,
   saveParentDocument,
   getDocumentURLByFilePath,
-}: PropertyParentDocumentTabsProps) => {
+}: PropertyParentPartnerDocumentTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
       <Tabs defaultValue="document_requirements">

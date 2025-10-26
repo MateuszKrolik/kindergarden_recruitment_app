@@ -12,7 +12,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -22,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
+} from "@/components/ui/table";
 import { COMPLIANCE_EVENTS } from "@/socket/events/modules/compliance";
 import socket from "@/socket";
 import { ApiResponse } from "@/types/response";
@@ -233,9 +233,9 @@ export const ParentDocumentApprovalsTable = ({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}

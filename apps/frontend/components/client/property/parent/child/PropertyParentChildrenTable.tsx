@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -21,10 +21,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
+} from "@/components/ui/table";
 import { Fragment, useCallback, useEffect, useState } from "react";
-import { Collapsible, CollapsibleContent } from "../ui/collapsible";
-import { Tooltip, TooltipContent, TooltipProvider } from "../ui/tooltip";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import socket from "@/socket";
 import { PROPERTY_MANAGEMENT_EVENTS } from "@/socket/events/modules/property-management";

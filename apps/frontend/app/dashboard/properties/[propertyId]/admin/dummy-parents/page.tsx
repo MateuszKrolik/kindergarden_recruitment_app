@@ -6,7 +6,7 @@ import {
 } from "@/app/actions/compliance";
 import { getPropertyUser } from "@/app/actions/identity";
 import { getParentDocumentURLByDocumentID } from "@/app/actions/reporting";
-import AdminPropertyParentDocumentTable from "@/components/client/AdminPropertyParentDocumentTable";
+import AdminPropertyParentDocumentTable from "@/components/client/property/admin/parent/approvals/AdminPropertyParentDocumentTable";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";

@@ -2,7 +2,7 @@
 
 import { getAllProperties } from "@/app/actions/property-management";
 import { getPropertyUser } from "@/app/actions/identity";
-import PropertyTable from "@/components/client/PropertiesTable";
+import PropertyTable from "@/components/client/property/PropertiesTable";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 

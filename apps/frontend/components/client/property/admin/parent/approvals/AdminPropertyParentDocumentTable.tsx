@@ -35,53 +35,53 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
+import AdminPropertyParentDocumentTableActionMenu from "./AdminPropertyParentDocumentTableActionMenu";
 import { COMPLIANCE_EVENTS } from "@/socket/events/modules/compliance";
 import socket from "@/socket";
 import { ApiResponse } from "@/types/response";
 import {
-  PagedResponse_PropertyChildDocument,
-  PropertyChildDocument,
+  PagedResponse_PropertyParentDocument,
+  PropertyParentDocument,
 } from "@/types/modules/compliance/model";
 import { REQUEST_STATUS } from "@/types/modules/compliance/enum";
-import AdminPropertyChildDocumentTableActionMenu from "./AdminPropertyChildDocumentTableActionMenu";
 
-interface AdminPropertyChildrenDocumentTableProps {
+interface AdminPropertyParentDocumentTableProps {
   jwt: string;
   propertyId: string;
   adminId: string;
-  getAllChildDocumentApprovalRequestsForGivenProperty(
+  getAllDocumentApprovalRequestsForGivenProperty(
     jwt: string,
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<ApiResponse<PagedResponse_PropertyChildDocument>>;
-  setPropertyChildDocumentApprovalRequestStatus(
+  ): Promise<ApiResponse<PagedResponse_PropertyParentDocument>>;
+  setPropertyParentDocumentApprovalRequestStatus(
     jwt: string,
     propertyId: string,
-    childId: string,
-    childDocumentId: string,
+    userId: string,
+    parentDocumentId: string,
     requestStatus: REQUEST_STATUS,
-  ): Promise<ApiResponse<PropertyChildDocument>>;
-  getChildDocumentURLByDocumentID(
+  ): Promise<ApiResponse<PropertyParentDocument>>;
+  getParentDocumentURLByDocumentID(
     jwt: string,
-    documentId: string,
+    docId: string,
   ): Promise<ApiResponse<string>>;
 }
 
-export default function AdminPropertyChildrenDocumentTable({
+export default function AdminPropertyParentDocumentTable({
   jwt,
   propertyId,
   adminId,
-  getAllChildDocumentApprovalRequestsForGivenProperty,
-  setPropertyChildDocumentApprovalRequestStatus,
-  getChildDocumentURLByDocumentID,
-}: AdminPropertyChildrenDocumentTableProps) {
+  getAllDocumentApprovalRequestsForGivenProperty,
+  setPropertyParentDocumentApprovalRequestStatus,
+  getParentDocumentURLByDocumentID,
+}: AdminPropertyParentDocumentTableProps) {
   const searchParams = useSearchParams();
   const pageNumberParam = searchParams.get("pageNumber");
   const pageNumber = parseInt(pageNumberParam || "1");
   const pageSizeParam = searchParams.get("pageSize");
   const pageSize = parseInt(pageSizeParam || "1");
-  const [result, setResult] = useState<Array<PropertyChildDocument>>([]);
+  const [result, setResult] = useState<Array<PropertyParentDocument>>([]);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -96,7 +96,7 @@ export default function AdminPropertyChildrenDocumentTable({
     async (size: number, pageNumber: number) => {
       setIsLoading(true);
       const { data: result, error } =
-        await getAllChildDocumentApprovalRequestsForGivenProperty(
+        await getAllDocumentApprovalRequestsForGivenProperty(
           jwt,
           propertyId,
           size,
@@ -115,42 +115,42 @@ export default function AdminPropertyChildrenDocumentTable({
       setTotalPages(result.total_pages);
       setIsLoading(false);
     },
-    [jwt, propertyId, getAllChildDocumentApprovalRequestsForGivenProperty],
+    [jwt, propertyId, getAllDocumentApprovalRequestsForGivenProperty],
   );
 
-  const columns: ColumnDef<PropertyChildDocument>[] = [
+  const columns: ColumnDef<PropertyParentDocument>[] = [
     {
-      accessorKey: "child_id",
+      accessorKey: "user_id",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Child ID
+            Parent User ID
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("child_id")}</div>
+        <div className="lowercase">{row.getValue("user_id")}</div>
       ),
     },
     {
-      accessorKey: "child_document_id",
+      accessorKey: "parent_document_id",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Child Document ID
+            Parent Document ID
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("child_document_id")}</div>
+        <div className="lowercase">{row.getValue("parent_document_id")}</div>
       ),
     },
     {
@@ -194,21 +194,21 @@ export default function AdminPropertyChildrenDocumentTable({
         const request = row.original;
 
         return (
-          <AdminPropertyChildDocumentTableActionMenu
+          <AdminPropertyParentDocumentTableActionMenu
             jwt={jwt}
             adminId={adminId}
             request={request}
-            setPropertyChildDocumentApprovalRequestStatus={
-              setPropertyChildDocumentApprovalRequestStatus
+            setPropertyParentDocumentApprovalRequestStatus={
+              setPropertyParentDocumentApprovalRequestStatus
             }
-            getChildDocumentURLByDocumentID={getChildDocumentURLByDocumentID}
+            getParentDocumentURLByDocumentID={getParentDocumentURLByDocumentID}
           />
         );
       },
     },
   ];
 
-  const table = useReactTable<PropertyChildDocument>({
+  const table = useReactTable<PropertyParentDocument>({
     data: result,
     columns,
     onSortingChange: setSorting,
@@ -231,10 +231,10 @@ export default function AdminPropertyChildrenDocumentTable({
   }, [loadProperties, pageNumber, pageSize]);
 
   useEffect(() => {
-    function onRequestApproved(event: PropertyChildDocument) {
+    function onRequestApproved(event: PropertyParentDocument) {
       setResult((prev) => {
         const existingIndex = prev.findIndex(
-          (doc) => doc.child_document_id === event.child_document_id,
+          (doc) => doc.parent_document_id === event.parent_document_id,
         );
 
         if (existingIndex !== -1) {
@@ -251,31 +251,31 @@ export default function AdminPropertyChildrenDocumentTable({
       });
 
       toast.success(
-        `Document: ${event.child_document_id} was just approved! 🎉`,
+        `Document: ${event.parent_document_id} was just approved! 🎉`,
       );
     }
 
-    function onRequestSent(event: PropertyChildDocument) {
+    function onRequestSent(event: PropertyParentDocument) {
       setResult((prev) => [...prev, event]);
     }
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_APPROVED,
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
       onRequestApproved,
     );
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_REQUESTED,
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
       onRequestSent,
     );
 
     return () => {
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_APPROVED,
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
         onRequestApproved,
       );
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_REQUESTED,
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
         onRequestSent,
       );
     };
@@ -295,9 +295,9 @@ export default function AdminPropertyChildrenDocumentTable({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}

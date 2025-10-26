@@ -6,12 +6,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuItem,
-} from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
+} from "../../ui/dropdown-menu";
+import { Button } from "../../ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { Progress } from "../ui/progress";
+import { Progress } from "../../ui/progress";
 import { ApiResponse } from "@/types/response";
 import { PropertyUser } from "@/types/modules/identity/model";
 

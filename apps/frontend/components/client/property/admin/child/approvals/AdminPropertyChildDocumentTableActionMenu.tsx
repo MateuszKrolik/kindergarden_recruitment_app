@@ -5,8 +5,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { ApiResponse } from "@/types/response";

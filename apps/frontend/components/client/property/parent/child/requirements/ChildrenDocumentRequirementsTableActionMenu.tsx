@@ -1,5 +1,5 @@
 import { MoreHorizontal } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuSeparator,
@@ -7,10 +7,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Progress } from "../ui/progress";
+import { Progress } from "@/components/ui/progress";
 import { ApiResponse } from "@/types/response";
 import { PropertyChildDocumentRequirement } from "@/types/modules/property/model";
 import { CHILD_DOCUMENT_TYPE } from "@/types/modules/reporting/enum";

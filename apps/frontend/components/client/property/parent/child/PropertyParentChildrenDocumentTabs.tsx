@@ -1,9 +1,9 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyParentChildrenTable } from "./PropertyParentChildrenTable";
-import { ParentChildDocumentApprovalsTable } from "./ParentChildDocumentApprovalsTable";
-import { ChildrenDocumentRequirementsTable } from "./ChildrenDocumentRequirementsTable";
+import { ParentChildDocumentApprovalsTable } from "./approvals/ParentChildDocumentApprovalsTable";
+import { ChildrenDocumentRequirementsTable } from "./requirements/ChildrenDocumentRequirementsTable";
 import { ApiResponse } from "@/types/response";
 import {
   PropertyChild,

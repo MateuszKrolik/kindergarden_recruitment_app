@@ -20,7 +20,7 @@ import {
   saveChildDocument,
   saveParentDocument,
 } from "@/app/actions/reporting";
-import { PropertyParentPageTabs } from "@/components/client/PropertyParentPageTabs";
+import { PropertyParentPageTabs } from "@/components/client/property/parent/PropertyParentPageTabs";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
