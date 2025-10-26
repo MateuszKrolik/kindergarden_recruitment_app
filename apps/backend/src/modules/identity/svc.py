@@ -51,6 +51,13 @@ class IIdentitySvc(ABC):
     ) -> HTTPErrorResponse[bool]:
         pass
 
+    @abstractmethod
+    async def get_parent_partner_condition_keys(
+        self,
+        partner_id: UUID,
+    ) -> HTTPErrorResponse[ParentConditionKeys]:
+        pass
+
 
 class IdentitySvc(IIdentitySvc):
     def __init__(self, repo: IIdentityRepo) -> None:
@@ -95,3 +102,9 @@ class IdentitySvc(IIdentitySvc):
             None, error
         assert data is not None
         return data.role is PROPERTY_USER_ROLE.admin, None
+
+    async def get_parent_partner_condition_keys(
+        self,
+        partner_id: UUID,
+    ) -> HTTPErrorResponse[ParentConditionKeys]:
+        return await self.repo.get_parent_partner_condition_keys(partner_id=partner_id)

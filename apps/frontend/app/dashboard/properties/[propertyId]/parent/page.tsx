@@ -11,6 +11,7 @@ import {
 import {
   getDocumentRequirementsForGivenPropertyChild,
   getPropertyParentDocumentRequirements,
+  getPropertyParentPartnerDocumentRequirements,
 } from "@/app/actions/property-management";
 import { getPropertyUser } from "@/app/actions/identity";
 import {
@@ -83,6 +84,9 @@ export default async function PropertyParentPage({
         getPropertyChildDocumentApprovalRequestByDocumentId
       }
       saveChildDocument={saveChildDocument}
+      getPropertyParentPartnerDocumentRequirements={
+        getPropertyParentPartnerDocumentRequirements
+      }
     />
   );
 }

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
+from uuid import UUID
 
 from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
@@ -29,4 +30,11 @@ class IIdentityClient(ABC):
         self,
         child_id: str,
     ) -> HTTPErrorResponse[ChildConditionKeys]:
+        pass
+
+    @abstractmethod
+    async def get_parent_partner_condition_keys(
+        self,
+        partner_id: UUID,
+    ) -> HTTPErrorResponse[ParentConditionKeys]:
         pass

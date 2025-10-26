@@ -91,4 +91,38 @@ INSERT INTO identity.property_users(
   'admin'
 );
 
+INSERT INTO identity.parent_partner_details(
+  partner_id,
+  first_name,
+  last_name,
+  phone,
+  pesel,
+  birth_date,
+  home_address,
+  workplace,
+  gender,
+  -- condition keys
+  is_employed,
+  is_self_employed,
+  is_student,
+  filed_tax_in_desired_location,
+  resides_in_desired_location
+) VALUES (
+  '6ceaa734-b828-41ba-8351-a0198f64c089',
+  'Test2',
+  'User2',
+  '+48 999 999 999',
+  '5678',
+  NOW(),
+  'Random City, Random Street',
+  'Random City, Random Street',
+  'female',
+  -- condition keys
+  true,
+  false,
+  true,
+  false,
+  false
+);
+
 COMMIT;

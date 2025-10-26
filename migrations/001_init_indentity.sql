@@ -41,4 +41,22 @@ CREATE TABLE IF NOT EXISTS identity.property_users(
   PRIMARY KEY (property_id, user_id)
 );
 
+CREATE TABLE IF NOT EXISTS identity.parent_partner_details(
+  partner_id uuid DEFAULT gen_random_uuid() primary key,
+  first_name VARCHAR NOT NULL,
+  last_name VARCHAR NOT NULL,
+  phone VARCHAR NOT NULL,
+  pesel VARCHAR NOT NULL,
+  birth_date DATE NOT NULL,
+  home_address VARCHAR NOT NULL,
+  workplace VARCHAR,
+  gender TEXT CHECK (gender IN ('male', 'female')),
+  -- condition keys
+  is_employed BOOLEAN,
+  is_self_employed BOOLEAN,
+  is_student BOOLEAN,
+  filed_tax_in_desired_location BOOLEAN,
+  resides_in_desired_location BOOLEAN
+);
+
 COMMIT;

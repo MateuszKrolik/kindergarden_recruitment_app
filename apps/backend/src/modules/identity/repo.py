@@ -3,7 +3,6 @@ from uuid import UUID
 from asyncpg import Pool
 from abc import ABC, abstractmethod
 
-from src.shared.types.modules.identity.enum import PROPERTY_USER_ROLE
 from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
     ParentChild,
@@ -42,6 +41,13 @@ class IIdentityRepo(ABC):
         self,
         child_id: str,
     ) -> HTTPErrorResponse[ChildConditionKeys]:
+        pass
+
+    @abstractmethod
+    async def get_parent_partner_condition_keys(
+        self,
+        partner_id: UUID,
+    ) -> HTTPErrorResponse[ParentConditionKeys]:
         pass
 
 
@@ -136,3 +142,29 @@ class IdentityRepo(IIdentityRepo):
                     code=404, message=f"Child with id: {child_id} does not exist!"
                 )
             return ChildConditionKeys(**rows[0]), None
+
+    async def get_parent_partner_condition_keys(
+        self,
+        partner_id: UUID,
+    ) -> HTTPErrorResponse[ParentConditionKeys]:
+        sql = """
+        SELECT
+          is_employed,
+          is_self_employed,
+          is_student,
+          filed_tax_in_desired_location,
+          resides_in_desired_location
+        FROM identity.parent_partner_details
+        WHERE partner_id = $1;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(connection.fetch, sql, partner_id)
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            if len(rows) == 0:
+                return None, HTTPError(
+                    code=404, message=f"Partner with id: {partner_id} does not exist!"
+                )
+            keys = ParentConditionKeys(**rows[0])
+            return keys, None

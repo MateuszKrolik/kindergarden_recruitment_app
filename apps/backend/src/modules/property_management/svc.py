@@ -103,6 +103,12 @@ class IPropertyManagementSvc(ABC):
     ) -> HTTPErrorResponse[PropertyChild]:
         pass
 
+    @abstractmethod
+    async def get_document_requirements_for_given_property_parent_partner(
+        self, property_id: UUID, partner_id: UUID
+    ) -> HTTPErrorResponse[List[PropertyParentDocumentRequirement]]:
+        pass
+
 
 class PropertyManagementSvc(IPropertyManagementSvc):
     def __init__(
@@ -250,6 +256,35 @@ class PropertyManagementSvc(IPropertyManagementSvc):
         return await self.repo.get_property_child_by_id(
             property_id=property_id, child_id=child_id
         )
+
+    async def get_document_requirements_for_given_property_parent_partner(
+        self, property_id: UUID, partner_id: UUID
+    ) -> HTTPErrorResponse[List[PropertyParentDocumentRequirement]]:
+        tasks = await asyncio.gather(
+            self.repo.get_all_property_parent_document_requirements(
+                property_id=property_id
+            ),
+            self.identity_client.get_parent_partner_condition_keys(
+                partner_id=partner_id
+            ),
+        )
+        all_req_task: HTTPErrorResponse[List[PropertyParentDocumentRequirement]] = (
+            tasks[0]
+        )
+        all_req_task_result, error = all_req_task
+        if error:
+            return None, error
+        assert all_req_task_result is not None
+        condition_key_task: HTTPErrorResponse[ParentConditionKeys] = tasks[1]
+        condition_key_task_result, error = condition_key_task
+        if error:
+            return None, error
+        assert condition_key_task_result is not None
+        active_reqs: List[PropertyParentDocumentRequirement] = []
+        for req in all_req_task_result:
+            if self._is_parent_requirement_active(condition_key_task_result, req):
+                active_reqs.append(req)
+        return active_reqs, None
 
     def _is_parent_requirement_active(
         self,

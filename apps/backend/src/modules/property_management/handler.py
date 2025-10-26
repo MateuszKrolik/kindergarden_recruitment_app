@@ -1,4 +1,5 @@
 from typing import Callable, List
+from uuid import UUID
 from fastapi import APIRouter, Query, Response, Depends
 from fastapi.responses import JSONResponse
 
@@ -181,6 +182,41 @@ class PropertyManagementHandler:
                 )
             data, error = await self.svc.get_all_property_children_paged(
                 property_id=property_id, page_size=page_size, page_number=page_number
+            )
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 200
+            assert data is not None
+            return data
+
+        @self.router.get(
+            "/properties/{property_id}/parent-partners/{partner_id}/parent-document-requirements",
+            responses={
+                200: {"model": List[PropertyParentDocumentRequirement]},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def get_document_requirements_for_given_property_parent_partner(
+            property_id: UUID,
+            partner_id: UUID,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> List[PropertyParentDocumentRequirement]:
+            user, error = user_result
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            (
+                data,
+                error,
+            ) = await self.svc.get_document_requirements_for_given_property_parent_partner(
+                property_id=property_id,
+                partner_id=partner_id,
             )
             if error:
                 return JSONResponse(

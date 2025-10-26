@@ -1,7 +1,6 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ParentDocumentRequirementsTable } from "../requirements/ParentDocumentRequirementsTable";
 import { ParentDocumentApprovalsTable } from "../approvals/ParentDocumentApprovalsTable";
 import { ApiResponse } from "@/types/response";
 import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
@@ -9,15 +8,16 @@ import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
 import { ParentDocument } from "@/types/modules/reporting/model";
 import { PropertyParentDocument } from "@/types/modules/compliance/model";
 import { PropertyParentDocumentRequest } from "@/types/modules/compliance/dto";
+import { ParentPartnerDocumentRequirementsTable } from "./requirements/ParentPartnerDocumentRequirementsTable";
 
 type PropertyParentPartnerDocumentTabsProps = {
   jwt: string;
   propertyId: string;
   userId: string;
-  getPropertyParentDocumentRequirements(
+  getPropertyParentPartnerDocumentRequirements(
     jwt: string,
     propertyId: string,
-    userId: string,
+    partnerId: string,
   ): Promise<ApiResponse<PropertyParentDocumentRequirement[]>>;
   getParentDocumentByType(
     jwt: string,
@@ -59,7 +59,7 @@ export const PropertyParentPartnerDocumentTabs = ({
   propertyId,
   userId,
   getParentDocumentByType,
-  getPropertyParentDocumentRequirements,
+  getPropertyParentPartnerDocumentRequirements,
   getAllDocumentApprovalRequestsForGivenPropertyParent,
   getPropertyParentDocumentApprovalRequestByDocumentId,
   sendPropertyParentDocumentApprovalRequest,
@@ -76,13 +76,13 @@ export const PropertyParentPartnerDocumentTabs = ({
           <TabsTrigger value="approval_requests">Approval Requests</TabsTrigger>
         </TabsList>
         <TabsContent value="document_requirements">
-          <ParentDocumentRequirementsTable
+          <ParentPartnerDocumentRequirementsTable
             jwt={jwt}
             propertyId={propertyId}
             userId={userId}
             getParentDocumentByType={getParentDocumentByType}
-            getPropertyParentDocumentRequirements={
-              getPropertyParentDocumentRequirements
+            getPropertyParentPartnerDocumentRequirements={
+              getPropertyParentPartnerDocumentRequirements
             }
             getPropertyParentDocumentApprovalRequestByDocumentId={
               getPropertyParentDocumentApprovalRequestByDocumentId

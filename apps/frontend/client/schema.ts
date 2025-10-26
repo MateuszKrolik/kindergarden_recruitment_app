@@ -193,6 +193,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-document-requirements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Document Requirements For Given Property Parent Partner */
+        get: operations["get_document_requirements_for_given_property_parent_partner_properties__property_id__parent_partners__partner_id__parent_document_requirements_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/properties/{property_id}/parents/{parent_id}/parent-document-requests": {
         parameters: {
             query?: never;
@@ -1067,6 +1084,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PagedResponse_PropertyChild_"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    get_document_requirements_for_given_property_parent_partner_properties__property_id__parent_partners__partner_id__parent_document_requirements_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                property_id: string;
+                partner_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyParentDocumentRequirement"][];
                 };
             };
             /** @description Default Response */

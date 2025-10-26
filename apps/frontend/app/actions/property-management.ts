@@ -88,3 +88,19 @@ export async function getAllPropertyChildrenPaged(
   if (error) return { data: undefined, error: error };
   return { data: data, error: undefined };
 }
+
+export async function getPropertyParentPartnerDocumentRequirements(
+  jwt: string,
+  propertyId: string,
+  partnerId: string,
+): Promise<ApiResponse<PropertyParentDocumentRequirement[]>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-document-requirements",
+    {
+      params: { path: { property_id: propertyId, partner_id: partnerId } },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
