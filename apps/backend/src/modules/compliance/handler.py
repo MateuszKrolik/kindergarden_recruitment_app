@@ -7,12 +7,14 @@ from fastapi.responses import JSONResponse
 from src.modules.compliance.dto import (
     PropertyChildDocumentRequest,
     PropertyParentDocumentRequest,
+    PropertyParentPartnerDocumentRequest,
 )
 from src.modules.compliance.svc import IComplianceSvc
 from src.shared.types.modules.compliance.enum import REQUEST_STATUS
 from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
     PropertyParentDocument,
+    PropertyParentPartnerDocument,
 )
 from src.shared.types.pagination import PagedResponse
 from src.shared.types.response import AuthMiddlewareResponse, HTTPError
@@ -413,5 +415,44 @@ class ComplianceHandler:
                     content=error.dict(),
                 )
             response.status_code = 200
+            assert data is not None
+            return data
+
+        @self.router.post(
+            "/properties/{property_id}/parent-partners/{partner_id}/document-requests/{parent_partner_document_id}",
+            responses={
+                201: {"model": PropertyParentPartnerDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def send_property_parent_partner_document_approval_request(
+            property_id: UUID,
+            partner_id: UUID,
+            parent_partner_document_id: UUID,
+            response: Response,
+            body: PropertyParentPartnerDocumentRequest,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> PropertyParentPartnerDocument:
+            user, error = user_result
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            (
+                data,
+                error,
+            ) = await self.svc.send_property_parent_partner_document_approval_request(
+                property_id=property_id,
+                partner_id=partner_id,
+                parent_partner_document_id=parent_partner_document_id,
+                document_type=body.document_type,
+            )
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 201
             assert data is not None
             return data

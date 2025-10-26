@@ -15,8 +15,11 @@ import { ApiResponse } from "@/types/response";
 import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
 import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
 import { ParentPartnerDocument } from "@/types/modules/reporting/model";
-import { PropertyParentDocument } from "@/types/modules/compliance/model";
-import { PropertyParentDocumentRequest } from "@/types/modules/compliance/dto";
+import {
+  PropertyParentDocument,
+  PropertyParentPartnerDocument,
+} from "@/types/modules/compliance/model";
+import { PropertyParentPartnerDocumentRequest } from "@/types/modules/compliance/dto";
 
 type ParentPartnerDocumentRequirementsTableActionMenuProps = {
   jwt: string;
@@ -34,13 +37,13 @@ type ParentPartnerDocumentRequirementsTableActionMenuProps = {
     userId: string,
     parentDocId: string,
   ): Promise<ApiResponse<PropertyParentDocument>>;
-  sendPropertyParentDocumentApprovalRequest(
+  sendPropertyParentPartnerDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
-    parentId: string,
-    parentDocumentId: string,
-    body: PropertyParentDocumentRequest,
-  ): Promise<ApiResponse<PropertyParentDocument>>;
+    partnerId: string,
+    parentPartnerDocumentId: string,
+    body: PropertyParentPartnerDocumentRequest,
+  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
   saveParentPartnerDocument(
     jwt: string,
     partnerId: string,
@@ -60,7 +63,7 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
   requirement,
   getParentPartnerDocumentByType,
   getPropertyParentDocumentApprovalRequestByDocumentId,
-  sendPropertyParentDocumentApprovalRequest,
+  sendPropertyParentPartnerDocumentApprovalRequest,
   saveParentPartnerDocument,
   getDocumentURLByFilePath,
 }: ParentPartnerDocumentRequirementsTableActionMenuProps) => {
@@ -139,7 +142,7 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
                 disabled={disableApprovalRequest}
                 onClick={async () => {
                   const { error } =
-                    await sendPropertyParentDocumentApprovalRequest(
+                    await sendPropertyParentPartnerDocumentApprovalRequest(
                       jwt,
                       propertyId,
                       userId,

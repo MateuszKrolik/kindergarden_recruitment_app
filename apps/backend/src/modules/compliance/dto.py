@@ -9,3 +9,7 @@ class PropertyParentDocumentRequest(BaseModel):
 
 class PropertyChildDocumentRequest(BaseModel):
     document_type: CHILD_DOCUMENT_TYPE
+
+
+class PropertyParentPartnerDocumentRequest(BaseModel):
+    document_type: DOCUMENT_TYPE

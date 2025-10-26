@@ -5,12 +5,12 @@ import { ParentDocumentApprovalsTable } from "../approvals/ParentDocumentApprova
 import { ApiResponse } from "@/types/response";
 import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
 import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
+import { ParentPartnerDocument } from "@/types/modules/reporting/model";
 import {
-  ParentDocument,
-  ParentPartnerDocument,
-} from "@/types/modules/reporting/model";
-import { PropertyParentDocument } from "@/types/modules/compliance/model";
-import { PropertyParentDocumentRequest } from "@/types/modules/compliance/dto";
+  PropertyParentDocument,
+  PropertyParentPartnerDocument,
+} from "@/types/modules/compliance/model";
+import { PropertyParentPartnerDocumentRequest } from "@/types/modules/compliance/dto";
 import { ParentPartnerDocumentRequirementsTable } from "./requirements/ParentPartnerDocumentRequirementsTable";
 
 type PropertyParentPartnerDocumentTabsProps = {
@@ -38,13 +38,13 @@ type PropertyParentPartnerDocumentTabsProps = {
     userId: string,
     parentDocId: string,
   ): Promise<ApiResponse<PropertyParentDocument>>;
-  sendPropertyParentDocumentApprovalRequest(
+  sendPropertyParentPartnerDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
-    parentId: string,
-    parentDocumentId: string,
-    body: PropertyParentDocumentRequest,
-  ): Promise<ApiResponse<PropertyParentDocument>>;
+    partnerId: string,
+    parentPartnerDocumentId: string,
+    body: PropertyParentPartnerDocumentRequest,
+  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
   saveParentPartnerDocument(
     jwt: string,
     partnerId: string,
@@ -65,7 +65,7 @@ export const PropertyParentPartnerDocumentTabs = ({
   getPropertyParentPartnerDocumentRequirements,
   getAllDocumentApprovalRequestsForGivenPropertyParent,
   getPropertyParentDocumentApprovalRequestByDocumentId,
-  sendPropertyParentDocumentApprovalRequest,
+  sendPropertyParentPartnerDocumentApprovalRequest,
   saveParentPartnerDocument,
   getDocumentURLByFilePath,
 }: PropertyParentPartnerDocumentTabsProps) => {
@@ -90,8 +90,8 @@ export const PropertyParentPartnerDocumentTabs = ({
             getPropertyParentDocumentApprovalRequestByDocumentId={
               getPropertyParentDocumentApprovalRequestByDocumentId
             }
-            sendPropertyParentDocumentApprovalRequest={
-              sendPropertyParentDocumentApprovalRequest
+            sendPropertyParentPartnerDocumentApprovalRequest={
+              sendPropertyParentPartnerDocumentApprovalRequest
             }
             saveParentPartnerDocument={saveParentPartnerDocument}
             getDocumentURLByFilePath={getDocumentURLByFilePath}

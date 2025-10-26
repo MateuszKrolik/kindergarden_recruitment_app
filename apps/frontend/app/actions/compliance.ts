@@ -7,11 +7,13 @@ import {
   PagedResponse_PropertyParentDocument,
   PropertyChildDocument,
   PropertyParentDocument,
+  PropertyParentPartnerDocument,
 } from "@/types/modules/compliance/model";
 import { REQUEST_STATUS } from "@/types/modules/compliance/enum";
 import {
   PropertyChildDocumentRequest,
   PropertyParentDocumentRequest,
+  PropertyParentPartnerDocumentRequest,
 } from "@/types/modules/compliance/dto";
 
 export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
@@ -236,6 +238,31 @@ export async function setPropertyChildDocumentApprovalRequestStatus(
           request_status: requestStatus,
         },
       },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function sendPropertyParentPartnerDocumentApprovalRequest(
+  jwt: string,
+  propertyId: string,
+  partnerId: string,
+  parentPartnerDocumentId: string,
+  body: PropertyParentPartnerDocumentRequest,
+): Promise<ApiResponse<PropertyParentPartnerDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.POST(
+    "/properties/{property_id}/parent-partners/{partner_id}/document-requests/{parent_partner_document_id}",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+          partner_id: partnerId,
+          parent_partner_document_id: parentPartnerDocumentId,
+        },
+      },
+      body: body,
     },
   );
   if (error) return { data: undefined, error: error };

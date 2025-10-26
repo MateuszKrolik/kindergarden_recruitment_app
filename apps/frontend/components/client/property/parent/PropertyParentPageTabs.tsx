@@ -21,10 +21,12 @@ import {
 import {
   PropertyChildDocument,
   PropertyParentDocument,
+  PropertyParentPartnerDocument,
 } from "@/types/modules/compliance/model";
 import {
   PropertyChildDocumentRequest,
   PropertyParentDocumentRequest,
+  PropertyParentPartnerDocumentRequest,
 } from "@/types/modules/compliance/dto";
 import { PropertyParentPartnerDocumentTabs } from "./partner/PropertyParentPartnerDocumentTabs";
 
@@ -120,6 +122,13 @@ type PropertyParentPageTabsProps = {
     documentType: DOCUMENT_TYPE,
     file: File,
   ): Promise<ApiResponse<ParentPartnerDocument>>;
+  sendPropertyParentPartnerDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    partnerId: string,
+    parentPartnerDocumentId: string,
+    body: PropertyParentPartnerDocumentRequest,
+  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
 };
 
 export const PropertyParentPageTabs = ({
@@ -142,6 +151,7 @@ export const PropertyParentPageTabs = ({
   getPropertyParentPartnerDocumentRequirements,
   getParentPartnerDocumentByType,
   saveParentPartnerDocument,
+  sendPropertyParentPartnerDocumentApprovalRequest,
 }: PropertyParentPageTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
@@ -190,8 +200,8 @@ export const PropertyParentPageTabs = ({
             getPropertyParentDocumentApprovalRequestByDocumentId={
               getPropertyParentDocumentApprovalRequestByDocumentId
             }
-            sendPropertyParentDocumentApprovalRequest={
-              sendPropertyParentDocumentApprovalRequest
+            sendPropertyParentPartnerDocumentApprovalRequest={
+              sendPropertyParentPartnerDocumentApprovalRequest
             }
             saveParentPartnerDocument={saveParentPartnerDocument}
             getDocumentURLByFilePath={getDocumentURLByFilePath}

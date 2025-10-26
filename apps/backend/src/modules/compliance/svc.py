@@ -12,6 +12,7 @@ from src.shared.types.modules.compliance.enum import REQUEST_STATUS
 from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
     PropertyParentDocument,
+    PropertyParentPartnerDocument,
 )
 from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
 from src.shared.types.pagination import PagedResponse
@@ -115,6 +116,16 @@ class IComplianceSvc(ABC):
         request_status: REQUEST_STATUS,
         admin_id: UUID,
     ) -> HTTPErrorResponse[PropertyChildDocument]:
+        pass
+
+    @abstractmethod
+    async def send_property_parent_partner_document_approval_request(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+        document_type: DOCUMENT_TYPE,
+    ) -> HTTPErrorResponse[PropertyParentPartnerDocument]:
         pass
 
 
@@ -320,6 +331,33 @@ class ComplianceSvc(IComplianceSvc):
         )
         if error := await self._publish_event(event):
             return None, error
+        return data, None
+
+    async def send_property_parent_partner_document_approval_request(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+        document_type: DOCUMENT_TYPE,
+    ) -> HTTPErrorResponse[PropertyParentPartnerDocument]:
+        (
+            data,
+            error,
+        ) = await self.repo.send_property_parent_partner_document_approval_request(
+            property_id=property_id,
+            partner_id=partner_id,
+            parent_partner_document_id=parent_partner_document_id,
+            document_type=document_type,
+        )
+        if error:
+            return None, error
+        _, socket_error = await try_except(
+            self.socket_server.emit,
+            COMPLIANCE_EVENT.PROPERTY_PARENT_PARTNER_DOCUMENT_REQUESTED,
+            data.model_dump(mode="json"),
+        )
+        if socket_error:
+            self.logger.error(socket_error)
         return data, None
 
     async def _publish_event(self, event: EventEnvelope[T]) -> Optional[HTTPError]:

@@ -22,3 +22,12 @@ class PropertyChildDocument(BaseModel):
     request_status: REQUEST_STATUS
     approved_by: Optional[UUID]
     document_type: CHILD_DOCUMENT_TYPE
+
+
+class PropertyParentPartnerDocument(BaseModel):
+    property_id: UUID
+    partner_id: UUID
+    parent_partner_document_id: UUID
+    request_status: REQUEST_STATUS
+    approved_by: Optional[UUID]
+    document_type: DOCUMENT_TYPE

@@ -7,6 +7,7 @@ from src.shared.types.modules.compliance.enum import REQUEST_STATUS
 from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
     PropertyParentDocument,
+    PropertyParentPartnerDocument,
 )
 from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
 from src.shared.types.pagination import PagedResponse
@@ -108,6 +109,16 @@ class IComplianceRepo(ABC):
         request_status: REQUEST_STATUS,
         admin_id: UUID,
     ) -> HTTPErrorResponse[PropertyChildDocument]:
+        pass
+
+    @abstractmethod
+    async def send_property_parent_partner_document_approval_request(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+        document_type: DOCUMENT_TYPE,
+    ) -> HTTPErrorResponse[PropertyParentPartnerDocument]:
         pass
 
 
@@ -424,3 +435,41 @@ class ComplianceRepo(IComplianceRepo):
                     message=f"Child document request: ${child_document_id} was not found!",
                 )
             return PropertyChildDocument(**row), None
+
+    async def send_property_parent_partner_document_approval_request(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+        document_type: DOCUMENT_TYPE,
+    ) -> HTTPErrorResponse[PropertyParentPartnerDocument]:
+        sql = """
+        INSERT INTO compliance.property_parent_partner_documents(
+            property_id,
+            partner_id,
+            parent_partner_document_id,
+            document_type
+        ) VALUES (
+            $1,
+            $2,
+            $3,
+            $4
+        ) RETURNING *;
+        """
+        async with self.pool.acquire() as connection:
+            row, error = await try_except(
+                connection.fetchrow,
+                sql,
+                property_id,
+                partner_id,
+                parent_partner_document_id,
+                document_type,
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            if row is None:
+                return None, HTTPError(
+                    code=404,
+                    message=f"Approval request: {parent_partner_document_id} was not saved successfully!",
+                )
+            return PropertyParentPartnerDocument(**row), None
