@@ -1,7 +1,5 @@
 "use client";
 
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,7 +11,10 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
+import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -22,75 +23,55 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useCallback, useEffect, useState } from "react";
-import { ParentPartnerDocumentRequirementsTableActionMenu } from "./ParentPartnerDocumentRequirementsTableActionMenu";
+import { COMPLIANCE_EVENTS } from "@/socket/events/modules/compliance";
+import socket from "@/socket";
 import { ApiResponse } from "@/types/response";
-import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
-import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
-import { ParentPartnerDocument } from "@/types/modules/reporting/model";
 import { PropertyParentPartnerDocument } from "@/types/modules/compliance/model";
-import { PropertyParentPartnerDocumentRequest } from "@/types/modules/compliance/dto";
 
-export type ParentPartnerDocumentRequirementsTableProps = {
+type ParentPartnerDocumentApprovalsTableProps = {
   jwt: string;
   propertyId: string;
   userId: string;
-  getPropertyParentPartnerDocumentRequirements(
+  getAllDocumentApprovalRequestsForGivenPropertyParentPartner(
     jwt: string,
     propertyId: string,
     partnerId: string,
-  ): Promise<ApiResponse<PropertyParentDocumentRequirement[]>>;
-  getParentPartnerDocumentByType(
-    jwt: string,
-    partnerId: string,
-    documentType: DOCUMENT_TYPE,
-  ): Promise<ApiResponse<ParentPartnerDocument>>;
-  getPropertyParentPartnerDocumentApprovalRequestByDocumentId(
-    jwt: string,
-    propertyId: string,
-    partnerId: string,
-    parentPartnerDocumentId: string,
-  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
-  sendPropertyParentPartnerDocumentApprovalRequest(
-    jwt: string,
-    propertyId: string,
-    partnerId: string,
-    parentPartnerDocumentId: string,
-    body: PropertyParentPartnerDocumentRequest,
-  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
-  saveParentPartnerDocument(
-    jwt: string,
-    partnerId: string,
-    documentType: DOCUMENT_TYPE,
-    file: File,
-  ): Promise<ApiResponse<ParentPartnerDocument>>;
-  getDocumentURLByFilePath(
-    jwt: string,
-    key: string,
-  ): Promise<ApiResponse<string>>;
+  ): Promise<ApiResponse<PropertyParentPartnerDocument[]>>;
 };
 
-export const ParentPartnerDocumentRequirementsTable = ({
+export const ParentPartnerDocumentApprovalsTable = ({
   jwt,
   propertyId,
   userId,
-  getPropertyParentPartnerDocumentRequirements,
-  getParentPartnerDocumentByType,
-  getPropertyParentPartnerDocumentApprovalRequestByDocumentId,
-  sendPropertyParentPartnerDocumentApprovalRequest,
-  saveParentPartnerDocument,
-  getDocumentURLByFilePath,
-}: ParentPartnerDocumentRequirementsTableProps) => {
+  getAllDocumentApprovalRequestsForGivenPropertyParentPartner,
+}: ParentPartnerDocumentApprovalsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<Array<PropertyParentDocumentRequirement>>(
-    [],
-  );
+  const [data, setData] = useState<Array<PropertyParentPartnerDocument>>([]);
 
-  const columns: ColumnDef<PropertyParentDocumentRequirement>[] = [
+  const columns: ColumnDef<PropertyParentPartnerDocument>[] = [
+    {
+      accessorKey: "parent_partner_document_id",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Document ID
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="lowercase">
+          {row.getValue("parent_partner_document_id")}
+        </div>
+      ),
+    },
     {
       accessorKey: "document_type",
       header: ({ column }) => {
@@ -109,105 +90,122 @@ export const ParentPartnerDocumentRequirementsTable = ({
       ),
     },
     {
-      accessorKey: "requirement_type",
+      accessorKey: "request_status",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Requirement Type
+            Request Status
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("requirement_type")}</div>
+        <div className="lowercase">{row.getValue("request_status")}</div>
       ),
     },
     {
-      accessorKey: "condition_key",
+      accessorKey: "approved_by",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Condition Key
+            Approved By ID
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("condition_key")}</div>
+        <div className="lowercase">{row.getValue("approved_by")}</div>
       ),
-    },
-    {
-      accessorKey: "point_value",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Point Value
-            <ArrowUpDown />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("point_value")}</div>
-      ),
-    },
-    {
-      id: "actions",
-      enableHiding: false,
-      cell: ({ row }) => {
-        const requirement = row.original;
-        return (
-          <ParentPartnerDocumentRequirementsTableActionMenu
-            jwt={jwt}
-            propertyId={propertyId}
-            userId={userId}
-            getParentPartnerDocumentByType={getParentPartnerDocumentByType}
-            requirement={requirement}
-            getPropertyParentPartnerDocumentApprovalRequestByDocumentId={
-              getPropertyParentPartnerDocumentApprovalRequestByDocumentId
-            }
-            sendPropertyParentPartnerDocumentApprovalRequest={
-              sendPropertyParentPartnerDocumentApprovalRequest
-            }
-            saveParentPartnerDocument={saveParentPartnerDocument}
-            getDocumentURLByFilePath={getDocumentURLByFilePath}
-          />
-        );
-      },
     },
   ];
 
   const fetchData = useCallback(async () => {
-    const { data, error } = await getPropertyParentPartnerDocumentRequirements(
-      jwt,
-      propertyId,
-      userId,
-    );
+    const { data: result, error } =
+      await getAllDocumentApprovalRequestsForGivenPropertyParentPartner(
+        jwt,
+        propertyId,
+        userId,
+      );
 
     if (error) {
       const errMsg = error.message;
-      toast.error(errMsg);
+      toast.error(`Error: ${errMsg}`);
       setError(errMsg);
       return;
     }
 
-    setData(data);
-  }, [jwt, propertyId, userId, getPropertyParentPartnerDocumentRequirements]);
+    setData(result);
+  }, [
+    jwt,
+    propertyId,
+    userId,
+    getAllDocumentApprovalRequestsForGivenPropertyParentPartner,
+  ]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const table = useReactTable<PropertyParentDocumentRequirement>({
-    data: error || data instanceof Error ? [] : data,
+  useEffect(() => {
+    function onRequestApproved(event: PropertyParentPartnerDocument) {
+      setData((prev) => {
+        const existingIndex = prev.findIndex(
+          (doc) =>
+            doc.parent_partner_document_id === event.parent_partner_document_id,
+        );
+
+        if (existingIndex !== -1) {
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            request_status: event.request_status,
+            approved_by: event.approved_by,
+          };
+          return updated;
+        }
+
+        return prev;
+      });
+
+      toast.success(
+        `Document: ${event.parent_partner_document_id} was just approved! 🎉`,
+      );
+    }
+
+    function onRequestSent(event: PropertyParentPartnerDocument) {
+      setData((prev) => [...prev, event]);
+    }
+
+    socket.on(
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
+      onRequestApproved,
+    );
+
+    socket.on(
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_REQUESTED,
+      onRequestSent,
+    );
+
+    return () => {
+      socket.off(
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
+        onRequestApproved,
+      );
+      socket.off(
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_REQUESTED,
+        onRequestSent,
+      );
+    };
+  }, []);
+
+  const table = useReactTable<PropertyParentPartnerDocument>({
+    data: error ? [] : data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

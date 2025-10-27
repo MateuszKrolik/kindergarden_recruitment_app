@@ -399,6 +399,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-document-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get All Document Approval Requests For Given Property Parent Partner */
+        get: operations["get_all_document_approval_requests_for_given_property_parent_partner_properties__property_id__parent_partners__partner_id__parent_document_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Property Parent Partner Document Approval Request By Document Id */
+        get: operations["get_property_parent_partner_document_approval_request_by_document_id_properties__property_id__parent_partners__partner_id__parent_documents__parent_partner_document_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1677,6 +1711,71 @@ export interface operations {
             };
             /** @description Created */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyParentPartnerDocument"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    get_all_document_approval_requests_for_given_property_parent_partner_properties__property_id__parent_partners__partner_id__parent_document_requests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                property_id: string;
+                partner_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyParentPartnerDocument"][];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    get_property_parent_partner_document_approval_request_by_document_id_properties__property_id__parent_partners__partner_id__parent_documents__parent_partner_document_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                property_id: string;
+                partner_id: string;
+                parent_partner_document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

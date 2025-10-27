@@ -1,17 +1,14 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ParentDocumentApprovalsTable } from "../approvals/ParentDocumentApprovalsTable";
 import { ApiResponse } from "@/types/response";
 import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
 import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
 import { ParentPartnerDocument } from "@/types/modules/reporting/model";
-import {
-  PropertyParentDocument,
-  PropertyParentPartnerDocument,
-} from "@/types/modules/compliance/model";
+import { PropertyParentPartnerDocument } from "@/types/modules/compliance/model";
 import { PropertyParentPartnerDocumentRequest } from "@/types/modules/compliance/dto";
 import { ParentPartnerDocumentRequirementsTable } from "./requirements/ParentPartnerDocumentRequirementsTable";
+import { ParentPartnerDocumentApprovalsTable } from "./approvals/ParentDocumentApprovalsTable";
 
 type PropertyParentPartnerDocumentTabsProps = {
   jwt: string;
@@ -27,17 +24,17 @@ type PropertyParentPartnerDocumentTabsProps = {
     partnerId: string,
     documentType: DOCUMENT_TYPE,
   ): Promise<ApiResponse<ParentPartnerDocument>>;
-  getAllDocumentApprovalRequestsForGivenPropertyParent(
+  getAllDocumentApprovalRequestsForGivenPropertyParentPartner(
     jwt: string,
     propertyId: string,
-    userId: string,
-  ): Promise<ApiResponse<PropertyParentDocument[]>>;
-  getPropertyParentDocumentApprovalRequestByDocumentId(
+    partnerId: string,
+  ): Promise<ApiResponse<PropertyParentPartnerDocument[]>>;
+  getPropertyParentPartnerDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
-    userId: string,
-    parentDocId: string,
-  ): Promise<ApiResponse<PropertyParentDocument>>;
+    partnerId: string,
+    parentPartnerDocumentId: string,
+  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
   sendPropertyParentPartnerDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
@@ -63,8 +60,8 @@ export const PropertyParentPartnerDocumentTabs = ({
   userId,
   getParentPartnerDocumentByType,
   getPropertyParentPartnerDocumentRequirements,
-  getAllDocumentApprovalRequestsForGivenPropertyParent,
-  getPropertyParentDocumentApprovalRequestByDocumentId,
+  getAllDocumentApprovalRequestsForGivenPropertyParentPartner,
+  getPropertyParentPartnerDocumentApprovalRequestByDocumentId,
   sendPropertyParentPartnerDocumentApprovalRequest,
   saveParentPartnerDocument,
   getDocumentURLByFilePath,
@@ -87,8 +84,8 @@ export const PropertyParentPartnerDocumentTabs = ({
             getPropertyParentPartnerDocumentRequirements={
               getPropertyParentPartnerDocumentRequirements
             }
-            getPropertyParentDocumentApprovalRequestByDocumentId={
-              getPropertyParentDocumentApprovalRequestByDocumentId
+            getPropertyParentPartnerDocumentApprovalRequestByDocumentId={
+              getPropertyParentPartnerDocumentApprovalRequestByDocumentId
             }
             sendPropertyParentPartnerDocumentApprovalRequest={
               sendPropertyParentPartnerDocumentApprovalRequest
@@ -98,12 +95,12 @@ export const PropertyParentPartnerDocumentTabs = ({
           />
         </TabsContent>
         <TabsContent value="approval_requests">
-          <ParentDocumentApprovalsTable
+          <ParentPartnerDocumentApprovalsTable
             jwt={jwt}
             propertyId={propertyId}
             userId={userId}
-            getAllDocumentApprovalRequestsForGivenPropertyParent={
-              getAllDocumentApprovalRequestsForGivenPropertyParent
+            getAllDocumentApprovalRequestsForGivenPropertyParentPartner={
+              getAllDocumentApprovalRequestsForGivenPropertyParentPartner
             }
           />
         </TabsContent>

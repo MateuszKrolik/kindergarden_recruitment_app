@@ -128,6 +128,23 @@ class IComplianceSvc(ABC):
     ) -> HTTPErrorResponse[PropertyParentPartnerDocument]:
         pass
 
+    @abstractmethod
+    async def get_all_document_approval_requests_for_given_property_parent_partner(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+    ) -> HTTPErrorResponse[List[PropertyParentPartnerDocument]]:
+        pass
+
+    @abstractmethod
+    async def get_property_parent_partner_document_approval_request_by_document_id(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+    ) -> HTTPErrorResponse[PropertyParentPartnerDocument]:
+        pass
+
 
 class ComplianceSvc(IComplianceSvc):
     def __init__(
@@ -359,6 +376,27 @@ class ComplianceSvc(IComplianceSvc):
         if socket_error:
             self.logger.error(socket_error)
         return data, None
+
+    async def get_all_document_approval_requests_for_given_property_parent_partner(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+    ) -> HTTPErrorResponse[List[PropertyParentPartnerDocument]]:
+        return await self.repo.get_all_document_approval_requests_for_given_property_parent_partner(
+            property_id=property_id, partner_id=partner_id
+        )
+
+    async def get_property_parent_partner_document_approval_request_by_document_id(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+    ) -> HTTPErrorResponse[PropertyParentPartnerDocument]:
+        return await self.repo.get_property_parent_partner_document_approval_request_by_document_id(
+            property_id=property_id,
+            partner_id=partner_id,
+            parent_partner_document_id=parent_partner_document_id,
+        )
 
     async def _publish_event(self, event: EventEnvelope[T]) -> Optional[HTTPError]:
         event_name = event.type

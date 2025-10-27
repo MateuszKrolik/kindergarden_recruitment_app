@@ -456,3 +456,74 @@ class ComplianceHandler:
             response.status_code = 201
             assert data is not None
             return data
+
+        @self.router.get(
+            "/properties/{property_id}/parent-partners/{partner_id}/parent-document-requests",
+            responses={
+                200: {"model": List[PropertyParentPartnerDocument]},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def get_all_document_approval_requests_for_given_property_parent_partner(
+            property_id: UUID,
+            partner_id: UUID,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> List[PropertyParentPartnerDocument]:
+            user, error = user_result
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            (
+                data,
+                error,
+            ) = await self.svc.get_all_document_approval_requests_for_given_property_parent_partner(
+                property_id=property_id, partner_id=partner_id
+            )
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 200
+            assert data is not None
+            return data
+
+        @self.router.get(
+            "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}",
+            responses={
+                200: {"model": PropertyParentPartnerDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def get_property_parent_partner_document_approval_request_by_document_id(
+            property_id: UUID,
+            partner_id: UUID,
+            parent_partner_document_id: UUID,
+            response: Response,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> PropertyParentPartnerDocument:
+            user, error = user_result
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            (
+                data,
+                error,
+            ) = await self.svc.get_property_parent_partner_document_approval_request_by_document_id(
+                property_id=property_id,
+                partner_id=partner_id,
+                parent_partner_document_id=parent_partner_document_id,
+            )
+            if error:
+                return JSONResponse(
+                    status_code=error.code,
+                    content=error.dict(),
+                )
+            response.status_code = 200
+            assert data is not None
+            return data

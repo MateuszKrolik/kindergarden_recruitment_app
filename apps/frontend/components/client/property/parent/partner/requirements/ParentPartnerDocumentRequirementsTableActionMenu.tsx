@@ -15,10 +15,7 @@ import { ApiResponse } from "@/types/response";
 import { PropertyParentDocumentRequirement } from "@/types/modules/property/model";
 import { DOCUMENT_TYPE } from "@/types/modules/reporting/enum";
 import { ParentPartnerDocument } from "@/types/modules/reporting/model";
-import {
-  PropertyParentDocument,
-  PropertyParentPartnerDocument,
-} from "@/types/modules/compliance/model";
+import { PropertyParentPartnerDocument } from "@/types/modules/compliance/model";
 import { PropertyParentPartnerDocumentRequest } from "@/types/modules/compliance/dto";
 
 type ParentPartnerDocumentRequirementsTableActionMenuProps = {
@@ -31,12 +28,12 @@ type ParentPartnerDocumentRequirementsTableActionMenuProps = {
     partnerId: string,
     documentType: DOCUMENT_TYPE,
   ): Promise<ApiResponse<ParentPartnerDocument>>;
-  getPropertyParentDocumentApprovalRequestByDocumentId(
+  getPropertyParentPartnerDocumentApprovalRequestByDocumentId(
     jwt: string,
     propertyId: string,
-    userId: string,
-    parentDocId: string,
-  ): Promise<ApiResponse<PropertyParentDocument>>;
+    partnerId: string,
+    parentPartnerDocumentId: string,
+  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
   sendPropertyParentPartnerDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
@@ -62,7 +59,7 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
   userId,
   requirement,
   getParentPartnerDocumentByType,
-  getPropertyParentDocumentApprovalRequestByDocumentId,
+  getPropertyParentPartnerDocumentApprovalRequestByDocumentId,
   sendPropertyParentPartnerDocumentApprovalRequest,
   saveParentPartnerDocument,
   getDocumentURLByFilePath,
@@ -99,7 +96,7 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
       }
       setPartnerDoc(partnerDocResult);
       const { error: approvalReqError } =
-        await getPropertyParentDocumentApprovalRequestByDocumentId(
+        await getPropertyParentPartnerDocumentApprovalRequestByDocumentId(
           jwt,
           propertyId,
           userId,

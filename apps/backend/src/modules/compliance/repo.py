@@ -121,6 +121,23 @@ class IComplianceRepo(ABC):
     ) -> HTTPErrorResponse[PropertyParentPartnerDocument]:
         pass
 
+    @abstractmethod
+    async def get_all_document_approval_requests_for_given_property_parent_partner(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+    ) -> HTTPErrorResponse[List[PropertyParentPartnerDocument]]:
+        pass
+
+    @abstractmethod
+    async def get_property_parent_partner_document_approval_request_by_document_id(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+    ) -> HTTPErrorResponse[PropertyParentPartnerDocument]:
+        pass
+
 
 class ComplianceRepo(IComplianceRepo):
     def __init__(self, pool: Pool):
@@ -473,3 +490,51 @@ class ComplianceRepo(IComplianceRepo):
                     message=f"Approval request: {parent_partner_document_id} was not saved successfully!",
                 )
             return PropertyParentPartnerDocument(**row), None
+
+    async def get_all_document_approval_requests_for_given_property_parent_partner(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+    ) -> HTTPErrorResponse[List[PropertyParentPartnerDocument]]:
+        sql = """
+        SELECT *
+        FROM compliance.property_parent_partner_documents
+        WHERE property_id = $1 AND partner_id = $2;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(
+                connection.fetch, sql, property_id, partner_id
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            return [PropertyParentPartnerDocument(**row) for row in rows], None
+
+    async def get_property_parent_partner_document_approval_request_by_document_id(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+    ) -> HTTPErrorResponse[PropertyParentPartnerDocument]:
+        sql = """
+          SELECT *
+          FROM compliance.property_parent_partner_documents
+          WHERE property_id = $1 AND partner_id = $2 AND parent_partner_document_id = $3;
+          """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(
+                connection.fetch,
+                sql,
+                property_id,
+                partner_id,
+                parent_partner_document_id,
+            )
+            if error:
+                return None, HTTPError(code=500, message=str(error))
+            assert rows is not None
+            if len(rows) == 0:
+                return None, HTTPError(
+                    code=404,
+                    message=f"Partner document request with id: {parent_partner_document_id} was not found!",
+                )
+            return PropertyParentPartnerDocument(**rows[0]), None

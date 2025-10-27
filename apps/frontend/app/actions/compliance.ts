@@ -268,3 +268,42 @@ export async function sendPropertyParentPartnerDocumentApprovalRequest(
   if (error) return { data: undefined, error: error };
   return { data: data, error: undefined };
 }
+
+export async function getAllDocumentApprovalRequestsForGivenPropertyParentPartner(
+  jwt: string,
+  propertyId: string,
+  partnerId: string,
+): Promise<ApiResponse<PropertyParentPartnerDocument[]>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-document-requests",
+    {
+      params: { path: { property_id: propertyId, partner_id: partnerId } },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function getPropertyParentPartnerDocumentApprovalRequestByDocumentId(
+  jwt: string,
+  propertyId: string,
+  partnerId: string,
+  parentPartnerDocumentId: string,
+): Promise<ApiResponse<PropertyParentPartnerDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+          partner_id: partnerId,
+          parent_partner_document_id: parentPartnerDocumentId,
+        },
+      },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}

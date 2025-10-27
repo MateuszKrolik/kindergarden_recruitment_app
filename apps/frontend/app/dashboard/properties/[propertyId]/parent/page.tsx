@@ -8,6 +8,8 @@ import {
   sendPropertyChildDocumentApprovalRequest,
   getPropertyChildDocumentApprovalRequestByDocumentId,
   sendPropertyParentPartnerDocumentApprovalRequest,
+  getAllDocumentApprovalRequestsForGivenPropertyParentPartner,
+  getPropertyParentPartnerDocumentApprovalRequestByDocumentId,
 } from "@/app/actions/compliance";
 import {
   getDocumentRequirementsForGivenPropertyChild,
@@ -94,6 +96,12 @@ export default async function PropertyParentPage({
       saveParentPartnerDocument={saveParentPartnerDocument}
       sendPropertyParentPartnerDocumentApprovalRequest={
         sendPropertyParentPartnerDocumentApprovalRequest
+      }
+      getAllDocumentApprovalRequestsForGivenPropertyParentPartner={
+        getAllDocumentApprovalRequestsForGivenPropertyParentPartner
+      }
+      getPropertyParentPartnerDocumentApprovalRequestByDocumentId={
+        getPropertyParentPartnerDocumentApprovalRequestByDocumentId
       }
     />
   );
