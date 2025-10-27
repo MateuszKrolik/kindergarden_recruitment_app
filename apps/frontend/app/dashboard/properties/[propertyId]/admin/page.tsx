@@ -1,7 +1,7 @@
 "use server";
 
 import { getAllPropertyChildrenPaged } from "@/app/actions/property-management";
-import { AdminPropertyChildrenTable } from "@/components/client/AdminPropertyChildrenTable";
+import { AdminPropertyChildrenTable } from "@/components/client/property/admin/child/AdminPropertyChildrenTable";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
