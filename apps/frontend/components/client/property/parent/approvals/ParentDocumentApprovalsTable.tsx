@@ -177,6 +177,9 @@ export const ParentDocumentApprovalsTable = ({
 
     function onRequestSent(event: PropertyParentDocument) {
       setData((prev) => [...prev, event]);
+      toast.success(
+        `Document: ${event.parent_document_id} was just sent for approval!`,
+      );
     }
 
     socket.on(
@@ -233,9 +236,9 @@ export const ParentDocumentApprovalsTable = ({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}

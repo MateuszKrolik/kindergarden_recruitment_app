@@ -1,6 +1,4 @@
 import asyncio
-from typing import List, Set
-from uuid import UUID
 
 from src.modules.property_management.svc import IPropertyManagementSvc
 
@@ -12,7 +10,6 @@ from src.shared.types.modules.compliance.model import (
     PropertyParentDocument,
 )
 from src.shared.types.modules.property_management.event import PROPERTY_MANAGEMENT_EVENT
-from src.shared.types.modules.property_management.model import PropertyChild
 import socketio
 
 
@@ -34,19 +31,22 @@ class PropertyManagementEventHandler(EventHandler):
 
     @EventHandler.handle.register
     async def _(self, event: PropertyParentDocument):
-        tasks = await asyncio.gather(
-            self.svc.get_point_value_for_given_property_parent_document_by_document_type(
-                event.property_id,
-                event.document_type,
-            ),
-            self.svc.get_all_property_children_for_given_parent(
-                event.property_id,
-                event.user_id,
-            ),
-        )
-        points: int = tasks[0]
-        property_children: List[PropertyChild] = tasks[1]
-        children_ids: Set[UUID] = set(pc.child_id for pc in property_children)
+        async with asyncio.TaskGroup() as tg:
+            points_task = tg.create_task(
+                self.svc.get_point_value_for_given_property_parent_document_by_document_type(
+                    event.property_id,
+                    event.document_type,
+                )
+            )
+            property_children_task = tg.create_task(
+                self.svc.get_all_property_children_for_given_parent(
+                    event.property_id,
+                    event.user_id,
+                )
+            )
+        points = points_task.result()
+        property_children = property_children_task.result()
+        children_ids = set(pc.child_id for pc in property_children)
         increment_result = (
             await self.svc.increment_property_children_points_for_given_parent(
                 property_id=event.property_id,
@@ -65,18 +65,21 @@ class PropertyManagementEventHandler(EventHandler):
 
     @EventHandler.handle.register
     async def _(self, event: PropertyChildDocument):
-        tasks = await asyncio.gather(
-            self.svc.get_point_value_for_given_property_child_document_by_document_type(
-                event.property_id,
-                event.document_type,
-            ),
-            self.svc.get_property_child_by_id(
-                event.property_id,
-                event.child_id,
-            ),
-        )
-        points: int = tasks[0]
-        property_child: PropertyChild = tasks[1]
+        async with asyncio.TaskGroup() as tg:
+            points_task = tg.create_task(
+                self.svc.get_point_value_for_given_property_child_document_by_document_type(
+                    event.property_id,
+                    event.document_type,
+                )
+            )
+            property_child_task = tg.create_task(
+                self.svc.get_property_child_by_id(
+                    event.property_id,
+                    event.child_id,
+                )
+            )
+        points = points_task.result()
+        property_child = property_child_task.result()
         increment_result = (
             await self.svc.increment_property_children_points_for_given_parent(
                 property_id=event.property_id,

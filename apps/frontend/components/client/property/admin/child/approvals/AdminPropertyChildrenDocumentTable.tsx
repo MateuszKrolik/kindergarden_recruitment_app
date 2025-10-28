@@ -257,6 +257,9 @@ export default function AdminPropertyChildrenDocumentTable({
 
     function onRequestSent(event: PropertyChildDocument) {
       setResult((prev) => [...prev, event]);
+      toast.success(
+        `Document: ${event.child_document_id} was just sent for approval!`,
+      );
     }
 
     socket.on(
@@ -295,9 +298,9 @@ export default function AdminPropertyChildrenDocumentTable({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}

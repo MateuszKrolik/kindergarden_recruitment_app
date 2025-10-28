@@ -257,6 +257,9 @@ export default function AdminPropertyParentDocumentTable({
 
     function onRequestSent(event: PropertyParentDocument) {
       setResult((prev) => [...prev, event]);
+      toast.success(
+        `Document: ${event.parent_document_id} was just sent for approval!`,
+      );
     }
 
     socket.on(

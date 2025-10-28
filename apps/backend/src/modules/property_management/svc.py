@@ -1,6 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
-from typing import List, Set
+from typing import List
 from uuid import UUID
 from src.modules.property_management.client import IIdentityClient
 from src.shared.types.modules.property_management.enum import (
@@ -17,7 +17,6 @@ from src.shared.types.modules.property_management.model import (
 from src.modules.property_management.repo import IPropertyManagementRepo
 from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
-    ParentChild,
     ParentConditionKeys,
 )
 from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
@@ -134,48 +133,55 @@ class PropertyManagementSvc(IPropertyManagementSvc):
     async def get_document_requirements_for_given_property_parent(
         self, property_id: str, user_id: str
     ) -> List[PropertyParentDocumentRequirement]:
-        tasks = await asyncio.gather(
-            self.repo.get_all_property_parent_document_requirements(
-                property_id=property_id
-            ),
-            self.identity_client.get_parent_condition_keys(user_id=user_id),
-        )
-        all_req_task_result: List[PropertyParentDocumentRequirement] = tasks[0]
-        condition_key_task_result: ParentConditionKeys = tasks[1]
+        async with asyncio.TaskGroup() as tg:
+            all_req_task = tg.create_task(
+                self.repo.get_all_property_parent_document_requirements(
+                    property_id=property_id
+                )
+            )
+            condition_keys_task = tg.create_task(
+                self.identity_client.get_parent_condition_keys(user_id=user_id)
+            )
+        all_req = all_req_task.result()
+        condition_keys = condition_keys_task.result()
         active_reqs: List[PropertyParentDocumentRequirement] = []
-        for req in all_req_task_result:
-            if self._is_parent_requirement_active(condition_key_task_result, req):
+        for req in all_req:
+            if self._is_parent_requirement_active(condition_keys, req):
                 active_reqs.append(req)
         return active_reqs
 
     async def get_all_property_children_for_given_parent(
         self, property_id: str, parent_id: str
     ) -> List[PropertyChild]:
-        tasks = await asyncio.gather(
-            self.get_all_property_children(property_id=property_id),
-            self.identity_client.get_all_parent_children(parent_id=parent_id),
-        )
-        prop_children_task_result: List[PropertyChild] = tasks[0]
-        parent_children_task_result: List[ParentChild] = tasks[1]
-        parent_child_ids: Set[UUID] = {x.child_id for x in parent_children_task_result}
-        return [
-            pc for pc in prop_children_task_result if pc.child_id in parent_child_ids
-        ]
+        async with asyncio.TaskGroup() as tg:
+            prop_children_task = tg.create_task(
+                self.get_all_property_children(property_id=property_id)
+            )
+            parent_children_task = tg.create_task(
+                self.identity_client.get_all_parent_children(parent_id=parent_id)
+            )
+        prop_children = prop_children_task.result()
+        parent_children = parent_children_task.result()
+        parent_child_ids = {x.child_id for x in parent_children}
+        return [pc for pc in prop_children if pc.child_id in parent_child_ids]
 
     async def get_document_requirements_for_given_property_child(
         self,
         property_id: str,
         child_id: str,
     ) -> List[PropertyChildDocumentRequirement]:
-        tasks = await asyncio.gather(
-            self.repo.get_all_property_children_document_requirements(property_id),
-            self.identity_client.get_child_condition_keys(child_id),
-        )
-        all_req_task_result: List[PropertyChildDocumentRequirement] = tasks[0]
-        condition_key_task_result: ChildConditionKeys = tasks[1]
+        async with asyncio.TaskGroup() as tg:
+            all_req_task = tg.create_task(
+                self.repo.get_all_property_children_document_requirements(property_id)
+            )
+            condition_key_task = tg.create_task(
+                self.identity_client.get_child_condition_keys(child_id)
+            )
+        all_req = all_req_task.result()
+        condition_keys = condition_key_task.result()
         active_reqs: List[PropertyChildDocumentRequirement] = []
-        for req in all_req_task_result:
-            if self._is_child_requirement_active(condition_key_task_result, req):
+        for req in all_req:
+            if self._is_child_requirement_active(condition_keys, req):
                 active_reqs.append(req)
         return active_reqs
 
@@ -231,19 +237,22 @@ class PropertyManagementSvc(IPropertyManagementSvc):
     async def get_document_requirements_for_given_property_parent_partner(
         self, property_id: UUID, partner_id: UUID
     ) -> List[PropertyParentDocumentRequirement]:
-        tasks = await asyncio.gather(
-            self.repo.get_all_property_parent_document_requirements(
-                property_id=property_id
-            ),
-            self.identity_client.get_parent_partner_condition_keys(
-                partner_id=partner_id
-            ),
-        )
-        all_req_task_result: List[PropertyParentDocumentRequirement] = tasks[0]
-        condition_key_task_result: ParentConditionKeys = tasks[1]
+        async with asyncio.TaskGroup() as tg:
+            all_req_task = tg.create_task(
+                self.repo.get_all_property_parent_document_requirements(
+                    property_id=property_id
+                )
+            )
+            condition_keys_task = tg.create_task(
+                self.identity_client.get_parent_partner_condition_keys(
+                    partner_id=partner_id
+                )
+            )
+        all_req = all_req_task.result()
+        condition_keys = condition_keys_task.result()
         active_reqs: List[PropertyParentDocumentRequirement] = []
-        for req in all_req_task_result:
-            if self._is_parent_requirement_active(condition_key_task_result, req):
+        for req in all_req:
+            if self._is_parent_requirement_active(condition_keys, req):
                 active_reqs.append(req)
         return active_reqs
 

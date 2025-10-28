@@ -180,6 +180,9 @@ export const ParentPartnerDocumentApprovalsTable = ({
 
     function onRequestSent(event: PropertyParentPartnerDocument) {
       setData((prev) => [...prev, event]);
+      toast.success(
+        `Document: ${event.parent_partner_document_id} was just sent for approval!`,
+      );
     }
 
     socket.on(

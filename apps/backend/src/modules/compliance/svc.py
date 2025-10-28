@@ -240,11 +240,11 @@ class ComplianceSvc(IComplianceSvc):
                 message="Insufficient permissions - required role: 'admin'!"
             )
         data = await self.repo.set_property_parent_document_request_status(
-            property_id,
-            user_id,
-            parent_document_id,
-            request_status,
-            admin_id,
+            property_id=property_id,
+            user_id=user_id,
+            parent_document_id=parent_document_id,
+            request_status=request_status,
+            admin_id=admin_id,
         )
         event = create_event(
             type=COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED,
