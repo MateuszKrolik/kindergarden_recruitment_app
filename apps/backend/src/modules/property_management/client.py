@@ -7,7 +7,6 @@ from src.shared.types.modules.identity.model import (
     ParentChild,
     ParentConditionKeys,
 )
-from src.shared.types.response import HTTPErrorResponse
 
 
 class IIdentityClient(ABC):
@@ -15,26 +14,26 @@ class IIdentityClient(ABC):
     async def get_parent_condition_keys(
         self,
         user_id: str,
-    ) -> HTTPErrorResponse[ParentConditionKeys]:
+    ) -> ParentConditionKeys:
         pass
 
     @abstractmethod
     async def get_all_parent_children(
         self,
         parent_id: str,
-    ) -> HTTPErrorResponse[List[ParentChild]]:
+    ) -> List[ParentChild]:
         pass
 
     @abstractmethod
     async def get_child_condition_keys(
         self,
         child_id: str,
-    ) -> HTTPErrorResponse[ChildConditionKeys]:
+    ) -> ChildConditionKeys:
         pass
 
     @abstractmethod
     async def get_parent_partner_condition_keys(
         self,
         partner_id: UUID,
-    ) -> HTTPErrorResponse[ParentConditionKeys]:
+    ) -> ParentConditionKeys:
         pass

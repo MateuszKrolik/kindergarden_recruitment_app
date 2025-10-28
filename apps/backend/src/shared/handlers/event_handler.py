@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 
 import redis.asyncio as redis
 from src.shared.types.event import EventEnvelope
+from src.shared.utils.query import try_except
 
 
 class EventHandler(ABC):
@@ -46,7 +47,12 @@ class EventHandler(ABC):
             )
             envelope = EventEnvelope(**event_dict)
             event = event_type(**envelope.payload)
-            await self.handle(event)
+            _, error = await try_except(self.handle, event)
+            if error:
+                self.logger.error(
+                    f"Error occurred while processing event: '{event_name}'",
+                    exc_info=error,
+                )
 
     def _resolve_event(self, event_name: str) -> Optional[Any]:
         return self.EVENT_MAP.get(event_name)

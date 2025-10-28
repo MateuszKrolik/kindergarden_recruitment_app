@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generic, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, TypeVar
 
 from pydantic import BaseModel
 
@@ -10,13 +10,6 @@ class HTTPError(BaseModel):
     message: str
 
 
-class ApiResponse(BaseModel, Generic[T]):
-    data: Optional[T] = None
-    error: Optional[HTTPError] = None
+AuthMiddlewareResponse = Dict[str, Any]
 
-
-HTTPErrorResponse = Union[tuple[T, None], tuple[None, HTTPError]]
-
-ErrorResponse = Union[tuple[T, None], tuple[None, Exception]]
-
-AuthMiddlewareResponse = HTTPErrorResponse[Dict[str, Any]]
+AuthMiddlewareSignature = Callable[..., AuthMiddlewareResponse]

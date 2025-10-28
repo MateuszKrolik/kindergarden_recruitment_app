@@ -22,7 +22,6 @@ from src.shared.types.modules.identity.model import (
 )
 from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
 from src.shared.types.pagination import PagedResponse
-from src.shared.types.response import HTTPErrorResponse
 
 
 class IPropertyManagementSvc(ABC):
@@ -31,26 +30,26 @@ class IPropertyManagementSvc(ABC):
         self,
         page_size: int,
         page_number: int,
-    ) -> HTTPErrorResponse[PagedResponse[Property]]:
+    ) -> PagedResponse[Property]:
         pass
 
     @abstractmethod
     async def get_document_requirements_for_given_property_parent(
         self, property_id: str, user_id: str
-    ) -> HTTPErrorResponse[List[PropertyParentDocumentRequirement]]:
+    ) -> List[PropertyParentDocumentRequirement]:
         pass
 
     @abstractmethod
     async def get_all_property_children_for_given_parent(
         self, property_id: str, parent_id: str
-    ) -> HTTPErrorResponse[List[PropertyChild]]:
+    ) -> List[PropertyChild]:
         pass
 
     @abstractmethod
     async def get_all_property_children(
         self,
         property_id: str,
-    ) -> HTTPErrorResponse[List[PropertyChild]]:
+    ) -> List[PropertyChild]:
         pass
 
     @abstractmethod
@@ -58,7 +57,7 @@ class IPropertyManagementSvc(ABC):
         self,
         property_id: str,
         child_id: str,
-    ) -> HTTPErrorResponse[List[PropertyChildDocumentRequirement]]:
+    ) -> List[PropertyChildDocumentRequirement]:
         pass
 
     @abstractmethod
@@ -67,7 +66,7 @@ class IPropertyManagementSvc(ABC):
         property_id: str,
         page_size: int,
         page_number: int,
-    ) -> HTTPErrorResponse[PagedResponse[PropertyChild]]:
+    ) -> PagedResponse[PropertyChild]:
         pass
 
     @abstractmethod
@@ -75,7 +74,7 @@ class IPropertyManagementSvc(ABC):
         self,
         property_id: UUID,
         document_type: DOCUMENT_TYPE,
-    ) -> HTTPErrorResponse[int]:
+    ) -> int:
         pass
 
     @abstractmethod
@@ -83,7 +82,7 @@ class IPropertyManagementSvc(ABC):
         self,
         property_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
-    ) -> HTTPErrorResponse[int]:
+    ) -> int:
         pass
 
     @abstractmethod
@@ -92,7 +91,7 @@ class IPropertyManagementSvc(ABC):
         property_id: UUID,
         children_ids: List[UUID],
         point_value: int,
-    ) -> HTTPErrorResponse[List[PropertyChild]]:
+    ) -> List[PropertyChild]:
         pass
 
     @abstractmethod
@@ -100,13 +99,13 @@ class IPropertyManagementSvc(ABC):
         self,
         property_id: UUID,
         child_id: UUID,
-    ) -> HTTPErrorResponse[PropertyChild]:
+    ) -> PropertyChild:
         pass
 
     @abstractmethod
     async def get_document_requirements_for_given_property_parent_partner(
         self, property_id: UUID, partner_id: UUID
-    ) -> HTTPErrorResponse[List[PropertyParentDocumentRequirement]]:
+    ) -> List[PropertyParentDocumentRequirement]:
         pass
 
 
@@ -121,7 +120,7 @@ class PropertyManagementSvc(IPropertyManagementSvc):
         self,
         page_size: int,
         page_number: int,
-    ) -> HTTPErrorResponse[PagedResponse[Property]]:
+    ) -> PagedResponse[Property]:
         return await self.repo.get_all_properties(
             page_size=page_size, page_number=page_number
         )
@@ -129,91 +128,63 @@ class PropertyManagementSvc(IPropertyManagementSvc):
     async def get_all_property_children(
         self,
         property_id: str,
-    ) -> HTTPErrorResponse[List[PropertyChild]]:
+    ) -> List[PropertyChild]:
         return await self.repo.get_all_property_children(property_id=property_id)
 
     async def get_document_requirements_for_given_property_parent(
         self, property_id: str, user_id: str
-    ) -> HTTPErrorResponse[List[PropertyParentDocumentRequirement]]:
+    ) -> List[PropertyParentDocumentRequirement]:
         tasks = await asyncio.gather(
             self.repo.get_all_property_parent_document_requirements(
                 property_id=property_id
             ),
             self.identity_client.get_parent_condition_keys(user_id=user_id),
         )
-        all_req_task: HTTPErrorResponse[List[PropertyParentDocumentRequirement]] = (
-            tasks[0]
-        )
-        all_req_task_result, error = all_req_task
-        if error:
-            return None, error
-        assert all_req_task_result is not None
-        condition_key_task: HTTPErrorResponse[ParentConditionKeys] = tasks[1]
-        condition_key_task_result, error = condition_key_task
-        if error:
-            return None, error
-        assert condition_key_task_result is not None
+        all_req_task_result: List[PropertyParentDocumentRequirement] = tasks[0]
+        condition_key_task_result: ParentConditionKeys = tasks[1]
         active_reqs: List[PropertyParentDocumentRequirement] = []
         for req in all_req_task_result:
             if self._is_parent_requirement_active(condition_key_task_result, req):
                 active_reqs.append(req)
-        return active_reqs, None
+        return active_reqs
 
     async def get_all_property_children_for_given_parent(
         self, property_id: str, parent_id: str
-    ) -> HTTPErrorResponse[List[PropertyChild]]:
+    ) -> List[PropertyChild]:
         tasks = await asyncio.gather(
             self.get_all_property_children(property_id=property_id),
             self.identity_client.get_all_parent_children(parent_id=parent_id),
         )
-        prop_children_task: HTTPErrorResponse[List[PropertyChild]] = tasks[0]
-        prop_children_task_result, error = prop_children_task
-        if error:
-            return None, error
-        assert prop_children_task_result is not None
-        parent_children_task: HTTPErrorResponse[List[ParentChild]] = tasks[1]
-        parent_children_task_result, error = parent_children_task
-        if error:
-            return None, error
-        assert parent_children_task_result is not None
+        prop_children_task_result: List[PropertyChild] = tasks[0]
+        parent_children_task_result: List[ParentChild] = tasks[1]
         parent_child_ids: Set[UUID] = {x.child_id for x in parent_children_task_result}
         return [
             pc for pc in prop_children_task_result if pc.child_id in parent_child_ids
-        ], None
+        ]
 
     async def get_document_requirements_for_given_property_child(
         self,
         property_id: str,
         child_id: str,
-    ) -> HTTPErrorResponse[List[PropertyChildDocumentRequirement]]:
+    ) -> List[PropertyChildDocumentRequirement]:
         tasks = await asyncio.gather(
             self.repo.get_all_property_children_document_requirements(property_id),
             self.identity_client.get_child_condition_keys(child_id),
         )
-        all_req_task: HTTPErrorResponse[List[PropertyChildDocumentRequirement]] = tasks[
-            0
-        ]
-        all_req_task_result, error = all_req_task
-        if error:
-            return None, error
-        assert all_req_task_result is not None
-        condition_key_task: HTTPErrorResponse[ChildConditionKeys] = tasks[1]
-        condition_key_task_result, error = condition_key_task
-        if error:
-            return None, error
-        assert condition_key_task_result is not None
+        all_req_task_result: List[PropertyChildDocumentRequirement] = tasks[0]
+        condition_key_task_result: ChildConditionKeys = tasks[1]
         active_reqs: List[PropertyChildDocumentRequirement] = []
         for req in all_req_task_result:
             if self._is_child_requirement_active(condition_key_task_result, req):
                 active_reqs.append(req)
-        return active_reqs, None
+        return active_reqs
 
     async def get_all_property_children_paged(
         self,
         property_id: str,
         page_size: int,
         page_number: int,
-    ) -> HTTPErrorResponse[PagedResponse[PropertyChild]]:
+    ) -> PagedResponse[PropertyChild]:
         return await self.repo.get_all_property_children_paged(
             property_id=property_id, page_size=page_size, page_number=page_number
         )
@@ -222,7 +193,7 @@ class PropertyManagementSvc(IPropertyManagementSvc):
         self,
         property_id: UUID,
         document_type: DOCUMENT_TYPE,
-    ) -> HTTPErrorResponse[int]:
+    ) -> int:
         return await self.repo.get_point_value_for_given_property_parent_document_by_document_type(
             property_id=property_id,
             document_type=document_type,
@@ -233,7 +204,7 @@ class PropertyManagementSvc(IPropertyManagementSvc):
         property_id: UUID,
         children_ids: List[UUID],
         point_value: int,
-    ) -> HTTPErrorResponse[List[PropertyChild]]:
+    ) -> List[PropertyChild]:
         return await self.repo.increment_property_children_points_for_given_parent(
             property_id=property_id, point_value=point_value, children_ids=children_ids
         )
@@ -242,7 +213,7 @@ class PropertyManagementSvc(IPropertyManagementSvc):
         self,
         property_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
-    ) -> HTTPErrorResponse[int]:
+    ) -> int:
         return await self.repo.get_point_value_for_given_property_child_document_by_document_type(
             property_id=property_id,
             document_type=document_type,
@@ -252,14 +223,14 @@ class PropertyManagementSvc(IPropertyManagementSvc):
         self,
         property_id: UUID,
         child_id: UUID,
-    ) -> HTTPErrorResponse[PropertyChild]:
+    ) -> PropertyChild:
         return await self.repo.get_property_child_by_id(
             property_id=property_id, child_id=child_id
         )
 
     async def get_document_requirements_for_given_property_parent_partner(
         self, property_id: UUID, partner_id: UUID
-    ) -> HTTPErrorResponse[List[PropertyParentDocumentRequirement]]:
+    ) -> List[PropertyParentDocumentRequirement]:
         tasks = await asyncio.gather(
             self.repo.get_all_property_parent_document_requirements(
                 property_id=property_id
@@ -268,23 +239,13 @@ class PropertyManagementSvc(IPropertyManagementSvc):
                 partner_id=partner_id
             ),
         )
-        all_req_task: HTTPErrorResponse[List[PropertyParentDocumentRequirement]] = (
-            tasks[0]
-        )
-        all_req_task_result, error = all_req_task
-        if error:
-            return None, error
-        assert all_req_task_result is not None
-        condition_key_task: HTTPErrorResponse[ParentConditionKeys] = tasks[1]
-        condition_key_task_result, error = condition_key_task
-        if error:
-            return None, error
-        assert condition_key_task_result is not None
+        all_req_task_result: List[PropertyParentDocumentRequirement] = tasks[0]
+        condition_key_task_result: ParentConditionKeys = tasks[1]
         active_reqs: List[PropertyParentDocumentRequirement] = []
         for req in all_req_task_result:
             if self._is_parent_requirement_active(condition_key_task_result, req):
                 active_reqs.append(req)
-        return active_reqs, None
+        return active_reqs
 
     def _is_parent_requirement_active(
         self,

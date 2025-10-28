@@ -137,20 +137,20 @@ export default function AdminPropertyParentDocumentTable({
       ),
     },
     {
-      accessorKey: "parent_document_id",
+      accessorKey: "document_type",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Parent Document ID
+            Document Type
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("parent_document_id")}</div>
+        <div className="lowercase">{row.getValue("document_type")}</div>
       ),
     },
     {
@@ -295,9 +295,9 @@ export default function AdminPropertyParentDocumentTable({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}

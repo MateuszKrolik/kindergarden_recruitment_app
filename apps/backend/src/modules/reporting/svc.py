@@ -10,7 +10,6 @@ from src.shared.types.modules.reporting.model import (
     ParentDocument,
     ParentPartnerDocument,
 )
-from src.shared.types.response import HTTPErrorResponse
 
 
 class IReportingSvc(ABC):
@@ -19,20 +18,18 @@ class IReportingSvc(ABC):
         self,
         user_id: UUID,
         document_type: DOCUMENT_TYPE,
-    ) -> HTTPErrorResponse[ParentDocument]:
+    ) -> ParentDocument:
         pass
 
     @abstractmethod
-    async def get_parent_document_url_by_document_id(
-        self, doc_id: UUID
-    ) -> HTTPErrorResponse[str]:
+    async def get_parent_document_url_by_document_id(self, doc_id: UUID) -> str:
         pass
 
     @abstractmethod
     async def get_document_url_by_file_path(
         self,
         path: str,
-    ) -> HTTPErrorResponse[str]:
+    ) -> str:
         pass
 
     @abstractmethod
@@ -41,7 +38,7 @@ class IReportingSvc(ABC):
         user_id: UUID,
         document_type: DOCUMENT_TYPE,
         file: UploadFile = File(...),
-    ) -> HTTPErrorResponse[ParentDocument]:
+    ) -> ParentDocument:
         pass
 
     @abstractmethod
@@ -49,7 +46,7 @@ class IReportingSvc(ABC):
         self,
         child_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
-    ) -> HTTPErrorResponse[ChildDocument]:
+    ) -> ChildDocument:
         pass
 
     @abstractmethod
@@ -58,13 +55,11 @@ class IReportingSvc(ABC):
         child_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
         file: UploadFile = File(...),
-    ) -> HTTPErrorResponse[ChildDocument]:
+    ) -> ChildDocument:
         pass
 
     @abstractmethod
-    async def get_child_document_url_by_document_id(
-        self, doc_id: UUID
-    ) -> HTTPErrorResponse[str]:
+    async def get_child_document_url_by_document_id(self, doc_id: UUID) -> str:
         pass
 
     @abstractmethod
@@ -72,7 +67,7 @@ class IReportingSvc(ABC):
         self,
         partner_id: UUID,
         document_type: DOCUMENT_TYPE,
-    ) -> HTTPErrorResponse[ParentPartnerDocument]:
+    ) -> ParentPartnerDocument:
         pass
 
     @abstractmethod
@@ -81,7 +76,7 @@ class IReportingSvc(ABC):
         partner_id: UUID,
         document_type: DOCUMENT_TYPE,
         file: UploadFile = File(...),
-    ) -> HTTPErrorResponse[ParentPartnerDocument]:
+    ) -> ParentPartnerDocument:
         pass
 
 
@@ -94,26 +89,21 @@ class ReportingSvc(IReportingSvc):
         self,
         user_id: UUID,
         document_type: DOCUMENT_TYPE,
-    ) -> HTTPErrorResponse[ParentDocument]:
+    ) -> ParentDocument:
         return await self.repo.get_parent_document_by_type(
             user_id=user_id, document_type=document_type
         )
 
-    async def get_parent_document_url_by_document_id(
-        self, doc_id: UUID
-    ) -> HTTPErrorResponse[str]:
-        path, error = await self.repo.get_parent_document_file_path_by_document_id(
+    async def get_parent_document_url_by_document_id(self, doc_id: UUID) -> str:
+        path = await self.repo.get_parent_document_file_path_by_document_id(
             doc_id=doc_id
         )
-        if error:
-            return None, error
-        assert path is not None
         return await self.get_document_url_by_file_path(path=path)
 
     async def get_document_url_by_file_path(
         self,
         path: str,
-    ) -> HTTPErrorResponse[str]:
+    ) -> str:
         return await self.s3_repo.get_document_url_by_file_path(key=path)
 
     async def save_parent_document(
@@ -121,15 +111,11 @@ class ReportingSvc(IReportingSvc):
         user_id: UUID,
         document_type: DOCUMENT_TYPE,
         file: UploadFile = File(...),
-    ) -> HTTPErrorResponse[ParentDocument]:
+    ) -> ParentDocument:
         _, ext = os.path.splitext(file.filename)
         file_path = f"parents/{user_id}/documents/{document_type}{ext}"
         file_content = await file.read()
-        _, error = await self.s3_repo.upload_file(
-            key=file_path, file_content=file_content
-        )
-        if error:
-            return None, error
+        await self.s3_repo.upload_file(key=file_path, file_content=file_content)
         return await self.repo.save_parent_document(
             user_id=user_id, document_type=document_type, file_path=file_path
         )
@@ -138,7 +124,7 @@ class ReportingSvc(IReportingSvc):
         self,
         child_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
-    ) -> HTTPErrorResponse[ChildDocument]:
+    ) -> ChildDocument:
         return await self.repo.get_child_document_by_type(
             child_id=child_id, document_type=document_type
         )
@@ -148,35 +134,26 @@ class ReportingSvc(IReportingSvc):
         child_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
         file: UploadFile = File(...),
-    ) -> HTTPErrorResponse[ChildDocument]:
+    ) -> ChildDocument:
         _, ext = os.path.splitext(file.filename)
         file_path = f"children/{child_id}/documents/{document_type}{ext}"
         file_content = await file.read()
-        _, error = await self.s3_repo.upload_file(
-            key=file_path, file_content=file_content
-        )
-        if error:
-            return None, error
+        await self.s3_repo.upload_file(key=file_path, file_content=file_content)
         return await self.repo.save_child_document(
             child_id=child_id, document_type=document_type, file_path=file_path
         )
 
-    async def get_child_document_url_by_document_id(
-        self, doc_id: UUID
-    ) -> HTTPErrorResponse[str]:
-        path, error = await self.repo.get_child_document_file_path_by_document_id(
+    async def get_child_document_url_by_document_id(self, doc_id: UUID) -> str:
+        path = await self.repo.get_child_document_file_path_by_document_id(
             doc_id=doc_id
         )
-        if error:
-            return None, error
-        assert path is not None
         return await self.get_document_url_by_file_path(path=path)
 
     async def get_parent_partner_document_by_type(
         self,
         partner_id: UUID,
         document_type: DOCUMENT_TYPE,
-    ) -> HTTPErrorResponse[ParentPartnerDocument]:
+    ) -> ParentPartnerDocument:
         return await self.repo.get_parent_partner_document_by_type(
             partner_id=partner_id, document_type=document_type
         )
@@ -186,15 +163,11 @@ class ReportingSvc(IReportingSvc):
         partner_id: UUID,
         document_type: DOCUMENT_TYPE,
         file: UploadFile = File(...),
-    ) -> HTTPErrorResponse[ParentPartnerDocument]:
+    ) -> ParentPartnerDocument:
         _, ext = os.path.splitext(file.filename)
         file_path = f"parents/partners/{partner_id}/documents/{document_type}{ext}"
         file_content = await file.read()
-        _, error = await self.s3_repo.upload_file(
-            key=file_path, file_content=file_content
-        )
-        if error:
-            return None, error
+        await self.s3_repo.upload_file(key=file_path, file_content=file_content)
         return await self.repo.save_parent_partner_document(
             partner_id=partner_id, document_type=document_type, file_path=file_path
         )

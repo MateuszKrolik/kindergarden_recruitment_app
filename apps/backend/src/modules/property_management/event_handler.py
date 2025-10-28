@@ -13,7 +13,6 @@ from src.shared.types.modules.compliance.model import (
 )
 from src.shared.types.modules.property_management.event import PROPERTY_MANAGEMENT_EVENT
 from src.shared.types.modules.property_management.model import PropertyChild
-from src.shared.types.response import HTTPErrorResponse
 import socketio
 
 
@@ -45,42 +44,24 @@ class PropertyManagementEventHandler(EventHandler):
                 event.user_id,
             ),
         )
-        points_task: HTTPErrorResponse[int] = tasks[0]
-        points, error = points_task
-        if error:
-            self.logger.error(error)
-            return
-        assert points is not None
-        property_children_task: HTTPErrorResponse[List[PropertyChild]] = tasks[1]
-        property_children, error = property_children_task
-        if error:
-            self.logger.error(error)
-            return
-        assert property_children is not None
+        points: int = tasks[0]
+        property_children: List[PropertyChild] = tasks[1]
         children_ids: Set[UUID] = set(pc.child_id for pc in property_children)
-        (
-            increment_result,
-            error,
-        ) = await self.svc.increment_property_children_points_for_given_parent(
-            property_id=event.property_id,
-            point_value=points,
-            children_ids=children_ids,
+        increment_result = (
+            await self.svc.increment_property_children_points_for_given_parent(
+                property_id=event.property_id,
+                point_value=points,
+                children_ids=children_ids,
+            )
         )
-        if error:
-            self.logger.error(error)
-            return
-        assert increment_result is not None
-        try:
-            await self.socket_server.emit(
-                COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED,
-                event.model_dump(mode="json"),
-            )
-            await self.socket_server.emit(
-                PROPERTY_MANAGEMENT_EVENT.PROPERTY_CHILDREN_UPDATED,
-                [m.model_dump(mode="json") for m in increment_result],
-            )
-        except Exception as e:
-            self.logger.error(e)
+        await self.socket_server.emit(
+            COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED,
+            event.model_dump(mode="json"),
+        )
+        await self.socket_server.emit(
+            PROPERTY_MANAGEMENT_EVENT.PROPERTY_CHILDREN_UPDATED,
+            [m.model_dump(mode="json") for m in increment_result],
+        )
 
     @EventHandler.handle.register
     async def _(self, event: PropertyChildDocument):
@@ -94,38 +75,20 @@ class PropertyManagementEventHandler(EventHandler):
                 event.child_id,
             ),
         )
-        points_task: HTTPErrorResponse[int] = tasks[0]
-        points, error = points_task
-        if error:
-            self.logger.error(error)
-            return
-        assert points is not None
-        property_child_task: HTTPErrorResponse[PropertyChild] = tasks[1]
-        property_child, error = property_child_task
-        if error:
-            self.logger.error(error)
-            return
-        assert property_child is not None
-        (
-            increment_result,
-            error,
-        ) = await self.svc.increment_property_children_points_for_given_parent(
-            property_id=event.property_id,
-            point_value=points,
-            children_ids=[property_child.child_id],
+        points: int = tasks[0]
+        property_child: PropertyChild = tasks[1]
+        increment_result = (
+            await self.svc.increment_property_children_points_for_given_parent(
+                property_id=event.property_id,
+                point_value=points,
+                children_ids=[property_child.child_id],
+            )
         )
-        if error:
-            self.logger.error(error)
-            return
-        assert increment_result is not None
-        try:
-            await self.socket_server.emit(
-                COMPLIANCE_EVENT.PROPERTY_CHILD_DOCUMENT_APPROVED,
-                event.model_dump(mode="json"),
-            )
-            await self.socket_server.emit(
-                PROPERTY_MANAGEMENT_EVENT.PROPERTY_CHILDREN_UPDATED,
-                [m.model_dump(mode="json") for m in increment_result],
-            )
-        except Exception as e:
-            self.logger.error(e)
+        await self.socket_server.emit(
+            COMPLIANCE_EVENT.PROPERTY_CHILD_DOCUMENT_APPROVED,
+            event.model_dump(mode="json"),
+        )
+        await self.socket_server.emit(
+            PROPERTY_MANAGEMENT_EVENT.PROPERTY_CHILDREN_UPDATED,
+            [m.model_dump(mode="json") for m in increment_result],
+        )

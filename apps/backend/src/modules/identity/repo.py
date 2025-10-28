@@ -3,13 +3,14 @@ from uuid import UUID
 from asyncpg import Pool
 from abc import ABC, abstractmethod
 
+from src.shared.exceptions.not_found import NotFoundException
+from src.shared.exceptions.database import DatabaseException
 from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
     ParentChild,
     ParentConditionKeys,
     PropertyUser,
 )
-from src.shared.types.response import HTTPError, HTTPErrorResponse
 from src.shared.utils.query import try_except
 
 
@@ -18,7 +19,7 @@ class IIdentityRepo(ABC):
     async def get_parent_condition_keys(
         self,
         user_id: str,
-    ) -> HTTPErrorResponse[ParentConditionKeys]:
+    ) -> ParentConditionKeys:
         pass
 
     @abstractmethod
@@ -26,28 +27,28 @@ class IIdentityRepo(ABC):
         self,
         property_id: UUID,
         user_id: UUID,
-    ) -> HTTPErrorResponse[PropertyUser]:
+    ) -> PropertyUser:
         pass
 
     @abstractmethod
     async def get_all_parent_children(
         self,
         parent_id: str,
-    ) -> HTTPErrorResponse[List[ParentChild]]:
+    ) -> List[ParentChild]:
         pass
 
     @abstractmethod
     async def get_child_condition_keys(
         self,
         child_id: str,
-    ) -> HTTPErrorResponse[ChildConditionKeys]:
+    ) -> ChildConditionKeys:
         pass
 
     @abstractmethod
     async def get_parent_partner_condition_keys(
         self,
         partner_id: UUID,
-    ) -> HTTPErrorResponse[ParentConditionKeys]:
+    ) -> ParentConditionKeys:
         pass
 
 
@@ -58,7 +59,7 @@ class IdentityRepo(IIdentityRepo):
     async def get_parent_condition_keys(
         self,
         user_id: str,
-    ) -> HTTPErrorResponse[ParentConditionKeys]:
+    ) -> ParentConditionKeys:
         sql = """
         SELECT
           is_employed,
@@ -72,20 +73,18 @@ class IdentityRepo(IIdentityRepo):
         async with self.pool.acquire() as connection:
             rows, error = await try_except(connection.fetch, sql, user_id)
             if error:
-                return None, HTTPError(code=500, message=str(error))
-            assert rows is not None
+                raise DatabaseException(message=str(error))
             if len(rows) == 0:
-                return None, HTTPError(
-                    code=404, message=f"Parent with id: {user_id} does not exist!"
+                raise NotFoundException(
+                    message=f"Parent with id: {user_id} does not exist!"
                 )
-            keys = ParentConditionKeys(**rows[0])
-            return keys, None
+            return ParentConditionKeys(**rows[0])
 
     async def get_property_user(
         self,
         property_id: UUID,
         user_id: UUID,
-    ) -> HTTPErrorResponse[PropertyUser]:
+    ) -> PropertyUser:
         sql = """
         SELECT *
         FROM identity.property_users
@@ -94,20 +93,17 @@ class IdentityRepo(IIdentityRepo):
         async with self.pool.acquire() as connection:
             rows, error = await try_except(connection.fetch, sql, property_id, user_id)
             if error:
-                return None, HTTPError(code=500, message=str(error))
-            assert rows is not None
+                raise DatabaseException(message=str(error))
             if len(rows) == 0:
-                return None, HTTPError(
-                    code=404,
+                raise NotFoundException(
                     message=f"User: {user_id} is not registered to property: {property_id}!",
                 )
-            data = PropertyUser(**rows[0])
-            return data, None
+            return PropertyUser(**rows[0])
 
     async def get_all_parent_children(
         self,
         parent_id: str,
-    ) -> HTTPErrorResponse[List[ParentChild]]:
+    ) -> List[ParentChild]:
         sql = """
         SELECT *
         FROM identity.parent_children
@@ -116,14 +112,13 @@ class IdentityRepo(IIdentityRepo):
         async with self.pool.acquire() as connection:
             rows, error = await try_except(connection.fetch, sql, parent_id)
             if error:
-                return None, HTTPError(code=500, message=str(error))
-            assert rows is not None
-            return [ParentChild(**row) for row in rows], None
+                raise DatabaseException(message=str(error))
+            return [ParentChild(**row) for row in rows]
 
     async def get_child_condition_keys(
         self,
         child_id: str,
-    ) -> HTTPErrorResponse[ChildConditionKeys]:
+    ) -> ChildConditionKeys:
         sql = """
         SELECT
           has_disability,
@@ -135,18 +130,17 @@ class IdentityRepo(IIdentityRepo):
         async with self.pool.acquire() as connection:
             rows, error = await try_except(connection.fetch, sql, child_id)
             if error:
-                return None, HTTPError(code=500, message=str(error))
-            assert rows is not None
+                raise DatabaseException(message=str(error))
             if len(rows) == 0:
-                return None, HTTPError(
-                    code=404, message=f"Child with id: {child_id} does not exist!"
+                raise NotFoundException(
+                    message=f"Child with id: {child_id} does not exist!"
                 )
-            return ChildConditionKeys(**rows[0]), None
+            return ChildConditionKeys(**rows[0])
 
     async def get_parent_partner_condition_keys(
         self,
         partner_id: UUID,
-    ) -> HTTPErrorResponse[ParentConditionKeys]:
+    ) -> ParentConditionKeys:
         sql = """
         SELECT
           is_employed,
@@ -160,11 +154,9 @@ class IdentityRepo(IIdentityRepo):
         async with self.pool.acquire() as connection:
             rows, error = await try_except(connection.fetch, sql, partner_id)
             if error:
-                return None, HTTPError(code=500, message=str(error))
-            assert rows is not None
+                raise DatabaseException(message=str(error))
             if len(rows) == 0:
-                return None, HTTPError(
-                    code=404, message=f"Partner with id: {partner_id} does not exist!"
+                raise NotFoundException(
+                    message=f"Partner with id: {partner_id} does not exist!"
                 )
-            keys = ParentConditionKeys(**rows[0])
-            return keys, None
+            return ParentConditionKeys(**rows[0])

@@ -10,7 +10,6 @@ from src.shared.types.modules.identity.model import (
     ParentConditionKeys,
     PropertyUser,
 )
-from src.shared.types.response import HTTPErrorResponse
 
 
 class IIdentitySvc(ABC):
@@ -18,7 +17,7 @@ class IIdentitySvc(ABC):
     async def get_parent_condition_keys(
         self,
         user_id: str,
-    ) -> HTTPErrorResponse[ParentConditionKeys]:
+    ) -> ParentConditionKeys:
         pass
 
     @abstractmethod
@@ -26,21 +25,21 @@ class IIdentitySvc(ABC):
         self,
         property_id: UUID,
         user_id: UUID,
-    ) -> HTTPErrorResponse[PropertyUser]:
+    ) -> PropertyUser:
         pass
 
     @abstractmethod
     async def get_all_parent_children(
         self,
         parent_id: str,
-    ) -> HTTPErrorResponse[List[ParentChild]]:
+    ) -> List[ParentChild]:
         pass
 
     @abstractmethod
     async def get_child_condition_keys(
         self,
         child_id: str,
-    ) -> HTTPErrorResponse[ChildConditionKeys]:
+    ) -> ChildConditionKeys:
         pass
 
     @abstractmethod
@@ -48,14 +47,14 @@ class IIdentitySvc(ABC):
         self,
         property_id: UUID,
         user_id: UUID,
-    ) -> HTTPErrorResponse[bool]:
+    ) -> bool:
         pass
 
     @abstractmethod
     async def get_parent_partner_condition_keys(
         self,
         partner_id: UUID,
-    ) -> HTTPErrorResponse[ParentConditionKeys]:
+    ) -> ParentConditionKeys:
         pass
 
 
@@ -66,14 +65,14 @@ class IdentitySvc(IIdentitySvc):
     async def get_parent_condition_keys(
         self,
         user_id: str,
-    ) -> HTTPErrorResponse[ParentConditionKeys]:
+    ) -> ParentConditionKeys:
         return await self.repo.get_parent_condition_keys(user_id)
 
     async def get_property_user(
         self,
         property_id: UUID,
         user_id: UUID,
-    ) -> HTTPErrorResponse[PropertyUser]:
+    ) -> PropertyUser:
         return await self.repo.get_property_user(
             property_id=property_id, user_id=user_id
         )
@@ -81,30 +80,27 @@ class IdentitySvc(IIdentitySvc):
     async def get_all_parent_children(
         self,
         parent_id: str,
-    ) -> HTTPErrorResponse[List[ParentChild]]:
+    ) -> List[ParentChild]:
         return await self.repo.get_all_parent_children(parent_id=parent_id)
 
     async def get_child_condition_keys(
         self,
         child_id: str,
-    ) -> HTTPErrorResponse[ChildConditionKeys]:
+    ) -> ChildConditionKeys:
         return await self.repo.get_child_condition_keys(child_id=child_id)
 
     async def is_property_admin(
         self,
         property_id: UUID,
         user_id: UUID,
-    ) -> HTTPErrorResponse[bool]:
-        data, error = await self.repo.get_property_user(
+    ) -> bool:
+        data = await self.repo.get_property_user(
             property_id=property_id, user_id=user_id
         )
-        if error:
-            None, error
-        assert data is not None
-        return data.role is PROPERTY_USER_ROLE.admin, None
+        return data.role is PROPERTY_USER_ROLE.admin
 
     async def get_parent_partner_condition_keys(
         self,
         partner_id: UUID,
-    ) -> HTTPErrorResponse[ParentConditionKeys]:
+    ) -> ParentConditionKeys:
         return await self.repo.get_parent_partner_condition_keys(partner_id=partner_id)
