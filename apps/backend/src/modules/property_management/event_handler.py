@@ -31,26 +31,15 @@ class PropertyManagementEventHandler(EventHandler):
 
     @EventHandler.handle.register
     async def _(self, event: PropertyParentDocument):
-        async with asyncio.TaskGroup() as tg:
-            points_task = tg.create_task(
-                self.svc.get_point_value_for_given_property_parent_document_by_document_type(
-                    event.property_id,
-                    event.document_type,
-                )
-            )
-            property_children_task = tg.create_task(
-                self.svc.get_all_property_children_for_given_parent(
-                    event.property_id,
-                    event.user_id,
-                )
-            )
-        points = points_task.result()
-        property_children = property_children_task.result()
+        property_children = await self.svc.get_all_property_children_for_given_parent(
+            event.property_id,
+            event.user_id,
+        )
         children_ids = set(pc.child_id for pc in property_children)
         increment_result = (
             await self.svc.increment_property_children_points_for_given_parent(
                 property_id=event.property_id,
-                point_value=points,
+                point_value=event.point_value,
                 children_ids=children_ids,
             )
         )

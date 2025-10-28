@@ -10,7 +10,7 @@ from src.shared.types.modules.property_management.model import (
     PropertyChildDocumentRequirement,
     PropertyParentDocumentRequirement,
 )
-from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
+from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE
 from src.shared.types.pagination import PagedResponse
 from src.shared.utils.pagination import calculate_offset, new_paged_response
 from src.shared.utils.query import try_except
@@ -53,14 +53,6 @@ class IPropertyManagementRepo(ABC):
         page_size: int,
         page_number: int,
     ) -> PagedResponse[PropertyChild]:
-        pass
-
-    @abstractmethod
-    async def get_point_value_for_given_property_parent_document_by_document_type(
-        self,
-        property_id: UUID,
-        document_type: DOCUMENT_TYPE,
-    ) -> int:
         pass
 
     @abstractmethod
@@ -216,31 +208,6 @@ class PropertyManagementRepo(IPropertyManagementRepo):
                 page_size=page_size,
                 page_number=page_number,
             )
-
-    async def get_point_value_for_given_property_parent_document_by_document_type(
-        self,
-        property_id: UUID,
-        document_type: DOCUMENT_TYPE,
-    ) -> int:
-        sql = """
-        SELECT point_value
-        FROM property_management.property_parent_document_requirements
-        WHERE property_id = $1 AND document_type = $2;
-        """
-        async with self.pool.acquire() as connection:
-            rows, error = await try_except(
-                connection.fetch,
-                sql,
-                property_id,
-                document_type,  # TODO: SQL index on document_type
-            )
-            if error:
-                raise DatabaseException(message=str(error))
-            if len(rows) == 0:
-                raise NotFoundException(
-                    message=f"Document type: ${document_type} not found in property: ${property_id}!",
-                )
-            return rows[0]["point_value"]
 
     async def increment_property_children_points_for_given_parent(
         self,

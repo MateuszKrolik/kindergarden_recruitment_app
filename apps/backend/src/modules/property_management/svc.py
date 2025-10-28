@@ -19,7 +19,7 @@ from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
     ParentConditionKeys,
 )
-from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMENT_TYPE
+from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE
 from src.shared.types.pagination import PagedResponse
 
 
@@ -66,14 +66,6 @@ class IPropertyManagementSvc(ABC):
         page_size: int,
         page_number: int,
     ) -> PagedResponse[PropertyChild]:
-        pass
-
-    @abstractmethod
-    async def get_point_value_for_given_property_parent_document_by_document_type(
-        self,
-        property_id: UUID,
-        document_type: DOCUMENT_TYPE,
-    ) -> int:
         pass
 
     @abstractmethod
@@ -193,16 +185,6 @@ class PropertyManagementSvc(IPropertyManagementSvc):
     ) -> PagedResponse[PropertyChild]:
         return await self.repo.get_all_property_children_paged(
             property_id=property_id, page_size=page_size, page_number=page_number
-        )
-
-    async def get_point_value_for_given_property_parent_document_by_document_type(
-        self,
-        property_id: UUID,
-        document_type: DOCUMENT_TYPE,
-    ) -> int:
-        return await self.repo.get_point_value_for_given_property_parent_document_by_document_type(
-            property_id=property_id,
-            document_type=document_type,
         )
 
     async def increment_property_children_points_for_given_parent(
