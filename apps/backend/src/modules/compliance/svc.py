@@ -65,6 +65,7 @@ class IComplianceSvc(ABC):
         user_id: UUID,
         parent_document_id: UUID,
         document_type: DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyParentDocument:
         pass
 
@@ -208,12 +209,14 @@ class ComplianceSvc(IComplianceSvc):
         user_id: UUID,
         parent_document_id: UUID,
         document_type: DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyParentDocument:
         data = await self.repo.send_property_parent_document_approval_request(
             property_id=property_id,
             user_id=user_id,
             parent_document_id=parent_document_id,
             document_type=document_type,
+            point_value=point_value,
         )
         _, socket_error = await try_except(
             self.socket_server.emit,

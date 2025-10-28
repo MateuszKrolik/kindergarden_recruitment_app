@@ -698,10 +698,14 @@ export interface components {
             /** Approved By */
             approved_by: string | null;
             document_type: components["schemas"]["DOCUMENT_TYPE"];
+            /** Point Value */
+            point_value: number;
         };
         /** PropertyParentDocumentRequest */
         PropertyParentDocumentRequest: {
             document_type: components["schemas"]["DOCUMENT_TYPE"];
+            /** Point Value */
+            point_value: number;
         };
         /** PropertyParentDocumentRequirement */
         PropertyParentDocumentRequirement: {
@@ -856,15 +860,6 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ParentDocument"];
-                };
-            };
-            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -995,15 +990,6 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChildDocument"];
-                };
-            };
-            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -1103,15 +1089,6 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ParentPartnerDocument"];
-                };
-            };
-            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -1440,15 +1417,6 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PropertyParentDocument"];
-                };
-            };
-            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -1588,15 +1556,6 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PropertyChildDocument"];
-                };
-            };
-            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -1701,15 +1660,6 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PropertyParentPartnerDocument"];
-                };
-            };
-            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;

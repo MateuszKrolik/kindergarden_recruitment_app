@@ -125,6 +125,7 @@ class ComplianceHandler:
                 user_id=parent_id,
                 parent_document_id=parent_doc_id,
                 document_type=body.document_type,
+                point_value=body.point_value,
             )
 
         @self.router.patch(

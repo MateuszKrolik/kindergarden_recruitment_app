@@ -13,6 +13,7 @@ class PropertyParentDocument(BaseModel):
     request_status: REQUEST_STATUS
     approved_by: Optional[UUID]
     document_type: DOCUMENT_TYPE
+    point_value: int
 
 
 class PropertyChildDocument(BaseModel):

@@ -5,6 +5,7 @@ from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE, DOCUMEN
 
 class PropertyParentDocumentRequest(BaseModel):
     document_type: DOCUMENT_TYPE
+    point_value: int
 
 
 class PropertyChildDocumentRequest(BaseModel):

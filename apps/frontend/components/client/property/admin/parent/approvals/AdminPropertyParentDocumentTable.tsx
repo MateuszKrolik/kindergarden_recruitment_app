@@ -154,6 +154,23 @@ export default function AdminPropertyParentDocumentTable({
       ),
     },
     {
+      accessorKey: "point_value",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Point Value
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("point_value")}</div>
+      ),
+    },
+    {
       accessorKey: "request_status",
       header: ({ column }) => {
         return (

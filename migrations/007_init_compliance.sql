@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS compliance.property_parent_documents(
     'rejected'
   )) DEFAULT 'pending',
   approved_by uuid,
+  point_value INTEGER NOT NULL,
   PRIMARY KEY (property_id, user_id, parent_document_id)
 );
 

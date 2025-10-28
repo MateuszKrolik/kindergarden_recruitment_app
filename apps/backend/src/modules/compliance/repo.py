@@ -60,6 +60,7 @@ class IComplianceRepo(ABC):
         user_id: UUID,
         parent_document_id: UUID,
         document_type: DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyParentDocument:
         pass
 
@@ -241,18 +242,21 @@ class ComplianceRepo(IComplianceRepo):
         user_id: UUID,
         parent_document_id: UUID,
         document_type: DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyParentDocument:
         sql = """
         INSERT INTO compliance.property_parent_documents(
             property_id,
             user_id,
             parent_document_id,
-            document_type
+            document_type,
+            point_value
         ) VALUES (
             $1,
             $2,
             $3,
-            $4
+            $4,
+            $5
         ) RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -263,6 +267,7 @@ class ComplianceRepo(IComplianceRepo):
                 user_id,
                 parent_document_id,
                 document_type,
+                point_value,
             )
             if error:
                 raise DatabaseException(message=str(error))
