@@ -13,21 +13,21 @@ class IIdentityClient(ABC):
     @abstractmethod
     async def get_parent_condition_keys(
         self,
-        user_id: str,
+        user_id: UUID,
     ) -> ParentConditionKeys:
         pass
 
     @abstractmethod
     async def get_all_parent_children(
         self,
-        parent_id: str,
+        parent_id: UUID,
     ) -> List[ParentChild]:
         pass
 
     @abstractmethod
     async def get_child_condition_keys(
         self,
-        child_id: str,
+        child_id: UUID,
     ) -> ChildConditionKeys:
         pass
 

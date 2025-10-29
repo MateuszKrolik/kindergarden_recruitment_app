@@ -91,6 +91,7 @@ class IComplianceRepo(ABC):
         child_id: UUID,
         child_document_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyChildDocument:
         pass
 
@@ -121,6 +122,7 @@ class IComplianceRepo(ABC):
         partner_id: UUID,
         parent_partner_document_id: UUID,
         document_type: DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyParentPartnerDocument:
         pass
 
@@ -138,6 +140,26 @@ class IComplianceRepo(ABC):
         property_id: UUID,
         partner_id: UUID,
         parent_partner_document_id: UUID,
+    ) -> PropertyParentPartnerDocument:
+        pass
+
+    @abstractmethod
+    async def get_all_partner_document_approval_requests_for_given_property(
+        self,
+        property_id: UUID,
+        page_size: int,
+        page_number: int,
+    ) -> PagedResponse[PropertyParentPartnerDocument]:
+        pass
+
+    @abstractmethod
+    async def set_property_parent_partner_document_request_status(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+        request_status: REQUEST_STATUS,
+        admin_id: UUID,
     ) -> PropertyParentPartnerDocument:
         pass
 
@@ -160,6 +182,8 @@ class ComplianceRepo(IComplianceRepo):
             rows, error = await try_except(connection.fetch, sql, property_id, user_id)
             if error:
                 raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException()
             return [PropertyParentDocument(**row) for row in rows]
 
     async def get_all_document_approval_requests_for_given_property_child(
@@ -176,6 +200,8 @@ class ComplianceRepo(IComplianceRepo):
             rows, error = await try_except(connection.fetch, sql, property_id, child_id)
             if error:
                 raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException()
             return [PropertyChildDocument(**row) for row in rows]
 
     async def get_property_parent_document_approval_request_by_document_id(
@@ -195,7 +221,7 @@ class ComplianceRepo(IComplianceRepo):
             )
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Parent document request with id: {parent_doc_id} was not found!",
                 )
@@ -226,7 +252,7 @@ class ComplianceRepo(IComplianceRepo):
             )
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 return new_paged_response(items=[], total=0, page_size=1, page_number=1)
             total_count = rows[0]["total_count"]
             return new_paged_response(
@@ -334,7 +360,7 @@ class ComplianceRepo(IComplianceRepo):
             )
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 return new_paged_response(items=[], total=0, page_size=1, page_number=1)
             total_count = rows[0]["total_count"]
             return new_paged_response(
@@ -350,18 +376,21 @@ class ComplianceRepo(IComplianceRepo):
         child_id: UUID,
         child_document_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyChildDocument:
         sql = """
         INSERT INTO compliance.property_children_documents(
             property_id,
             child_id,
             child_document_id,
-            document_type
+            document_type,
+            point_value
         ) VALUES (
             $1,
             $2,
             $3,
-            $4
+            $4,
+            $5
         ) RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -372,6 +401,7 @@ class ComplianceRepo(IComplianceRepo):
                 child_id,
                 child_document_id,
                 document_type,
+                point_value,
             )
             if error:
                 raise DatabaseException(message=str(error))
@@ -398,7 +428,7 @@ class ComplianceRepo(IComplianceRepo):
             )
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Child document request with id: {child_document_id} was not found!",
                 )
@@ -442,18 +472,21 @@ class ComplianceRepo(IComplianceRepo):
         partner_id: UUID,
         parent_partner_document_id: UUID,
         document_type: DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyParentPartnerDocument:
         sql = """
         INSERT INTO compliance.property_parent_partner_documents(
             property_id,
             partner_id,
             parent_partner_document_id,
-            document_type
+            document_type,
+            point_value
         ) VALUES (
             $1,
             $2,
             $3,
-            $4
+            $4,
+            $5
         ) RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -464,6 +497,7 @@ class ComplianceRepo(IComplianceRepo):
                 partner_id,
                 parent_partner_document_id,
                 document_type,
+                point_value,
             )
             if error:
                 raise DatabaseException(message=str(error))
@@ -489,6 +523,8 @@ class ComplianceRepo(IComplianceRepo):
             )
             if error:
                 raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException
             return [PropertyParentPartnerDocument(**row) for row in rows]
 
     async def get_property_parent_partner_document_approval_request_by_document_id(
@@ -512,8 +548,75 @@ class ComplianceRepo(IComplianceRepo):
             )
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Partner document request with id: {parent_partner_document_id} was not found!",
                 )
             return PropertyParentPartnerDocument(**rows[0])
+
+    async def get_all_partner_document_approval_requests_for_given_property(
+        self,
+        property_id: UUID,
+        page_size: int,
+        page_number: int,
+    ) -> PagedResponse[PropertyParentPartnerDocument]:
+        sql = """
+        SELECT
+          *,
+          COUNT(*) OVER() AS total_count
+        FROM compliance.property_parent_partner_documents
+        WHERE property_id = $1
+        LIMIT $2
+        OFFSET $3;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(
+                connection.fetch,
+                sql,
+                property_id,
+                page_size,
+                calculate_offset(page_size=page_size, page_number=page_number),
+            )
+            if error:
+                raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                return new_paged_response(items=[], total=0, page_size=1, page_number=1)
+            total_count = rows[0]["total_count"]
+            return new_paged_response(
+                items=[PropertyParentPartnerDocument(**row) for row in rows],
+                total=total_count,
+                page_size=page_size,
+                page_number=page_size,
+            )
+
+    async def set_property_parent_partner_document_request_status(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+        request_status: REQUEST_STATUS,
+        admin_id: UUID,
+    ) -> PropertyParentPartnerDocument:
+        sql = """
+        UPDATE compliance.property_parent_partner_documents
+        SET request_status = $1, approved_by = $2
+        WHERE property_id = $3 AND partner_id = $4 AND parent_partner_document_id = $5
+        RETURNING *;
+        """
+        async with self.pool.acquire() as connection:
+            row, error = await try_except(
+                connection.fetchrow,
+                sql,
+                request_status,
+                admin_id,
+                property_id,
+                partner_id,
+                parent_partner_document_id,
+            )
+            if error:
+                raise DatabaseException(message=str(error))
+            if row is None:
+                raise NotFoundException(
+                    message=f"Partner document request: ${parent_partner_document_id} was not found!",
+                )
+            return PropertyParentPartnerDocument(**row)

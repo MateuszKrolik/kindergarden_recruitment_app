@@ -9,3 +9,6 @@ class COMPLIANCE_EVENT(StrEnum):
     PROPERTY_PARENT_PARTNER_DOCUMENT_REQUESTED = (
         "property.parent.partner.document.requested"
     )
+    PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED = (
+        "property.parent.partner.document.approved"
+    )

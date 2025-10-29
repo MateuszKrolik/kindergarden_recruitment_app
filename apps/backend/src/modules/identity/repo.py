@@ -18,7 +18,7 @@ class IIdentityRepo(ABC):
     @abstractmethod
     async def get_parent_condition_keys(
         self,
-        user_id: str,
+        user_id: UUID,
     ) -> ParentConditionKeys:
         pass
 
@@ -33,14 +33,14 @@ class IIdentityRepo(ABC):
     @abstractmethod
     async def get_all_parent_children(
         self,
-        parent_id: str,
+        parent_id: UUID,
     ) -> List[ParentChild]:
         pass
 
     @abstractmethod
     async def get_child_condition_keys(
         self,
-        child_id: str,
+        child_id: UUID,
     ) -> ChildConditionKeys:
         pass
 
@@ -58,7 +58,7 @@ class IdentityRepo(IIdentityRepo):
 
     async def get_parent_condition_keys(
         self,
-        user_id: str,
+        user_id: UUID,
     ) -> ParentConditionKeys:
         sql = """
         SELECT
@@ -74,6 +74,8 @@ class IdentityRepo(IIdentityRepo):
             rows, error = await try_except(connection.fetch, sql, user_id)
             if error:
                 raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException()
             if len(rows) == 0:
                 raise NotFoundException(
                     message=f"Parent with id: {user_id} does not exist!"
@@ -94,7 +96,7 @@ class IdentityRepo(IIdentityRepo):
             rows, error = await try_except(connection.fetch, sql, property_id, user_id)
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"User: {user_id} is not registered to property: {property_id}!",
                 )
@@ -102,7 +104,7 @@ class IdentityRepo(IIdentityRepo):
 
     async def get_all_parent_children(
         self,
-        parent_id: str,
+        parent_id: UUID,
     ) -> List[ParentChild]:
         sql = """
         SELECT *
@@ -113,11 +115,13 @@ class IdentityRepo(IIdentityRepo):
             rows, error = await try_except(connection.fetch, sql, parent_id)
             if error:
                 raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException()
             return [ParentChild(**row) for row in rows]
 
     async def get_child_condition_keys(
         self,
-        child_id: str,
+        child_id: UUID,
     ) -> ChildConditionKeys:
         sql = """
         SELECT
@@ -131,7 +135,7 @@ class IdentityRepo(IIdentityRepo):
             rows, error = await try_except(connection.fetch, sql, child_id)
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Child with id: {child_id} does not exist!"
                 )
@@ -155,7 +159,7 @@ class IdentityRepo(IIdentityRepo):
             rows, error = await try_except(connection.fetch, sql, partner_id)
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Partner with id: {partner_id} does not exist!"
                 )

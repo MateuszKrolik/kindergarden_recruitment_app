@@ -18,12 +18,14 @@ INSERT INTO compliance.property_children_documents(
   property_id,
   child_id,
   child_document_id,
-  document_type
+  document_type,
+  point_value
 ) VALUES (
   'b2979118-9963-4b97-aa56-c9d25a8b4acf',
   '9e4f732a-3f0d-4348-8ade-b83e1e9a6346',
   'e0a4b370-449b-42dc-a821-9f3d66f376d4',
-  'disability_proof'
+  'disability_proof',
+  11
 );
 
 COMMIT;

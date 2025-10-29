@@ -8,6 +8,7 @@ from src.shared.types.modules.compliance.event import COMPLIANCE_EVENT
 from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
     PropertyParentDocument,
+    PropertyParentPartnerDocument,
 )
 from src.shared.types.modules.property_management.event import PROPERTY_MANAGEMENT_EVENT
 import socketio
@@ -17,6 +18,7 @@ class PropertyManagementEventHandler(EventHandler):
     EVENT_MAP = {
         COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED: PropertyParentDocument,
         COMPLIANCE_EVENT.PROPERTY_CHILD_DOCUMENT_APPROVED: PropertyChildDocument,
+        COMPLIANCE_EVENT.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED: PropertyParentPartnerDocument,
     }
 
     def __init__(
@@ -29,18 +31,17 @@ class PropertyManagementEventHandler(EventHandler):
         self.svc = svc
         self.socket_server = socket_server
 
-    @EventHandler.handle.register
+    @EventHandler.handle.register  # type: ignore[attr-defined]
     async def _(self, event: PropertyParentDocument):
         property_children = await self.svc.get_all_property_children_for_given_parent(
             event.property_id,
             event.user_id,
         )
-        children_ids = set(pc.child_id for pc in property_children)
         increment_result = (
             await self.svc.increment_property_children_points_for_given_parent(
                 property_id=event.property_id,
                 point_value=event.point_value,
-                children_ids=children_ids,
+                children_ids=[pc.child_id for pc in property_children],
             )
         )
         await self.socket_server.emit(
@@ -52,7 +53,29 @@ class PropertyManagementEventHandler(EventHandler):
             [m.model_dump(mode="json") for m in increment_result],
         )
 
-    @EventHandler.handle.register
+    @EventHandler.handle.register  # type: ignore[attr-defined]
+    async def _(self, event: PropertyParentPartnerDocument):
+        property_children = await self.svc.get_all_property_children_for_given_parent(
+            event.property_id,
+            event.partner_id,
+        )
+        increment_result = (
+            await self.svc.increment_property_children_points_for_given_parent(
+                property_id=event.property_id,
+                point_value=event.point_value,
+                children_ids=[pc.child_id for pc in property_children],
+            )
+        )
+        await self.socket_server.emit(
+            COMPLIANCE_EVENT.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
+            event.model_dump(mode="json"),
+        )
+        await self.socket_server.emit(
+            PROPERTY_MANAGEMENT_EVENT.PROPERTY_CHILDREN_UPDATED,
+            [m.model_dump(mode="json") for m in increment_result],
+        )
+
+    @EventHandler.handle.register  # type: ignore[attr-defined]
     async def _(self, event: PropertyChildDocument):
         async with asyncio.TaskGroup() as tg:
             points_task = tg.create_task(

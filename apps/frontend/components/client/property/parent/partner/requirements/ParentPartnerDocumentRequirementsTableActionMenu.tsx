@@ -146,6 +146,7 @@ export const ParentPartnerDocumentRequirementsTableActionMenu = ({
                       partnerDoc.id,
                       {
                         document_type: partnerDoc.document_type,
+                        point_value: requirement.point_value,
                       },
                     );
                   if (error) {

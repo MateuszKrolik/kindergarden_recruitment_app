@@ -35,53 +35,55 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
+import AdminPropertyParentPartnerDocumentTableActionMenu from "./AdminPropertyParentPartnerDocumentTableActionMenu";
 import { COMPLIANCE_EVENTS } from "@/socket/events/modules/compliance";
 import socket from "@/socket";
 import { ApiResponse } from "@/types/response";
 import {
-  PagedResponse_PropertyChildDocument,
-  PropertyChildDocument,
+  PagedResponse_PropertyParentPartnerDocument,
+  PropertyParentPartnerDocument,
 } from "@/types/modules/compliance/model";
 import { REQUEST_STATUS } from "@/types/modules/compliance/enum";
-import AdminPropertyChildDocumentTableActionMenu from "./AdminPropertyChildDocumentTableActionMenu";
 
-interface AdminPropertyChildrenDocumentTableProps {
+interface AdminPropertyParentPartnerDocumentTableProps {
   jwt: string;
   propertyId: string;
   adminId: string;
-  getAllChildDocumentApprovalRequestsForGivenProperty(
+  getAllPartnerDocumentApprovalRequestsForGivenProperty(
     jwt: string,
     propertyId: string,
     pageSize: number,
     pageNumber: number,
-  ): Promise<ApiResponse<PagedResponse_PropertyChildDocument>>;
-  setPropertyChildDocumentApprovalRequestStatus(
+  ): Promise<ApiResponse<PagedResponse_PropertyParentPartnerDocument>>;
+  setPropertyParentPartnerDocumentApprovalRequestStatus(
     jwt: string,
     propertyId: string,
-    childId: string,
-    childDocumentId: string,
+    partnerId: string,
+    parentPartnerDocumentId: string,
     requestStatus: REQUEST_STATUS,
-  ): Promise<ApiResponse<PropertyChildDocument>>;
-  getChildDocumentURLByDocumentID(
+  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
+  getParentPartnerDocumentURLByDocumentID(
     jwt: string,
     documentId: string,
   ): Promise<ApiResponse<string>>;
 }
 
-export default function AdminPropertyChildrenDocumentTable({
+export default function AdminPropertyParentPartnerDocumentTable({
   jwt,
   propertyId,
   adminId,
-  getAllChildDocumentApprovalRequestsForGivenProperty,
-  setPropertyChildDocumentApprovalRequestStatus,
-  getChildDocumentURLByDocumentID,
-}: AdminPropertyChildrenDocumentTableProps) {
+  getAllPartnerDocumentApprovalRequestsForGivenProperty,
+  setPropertyParentPartnerDocumentApprovalRequestStatus,
+  getParentPartnerDocumentURLByDocumentID,
+}: AdminPropertyParentPartnerDocumentTableProps) {
   const searchParams = useSearchParams();
   const pageNumberParam = searchParams.get("pageNumber");
   const pageNumber = parseInt(pageNumberParam || "1");
   const pageSizeParam = searchParams.get("pageSize");
   const pageSize = parseInt(pageSizeParam || "1");
-  const [result, setResult] = useState<Array<PropertyChildDocument>>([]);
+  const [result, setResult] = useState<Array<PropertyParentPartnerDocument>>(
+    [],
+  );
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -96,7 +98,7 @@ export default function AdminPropertyChildrenDocumentTable({
     async (size: number, pageNumber: number) => {
       setIsLoading(true);
       const { data: result, error } =
-        await getAllChildDocumentApprovalRequestsForGivenProperty(
+        await getAllPartnerDocumentApprovalRequestsForGivenProperty(
           jwt,
           propertyId,
           size,
@@ -115,25 +117,25 @@ export default function AdminPropertyChildrenDocumentTable({
       setTotalPages(result.total_pages);
       setIsLoading(false);
     },
-    [jwt, propertyId, getAllChildDocumentApprovalRequestsForGivenProperty],
+    [jwt, propertyId, getAllPartnerDocumentApprovalRequestsForGivenProperty],
   );
 
-  const columns: ColumnDef<PropertyChildDocument>[] = [
+  const columns: ColumnDef<PropertyParentPartnerDocument>[] = [
     {
-      accessorKey: "child_id",
+      accessorKey: "partner_id",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Child ID
+            Parent User ID
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("child_id")}</div>
+        <div className="lowercase">{row.getValue("partner_id")}</div>
       ),
     },
     {
@@ -211,21 +213,23 @@ export default function AdminPropertyChildrenDocumentTable({
         const request = row.original;
 
         return (
-          <AdminPropertyChildDocumentTableActionMenu
+          <AdminPropertyParentPartnerDocumentTableActionMenu
             jwt={jwt}
             adminId={adminId}
             request={request}
-            setPropertyChildDocumentApprovalRequestStatus={
-              setPropertyChildDocumentApprovalRequestStatus
+            setPropertyParentPartnerDocumentApprovalRequestStatus={
+              setPropertyParentPartnerDocumentApprovalRequestStatus
             }
-            getChildDocumentURLByDocumentID={getChildDocumentURLByDocumentID}
+            getParentPartnerDocumentURLByDocumentID={
+              getParentPartnerDocumentURLByDocumentID
+            }
           />
         );
       },
     },
   ];
 
-  const table = useReactTable<PropertyChildDocument>({
+  const table = useReactTable<PropertyParentPartnerDocument>({
     data: result,
     columns,
     onSortingChange: setSorting,
@@ -248,10 +252,11 @@ export default function AdminPropertyChildrenDocumentTable({
   }, [loadProperties, pageNumber, pageSize]);
 
   useEffect(() => {
-    function onRequestApproved(event: PropertyChildDocument) {
+    function onRequestApproved(event: PropertyParentPartnerDocument) {
       setResult((prev) => {
         const existingIndex = prev.findIndex(
-          (doc) => doc.child_document_id === event.child_document_id,
+          (doc) =>
+            doc.parent_partner_document_id === event.parent_partner_document_id,
         );
 
         if (existingIndex !== -1) {
@@ -268,34 +273,34 @@ export default function AdminPropertyChildrenDocumentTable({
       });
 
       toast.success(
-        `Document: ${event.child_document_id} was just approved! 🎉`,
+        `Document: ${event.parent_partner_document_id} was just approved! 🎉`,
       );
     }
 
-    function onRequestSent(event: PropertyChildDocument) {
+    function onRequestSent(event: PropertyParentPartnerDocument) {
       setResult((prev) => [...prev, event]);
       toast.success(
-        `Document: ${event.child_document_id} was just sent for approval!`,
+        `Document: ${event.parent_partner_document_id} was just sent for approval!`,
       );
     }
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_APPROVED,
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
       onRequestApproved,
     );
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_REQUESTED,
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_REQUESTED,
       onRequestSent,
     );
 
     return () => {
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_APPROVED,
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
         onRequestApproved,
       );
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_REQUESTED,
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_REQUESTED,
         onRequestSent,
       );
     };

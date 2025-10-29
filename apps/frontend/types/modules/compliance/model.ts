@@ -14,3 +14,6 @@ export type PagedResponse_PropertyChildDocument =
 
 export type PagedResponse_PropertyParentDocument =
   components["schemas"]["PagedResponse_PropertyParentDocument_"];
+
+export type PagedResponse_PropertyParentPartnerDocument =
+  components["schemas"]["PagedResponse_PropertyParentPartnerDocument_"];

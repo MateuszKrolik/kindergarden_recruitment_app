@@ -18,7 +18,7 @@ class IReportingRepo(ABC):
         self,
         user_id: UUID,
         document_type: DOCUMENT_TYPE,
-    ) -> [ParentDocument]:
+    ) -> ParentDocument:
         pass
 
     @abstractmethod
@@ -78,6 +78,13 @@ class IReportingRepo(ABC):
     ) -> ParentPartnerDocument:
         pass
 
+    @abstractmethod
+    async def get_parent_partner_document_file_path_by_document_id(
+        self,
+        doc_id: UUID,
+    ) -> str:
+        pass
+
 
 class ReportingRepo(IReportingRepo):
     def __init__(self, pool: Pool) -> None:
@@ -99,7 +106,7 @@ class ReportingRepo(IReportingRepo):
             )
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Document with type: ${document_type} does not exist for parent: {user_id}!",
                 )
@@ -118,7 +125,7 @@ class ReportingRepo(IReportingRepo):
             rows, error = await try_except(connection.fetch, sql, doc_id)
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Parent document with id: {doc_id} was not found!",
                 )
@@ -165,8 +172,8 @@ class ReportingRepo(IReportingRepo):
                 connection.fetch, sql, child_id, document_type
             )
             if error:
-                raise DatabaseException(code=500, message=str(error))
-            if len(rows) == 0:
+                raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Document with type: ${document_type} does not exist for child: {child_id}!",
                 )
@@ -211,7 +218,7 @@ class ReportingRepo(IReportingRepo):
             rows, error = await try_except(connection.fetch, sql, doc_id)
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Child document with id: {doc_id} was not found!",
                 )
@@ -233,7 +240,7 @@ class ReportingRepo(IReportingRepo):
             )
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Document with type: ${document_type} does not exist for parent partner: {partner_id}!",
                 )
@@ -264,3 +271,22 @@ class ReportingRepo(IReportingRepo):
                     message=f"Document: ${document_type} was NOT saved successfully for parent partner: ${partner_id}!",
                 )
             return ParentPartnerDocument(**row)
+
+    async def get_parent_partner_document_file_path_by_document_id(
+        self,
+        doc_id: UUID,
+    ) -> str:
+        sql = """
+        SELECT file_path
+        FROM reporting.parent_partner_documents
+        WHERE id = $1;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(connection.fetch, sql, doc_id)
+            if error:
+                raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException(
+                    message=f"Parent document with id: {doc_id} was not found!",
+                )
+            return rows[0]["file_path"]

@@ -5,6 +5,7 @@ import { ApiResponse } from "@/types/response";
 import {
   PagedResponse_PropertyChildDocument,
   PagedResponse_PropertyParentDocument,
+  PagedResponse_PropertyParentPartnerDocument,
   PropertyChildDocument,
   PropertyParentDocument,
   PropertyParentPartnerDocument,
@@ -300,6 +301,56 @@ export async function getPropertyParentPartnerDocumentApprovalRequestByDocumentI
           property_id: propertyId,
           partner_id: partnerId,
           parent_partner_document_id: parentPartnerDocumentId,
+        },
+      },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function getAllPartnerDocumentApprovalRequestsForGivenProperty(
+  jwt: string,
+  propertyId: string,
+  pageSize: number,
+  pageNumber: number,
+): Promise<ApiResponse<PagedResponse_PropertyParentPartnerDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET(
+    "/properties/{property_id}/parent-partner-document-requests",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+        },
+        query: {
+          page_size: pageSize,
+          page_number: pageNumber,
+        },
+      },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function setPropertyParentPartnerDocumentApprovalRequestStatus(
+  jwt: string,
+  propertyId: string,
+  partnerId: string,
+  parentPartnerDocumentId: string,
+  requestStatus: REQUEST_STATUS,
+): Promise<ApiResponse<PropertyParentPartnerDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.PATCH(
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/{request_status}",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+          partner_id: partnerId,
+          parent_partner_document_id: parentPartnerDocumentId,
+          request_status: requestStatus,
         },
       },
     },

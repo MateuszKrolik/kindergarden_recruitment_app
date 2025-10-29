@@ -79,6 +79,10 @@ class IReportingSvc(ABC):
     ) -> ParentPartnerDocument:
         pass
 
+    @abstractmethod
+    async def get_parent_partner_document_url_by_document_id(self, doc_id: UUID) -> str:
+        pass
+
 
 class ReportingSvc(IReportingSvc):
     def __init__(self, repo: IReportingRepo, s3_repo: IS3Repository) -> None:
@@ -171,3 +175,9 @@ class ReportingSvc(IReportingSvc):
         return await self.repo.save_parent_partner_document(
             partner_id=partner_id, document_type=document_type, file_path=file_path
         )
+
+    async def get_parent_partner_document_url_by_document_id(self, doc_id: UUID) -> str:
+        path = await self.repo.get_parent_partner_document_file_path_by_document_id(
+            doc_id=doc_id
+        )
+        return await self.get_document_url_by_file_path(path=path)

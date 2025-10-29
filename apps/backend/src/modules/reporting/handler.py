@@ -186,3 +186,19 @@ class ReportingHandler:
             return await self.svc.save_parent_partner_document(
                 partner_id=partner_id, document_type=document_type, file=file
             )
+
+        @self.router.get(
+            "/parent-partner-documents/{doc_id}",
+            status_code=200,
+            responses={
+                200: {"model": str},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def get_parent_partner_document_url_by_document_id(
+            doc_id: UUID,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> str:
+            return await self.svc.get_parent_partner_document_url_by_document_id(
+                doc_id=doc_id
+            )

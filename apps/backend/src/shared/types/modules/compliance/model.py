@@ -23,6 +23,7 @@ class PropertyChildDocument(BaseModel):
     request_status: REQUEST_STATUS
     approved_by: Optional[UUID]
     document_type: CHILD_DOCUMENT_TYPE
+    point_value: int
 
 
 class PropertyParentPartnerDocument(BaseModel):
@@ -32,3 +33,4 @@ class PropertyParentPartnerDocument(BaseModel):
     request_status: REQUEST_STATUS
     approved_by: Optional[UUID]
     document_type: DOCUMENT_TYPE
+    point_value: int

@@ -1,13 +1,13 @@
 import asyncio
 import json
 from abc import ABC
-from functools import singledispatchmethod
 from logging import getLogger
 from typing import Any, Dict, Optional
 
 import redis.asyncio as redis
 from src.shared.types.event import EventEnvelope
 from src.shared.utils.query import try_except
+from functools import singledispatchmethod
 
 
 class EventHandler(ABC):
@@ -45,12 +45,12 @@ class EventHandler(ABC):
             self.logger.info(
                 f"Received event '{event_name}':\n{json.dumps(event_dict, indent=2)}"
             )
-            envelope = EventEnvelope(**event_dict)
+            envelope: EventEnvelope = EventEnvelope(**event_dict)
             event = event_type(**envelope.payload)
             _, error = await try_except(self.handle, event)
             if error:
                 self.logger.error(
-                    f"Error occurred while processing event: '{event_name}'",
+                    f"Error occurred while processing event '{event_name}'",
                     exc_info=error,
                 )
 

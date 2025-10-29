@@ -96,6 +96,7 @@ class IComplianceSvc(ABC):
         child_id: UUID,
         child_document_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyChildDocument:
         pass
 
@@ -126,6 +127,7 @@ class IComplianceSvc(ABC):
         partner_id: UUID,
         parent_partner_document_id: UUID,
         document_type: DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyParentPartnerDocument:
         pass
 
@@ -143,6 +145,26 @@ class IComplianceSvc(ABC):
         property_id: UUID,
         partner_id: UUID,
         parent_partner_document_id: UUID,
+    ) -> PropertyParentPartnerDocument:
+        pass
+
+    @abstractmethod
+    async def get_all_partner_document_approval_requests_for_given_property(
+        self,
+        property_id: UUID,
+        page_size: int,
+        page_number: int,
+    ) -> PagedResponse[PropertyParentPartnerDocument]:
+        pass
+
+    @abstractmethod
+    async def set_property_parent_partner_document_request_status(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+        request_status: REQUEST_STATUS,
+        admin_id: UUID,
     ) -> PropertyParentPartnerDocument:
         pass
 
@@ -276,12 +298,14 @@ class ComplianceSvc(IComplianceSvc):
         child_id: UUID,
         child_document_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyChildDocument:
         data = await self.repo.send_property_child_document_approval_request(
             property_id=property_id,
             child_id=child_id,
             child_document_id=child_document_id,
             document_type=document_type,
+            point_value=point_value,
         )
         _, socket_error = await try_except(
             self.socket_server.emit,
@@ -343,12 +367,14 @@ class ComplianceSvc(IComplianceSvc):
         partner_id: UUID,
         parent_partner_document_id: UUID,
         document_type: DOCUMENT_TYPE,
+        point_value: int,
     ) -> PropertyParentPartnerDocument:
         data = await self.repo.send_property_parent_partner_document_approval_request(
             property_id=property_id,
             partner_id=partner_id,
             parent_partner_document_id=parent_partner_document_id,
             document_type=document_type,
+            point_value=point_value,
         )
         _, socket_error = await try_except(
             self.socket_server.emit,
@@ -379,6 +405,47 @@ class ComplianceSvc(IComplianceSvc):
             partner_id=partner_id,
             parent_partner_document_id=parent_partner_document_id,
         )
+
+    async def get_all_partner_document_approval_requests_for_given_property(
+        self,
+        property_id: UUID,
+        page_size: int,
+        page_number: int,
+    ) -> PagedResponse[PropertyParentPartnerDocument]:
+        return await self.repo.get_all_partner_document_approval_requests_for_given_property(
+            property_id=property_id, page_size=page_size, page_number=page_number
+        )
+
+    async def set_property_parent_partner_document_request_status(
+        self,
+        property_id: UUID,
+        partner_id: UUID,
+        parent_partner_document_id: UUID,
+        request_status: REQUEST_STATUS,
+        admin_id: UUID,
+    ) -> PropertyParentPartnerDocument:
+        is_admin = await self.identity_client.is_property_admin(
+            property_id=property_id, user_id=admin_id
+        )
+        if not is_admin:
+            raise ForbiddenException(
+                message="Insufficient permissions - required role: 'admin'!"
+            )
+        data = await self.repo.set_property_parent_partner_document_request_status(
+            property_id=property_id,
+            partner_id=partner_id,
+            parent_partner_document_id=parent_partner_document_id,
+            request_status=request_status,
+            admin_id=admin_id,
+        )
+        event = create_event(
+            type=COMPLIANCE_EVENT.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
+            source=__name__,
+            version="1.0",
+            payload=data,
+        )
+        await self._publish_event(event)
+        return data
 
     async def _publish_event(self, event: EventEnvelope[T]):
         event_name = event.type

@@ -191,6 +191,7 @@ class ComplianceHandler:
                 child_id=child_id,
                 child_document_id=child_document_id,
                 document_type=body.document_type,
+                point_value=body.point_value,
             )
 
         @self.router.get(
@@ -259,6 +260,7 @@ class ComplianceHandler:
                     partner_id=partner_id,
                     parent_partner_document_id=parent_partner_document_id,
                     document_type=body.document_type,
+                    point_value=body.point_value,
                 )
             )
 
@@ -297,4 +299,47 @@ class ComplianceHandler:
                 property_id=property_id,
                 partner_id=partner_id,
                 parent_partner_document_id=parent_partner_document_id,
+            )
+
+        @self.router.get(
+            "/properties/{property_id}/parent-partner-document-requests",
+            status_code=status.HTTP_200_OK,
+            responses={
+                200: {"model": PagedResponse[PropertyParentPartnerDocument]},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def get_all_partner_document_approval_requests_for_given_property(
+            property_id: UUID,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+            page_size: int = Query(1, ge=1),
+            page_number: int = Query(1, ge=1),
+        ) -> PagedResponse[PropertyParentPartnerDocument]:
+            return await self.svc.get_all_partner_document_approval_requests_for_given_property(
+                property_id=property_id, page_size=page_size, page_number=page_number
+            )
+
+        @self.router.patch(
+            "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/{request_status}",
+            status_code=status.HTTP_200_OK,
+            responses={
+                200: {"model": PropertyParentPartnerDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def set_property_parent_partner_document_request_status(
+            property_id: UUID,
+            partner_id: UUID,
+            parent_partner_document_id: UUID,
+            request_status: REQUEST_STATUS,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> PropertyParentPartnerDocument:
+            if request_status not in REQUEST_STATUS:
+                raise ValidationException(message="Invalid request status!")
+            return await self.svc.set_property_parent_partner_document_request_status(
+                property_id=property_id,
+                partner_id=partner_id,
+                parent_partner_document_id=parent_partner_document_id,
+                request_status=request_status,
+                admin_id=user_result.get("id"),
             )

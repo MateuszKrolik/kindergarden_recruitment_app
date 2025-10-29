@@ -28,28 +28,28 @@ class IPropertyManagementRepo(ABC):
     @abstractmethod
     async def get_all_property_parent_document_requirements(
         self,
-        property_id: str,
+        property_id: UUID,
     ) -> List[PropertyParentDocumentRequirement]:
         pass
 
     @abstractmethod
     async def get_all_property_children(
         self,
-        property_id: str,
+        property_id: UUID,
     ) -> List[PropertyChild]:
         pass
 
     @abstractmethod
     async def get_all_property_children_document_requirements(
         self,
-        property_id: str,
+        property_id: UUID,
     ) -> List[PropertyChildDocumentRequirement]:
         pass
 
     @abstractmethod
     async def get_all_property_children_paged(
         self,
-        property_id: str,
+        property_id: UUID,
         page_size: int,
         page_number: int,
     ) -> PagedResponse[PropertyChild]:
@@ -126,7 +126,7 @@ class PropertyManagementRepo(IPropertyManagementRepo):
 
     async def get_all_property_parent_document_requirements(
         self,
-        property_id: str,
+        property_id: UUID,
     ) -> List[PropertyParentDocumentRequirement]:
         sql = """
           SELECT *
@@ -137,6 +137,8 @@ class PropertyManagementRepo(IPropertyManagementRepo):
             rows, error = await try_except(connection.fetch, sql, property_id)
             if error:
                 raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException()
             requirements = [
                 PropertyParentDocumentRequirement(**dict(row)) for row in rows
             ]
@@ -144,7 +146,7 @@ class PropertyManagementRepo(IPropertyManagementRepo):
 
     async def get_all_property_children(
         self,
-        property_id: str,
+        property_id: UUID,
     ) -> List[PropertyChild]:
         sql = """
         SELECT *
@@ -155,11 +157,13 @@ class PropertyManagementRepo(IPropertyManagementRepo):
             rows, error = await try_except(connection.fetch, sql, property_id)
             if error:
                 raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException()
             return [PropertyChild(**row) for row in rows]
 
     async def get_all_property_children_document_requirements(
         self,
-        property_id: str,
+        property_id: UUID,
     ) -> List[PropertyChildDocumentRequirement]:
         sql = """
         SELECT *
@@ -170,11 +174,13 @@ class PropertyManagementRepo(IPropertyManagementRepo):
             rows, error = await try_except(connection.fetch, sql, property_id)
             if error:
                 raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException()
             return [PropertyChildDocumentRequirement(**row) for row in rows]
 
     async def get_all_property_children_paged(
         self,
-        property_id: str,
+        property_id: UUID,
         page_size: int,
         page_number: int,
     ) -> PagedResponse[PropertyChild]:
@@ -197,7 +203,7 @@ class PropertyManagementRepo(IPropertyManagementRepo):
             )
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 return new_paged_response(
                     [], 0, page_number=page_number, page_size=page_size
                 )
@@ -232,6 +238,8 @@ class PropertyManagementRepo(IPropertyManagementRepo):
             )
             if error:
                 raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException()
             return [PropertyChild(**row) for row in rows]
 
     async def get_point_value_for_given_property_child_document_by_document_type(
@@ -252,8 +260,8 @@ class PropertyManagementRepo(IPropertyManagementRepo):
                 document_type,  # TODO: SQL index on document_type
             )
             if error:
-                raise DatabaseException(code=500, message=str(error))
-            if len(rows) == 0:
+                raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Document type: ${document_type} not found in property: ${property_id}!",
                 )
@@ -273,7 +281,7 @@ class PropertyManagementRepo(IPropertyManagementRepo):
             rows, error = await try_except(connection.fetch, sql, property_id, child_id)
             if error:
                 raise DatabaseException(message=str(error))
-            if len(rows) == 0:
+            if rows is None or len(rows) == 0:
                 raise NotFoundException(
                     message=f"Child with id {child_id} is not registered to property: {property_id}!",
                 )

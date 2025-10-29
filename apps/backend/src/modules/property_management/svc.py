@@ -34,35 +34,35 @@ class IPropertyManagementSvc(ABC):
 
     @abstractmethod
     async def get_document_requirements_for_given_property_parent(
-        self, property_id: str, user_id: str
+        self, property_id: UUID, user_id: UUID
     ) -> List[PropertyParentDocumentRequirement]:
         pass
 
     @abstractmethod
     async def get_all_property_children_for_given_parent(
-        self, property_id: str, parent_id: str
+        self, property_id: UUID, parent_id: UUID
     ) -> List[PropertyChild]:
         pass
 
     @abstractmethod
     async def get_all_property_children(
         self,
-        property_id: str,
+        property_id: UUID,
     ) -> List[PropertyChild]:
         pass
 
     @abstractmethod
     async def get_document_requirements_for_given_property_child(
         self,
-        property_id: str,
-        child_id: str,
+        property_id: UUID,
+        child_id: UUID,
     ) -> List[PropertyChildDocumentRequirement]:
         pass
 
     @abstractmethod
     async def get_all_property_children_paged(
         self,
-        property_id: str,
+        property_id: UUID,
         page_size: int,
         page_number: int,
     ) -> PagedResponse[PropertyChild]:
@@ -118,12 +118,12 @@ class PropertyManagementSvc(IPropertyManagementSvc):
 
     async def get_all_property_children(
         self,
-        property_id: str,
+        property_id: UUID,
     ) -> List[PropertyChild]:
         return await self.repo.get_all_property_children(property_id=property_id)
 
     async def get_document_requirements_for_given_property_parent(
-        self, property_id: str, user_id: str
+        self, property_id: UUID, user_id: UUID
     ) -> List[PropertyParentDocumentRequirement]:
         async with asyncio.TaskGroup() as tg:
             all_req_task = tg.create_task(
@@ -143,7 +143,7 @@ class PropertyManagementSvc(IPropertyManagementSvc):
         return active_reqs
 
     async def get_all_property_children_for_given_parent(
-        self, property_id: str, parent_id: str
+        self, property_id: UUID, parent_id: UUID
     ) -> List[PropertyChild]:
         async with asyncio.TaskGroup() as tg:
             prop_children_task = tg.create_task(
@@ -159,8 +159,8 @@ class PropertyManagementSvc(IPropertyManagementSvc):
 
     async def get_document_requirements_for_given_property_child(
         self,
-        property_id: str,
-        child_id: str,
+        property_id: UUID,
+        child_id: UUID,
     ) -> List[PropertyChildDocumentRequirement]:
         async with asyncio.TaskGroup() as tg:
             all_req_task = tg.create_task(
@@ -179,7 +179,7 @@ class PropertyManagementSvc(IPropertyManagementSvc):
 
     async def get_all_property_children_paged(
         self,
-        property_id: str,
+        property_id: UUID,
         page_size: int,
         page_number: int,
     ) -> PagedResponse[PropertyChild]:

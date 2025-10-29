@@ -143,6 +143,7 @@ export const ChildrenDocumentRequirementsTableActionMenu = ({
                       childDoc.id,
                       {
                         document_type: childDoc.document_type,
+                        point_value: requirement.point_value,
                       },
                     );
                   if (error) {

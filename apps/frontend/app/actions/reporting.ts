@@ -155,3 +155,15 @@ export async function saveParentPartnerDocument(
   if (error) return { data: undefined, error: error };
   return { data: data, error: undefined };
 }
+
+export async function getParentPartnerDocumentURLByDocumentID(
+  jwt: string,
+  documentId: string,
+): Promise<ApiResponse<string>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.GET("/parent-partner-documents/{doc_id}", {
+    params: { path: { doc_id: documentId } },
+  });
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}

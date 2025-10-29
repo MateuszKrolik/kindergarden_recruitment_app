@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS compliance.property_children_documents(
     'rejected'
   )) DEFAULT 'pending',
   approved_by uuid,
+  point_value INTEGER NOT NULL,
   PRIMARY KEY (property_id, child_id, child_document_id)
 );
 
@@ -57,6 +58,7 @@ CREATE TABLE IF NOT EXISTS compliance.property_parent_partner_documents(
     'rejected'
   )) DEFAULT 'pending',
   approved_by uuid,
+  point_value INTEGER NOT NULL,
   PRIMARY KEY (property_id, partner_id, parent_partner_document_id)
 );
 
