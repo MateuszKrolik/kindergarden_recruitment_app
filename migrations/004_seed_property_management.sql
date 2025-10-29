@@ -93,17 +93,21 @@ INSERT INTO property_management.property_parent_document_requirements(
 
 INSERT INTO property_management.property_children(
   property_id,
+  parent_id,
   child_id
 ) VALUES (
   'b2979118-9963-4b97-aa56-c9d25a8b4acf',
+  '6ceaa734-b828-41ba-8351-a0198f64c089',
   '9e4f732a-3f0d-4348-8ade-b83e1e9a6346'
 );
 
 INSERT INTO property_management.property_children(
   property_id,
+  parent_id,
   child_id
 ) VALUES (
   'b2979118-9963-4b97-aa56-c9d25a8b4acf',
+  '6ceaa734-b828-41ba-8351-a0198f64c089',
   'd6b6c283-fdaa-4379-b7fd-b431fd668656'
 );
 

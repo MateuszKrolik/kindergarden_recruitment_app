@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import List
 from uuid import UUID
 
 from src.modules.identity.repo import IIdentityRepo
 from src.shared.types.modules.identity.enum import PROPERTY_USER_ROLE
 from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
-    ParentChild,
     ParentConditionKeys,
     PropertyUser,
 )
@@ -16,7 +14,7 @@ class IIdentitySvc(ABC):
     @abstractmethod
     async def get_parent_condition_keys(
         self,
-        user_id: str,
+        user_id: UUID,
     ) -> ParentConditionKeys:
         pass
 
@@ -29,16 +27,9 @@ class IIdentitySvc(ABC):
         pass
 
     @abstractmethod
-    async def get_all_parent_children(
-        self,
-        parent_id: str,
-    ) -> List[ParentChild]:
-        pass
-
-    @abstractmethod
     async def get_child_condition_keys(
         self,
-        child_id: str,
+        child_id: UUID,
     ) -> ChildConditionKeys:
         pass
 
@@ -64,7 +55,7 @@ class IdentitySvc(IIdentitySvc):
 
     async def get_parent_condition_keys(
         self,
-        user_id: str,
+        user_id: UUID,
     ) -> ParentConditionKeys:
         return await self.repo.get_parent_condition_keys(user_id)
 
@@ -77,15 +68,9 @@ class IdentitySvc(IIdentitySvc):
             property_id=property_id, user_id=user_id
         )
 
-    async def get_all_parent_children(
-        self,
-        parent_id: str,
-    ) -> List[ParentChild]:
-        return await self.repo.get_all_parent_children(parent_id=parent_id)
-
     async def get_child_condition_keys(
         self,
-        child_id: str,
+        child_id: UUID,
     ) -> ChildConditionKeys:
         return await self.repo.get_child_condition_keys(child_id=child_id)
 

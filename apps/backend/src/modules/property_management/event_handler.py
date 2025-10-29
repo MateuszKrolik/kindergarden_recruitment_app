@@ -1,5 +1,3 @@
-import asyncio
-
 from src.modules.property_management.svc import IPropertyManagementSvc
 
 import redis.asyncio as redis
@@ -77,25 +75,14 @@ class PropertyManagementEventHandler(EventHandler):
 
     @EventHandler.handle.register  # type: ignore[attr-defined]
     async def _(self, event: PropertyChildDocument):
-        async with asyncio.TaskGroup() as tg:
-            points_task = tg.create_task(
-                self.svc.get_point_value_for_given_property_child_document_by_document_type(
-                    event.property_id,
-                    event.document_type,
-                )
-            )
-            property_child_task = tg.create_task(
-                self.svc.get_property_child_by_id(
-                    event.property_id,
-                    event.child_id,
-                )
-            )
-        points = points_task.result()
-        property_child = property_child_task.result()
+        property_child = await self.svc.get_property_child_by_id(
+            event.property_id,
+            event.child_id,
+        )
         increment_result = (
             await self.svc.increment_property_children_points_for_given_parent(
                 property_id=event.property_id,
-                point_value=points,
+                point_value=event.point_value,
                 children_ids=[property_child.child_id],
             )
         )

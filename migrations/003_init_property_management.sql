@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS property_management.property_children_document_requir
 
 CREATE TABLE IF NOT EXISTS property_management.property_children(
   property_id uuid NOT NULL,
+  parent_id uuid NOT NULL,
   child_id uuid NOT NULL,
   points INTEGER DEFAULT 0,
   approved BOOLEAN DEFAULT false,

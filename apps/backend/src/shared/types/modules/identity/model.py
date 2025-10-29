@@ -18,11 +18,6 @@ class PropertyUser(BaseModel):
     role: PROPERTY_USER_ROLE
 
 
-class ParentChild(BaseModel):
-    parent_id: UUID
-    child_id: UUID
-
-
 class ChildConditionKeys(BaseModel):
     has_disability: bool
     is_from_single_parent_family: bool

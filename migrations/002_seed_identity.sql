@@ -37,38 +37,26 @@ INSERT INTO identity.parent_user_details(
 
 INSERT INTO identity.children(
   id,
+  parent_id,
   has_disability,
   is_from_single_parent_family
 ) VALUES (
   '9e4f732a-3f0d-4348-8ade-b83e1e9a6346',
+  '6ceaa734-b828-41ba-8351-a0198f64c089',
   true,
   true
 );
 
-INSERT INTO identity.parent_children(
-  parent_id,
-  child_id
-) VALUES (
-  '6ceaa734-b828-41ba-8351-a0198f64c089',
-  '9e4f732a-3f0d-4348-8ade-b83e1e9a6346'
-);
-
 INSERT INTO identity.children(
   id,
+  parent_id,
   has_disability,
   is_from_single_parent_family
 ) VALUES (
   'd6b6c283-fdaa-4379-b7fd-b431fd668656',
+  '6ceaa734-b828-41ba-8351-a0198f64c089',
   true,
   false
-);
-
-INSERT INTO identity.parent_children(
-  parent_id,
-  child_id
-) VALUES (
-  '6ceaa734-b828-41ba-8351-a0198f64c089',
-  'd6b6c283-fdaa-4379-b7fd-b431fd668656'
 );
 
 INSERT INTO identity.property_users(

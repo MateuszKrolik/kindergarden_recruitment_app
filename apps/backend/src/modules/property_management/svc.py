@@ -19,7 +19,6 @@ from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
     ParentConditionKeys,
 )
-from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE
 from src.shared.types.pagination import PagedResponse
 
 
@@ -66,14 +65,6 @@ class IPropertyManagementSvc(ABC):
         page_size: int,
         page_number: int,
     ) -> PagedResponse[PropertyChild]:
-        pass
-
-    @abstractmethod
-    async def get_point_value_for_given_property_child_document_by_document_type(
-        self,
-        property_id: UUID,
-        document_type: CHILD_DOCUMENT_TYPE,
-    ) -> int:
         pass
 
     @abstractmethod
@@ -145,17 +136,9 @@ class PropertyManagementSvc(IPropertyManagementSvc):
     async def get_all_property_children_for_given_parent(
         self, property_id: UUID, parent_id: UUID
     ) -> List[PropertyChild]:
-        async with asyncio.TaskGroup() as tg:
-            prop_children_task = tg.create_task(
-                self.get_all_property_children(property_id=property_id)
-            )
-            parent_children_task = tg.create_task(
-                self.identity_client.get_all_parent_children(parent_id=parent_id)
-            )
-        prop_children = prop_children_task.result()
-        parent_children = parent_children_task.result()
-        parent_child_ids = {x.child_id for x in parent_children}
-        return [pc for pc in prop_children if pc.child_id in parent_child_ids]
+        return await self.repo.get_all_property_children_for_given_parent(
+            property_id=property_id, parent_id=parent_id
+        )
 
     async def get_document_requirements_for_given_property_child(
         self,
@@ -195,16 +178,6 @@ class PropertyManagementSvc(IPropertyManagementSvc):
     ) -> List[PropertyChild]:
         return await self.repo.increment_property_children_points_for_given_parent(
             property_id=property_id, point_value=point_value, children_ids=children_ids
-        )
-
-    async def get_point_value_for_given_property_child_document_by_document_type(
-        self,
-        property_id: UUID,
-        document_type: CHILD_DOCUMENT_TYPE,
-    ) -> int:
-        return await self.repo.get_point_value_for_given_property_child_document_by_document_type(
-            property_id=property_id,
-            document_type=document_type,
         )
 
     async def get_property_child_by_id(

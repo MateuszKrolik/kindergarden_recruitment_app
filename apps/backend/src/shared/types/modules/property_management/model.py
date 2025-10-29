@@ -25,6 +25,7 @@ class PropertyParentDocumentRequirement(BaseModel):
 
 class PropertyChild(BaseModel):
     property_id: UUID
+    parent_id: UUID
     child_id: UUID
     points: int
     approved: bool

@@ -697,6 +697,11 @@ export interface components {
              */
             property_id: string;
             /**
+             * Parent Id
+             * Format: uuid
+             */
+            parent_id: string;
+            /**
              * Child Id
              * Format: uuid
              */

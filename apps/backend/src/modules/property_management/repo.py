@@ -10,7 +10,6 @@ from src.shared.types.modules.property_management.model import (
     PropertyChildDocumentRequirement,
     PropertyParentDocumentRequirement,
 )
-from src.shared.types.modules.reporting.enum import CHILD_DOCUMENT_TYPE
 from src.shared.types.pagination import PagedResponse
 from src.shared.utils.pagination import calculate_offset, new_paged_response
 from src.shared.utils.query import try_except
@@ -65,19 +64,17 @@ class IPropertyManagementRepo(ABC):
         pass
 
     @abstractmethod
-    async def get_point_value_for_given_property_child_document_by_document_type(
-        self,
-        property_id: UUID,
-        document_type: CHILD_DOCUMENT_TYPE,
-    ) -> int:
-        pass
-
-    @abstractmethod
     async def get_property_child_by_id(
         self,
         property_id: UUID,
         child_id: UUID,
     ) -> PropertyChild:
+        pass
+
+    @abstractmethod
+    async def get_all_property_children_for_given_parent(
+        self, property_id: UUID, parent_id: UUID
+    ) -> List[PropertyChild]:
         pass
 
 
@@ -242,31 +239,6 @@ class PropertyManagementRepo(IPropertyManagementRepo):
                 raise NotFoundException()
             return [PropertyChild(**row) for row in rows]
 
-    async def get_point_value_for_given_property_child_document_by_document_type(
-        self,
-        property_id: UUID,
-        document_type: CHILD_DOCUMENT_TYPE,
-    ) -> int:
-        sql = """
-        SELECT point_value
-        FROM property_management.property_children_document_requirements
-        WHERE property_id = $1 AND document_type = $2;
-        """
-        async with self.pool.acquire() as connection:
-            rows, error = await try_except(
-                connection.fetch,
-                sql,
-                property_id,
-                document_type,  # TODO: SQL index on document_type
-            )
-            if error:
-                raise DatabaseException(message=str(error))
-            if rows is None or len(rows) == 0:
-                raise NotFoundException(
-                    message=f"Document type: ${document_type} not found in property: ${property_id}!",
-                )
-            return rows[0]["point_value"]
-
     async def get_property_child_by_id(
         self,
         property_id: UUID,
@@ -286,3 +258,21 @@ class PropertyManagementRepo(IPropertyManagementRepo):
                     message=f"Child with id {child_id} is not registered to property: {property_id}!",
                 )
             return PropertyChild(**rows[0])
+
+    async def get_all_property_children_for_given_parent(
+        self, property_id: UUID, parent_id: UUID
+    ) -> List[PropertyChild]:
+        sql = """
+        SELECT *
+        FROM property_management.property_children
+        WHERE property_id = $1 AND parent_id = $2;
+        """
+        async with self.pool.acquire() as connection:
+            rows, error = await try_except(
+                connection.fetch, sql, property_id, parent_id
+            )
+            if error:
+                raise DatabaseException(message=str(error))
+            if rows is None or len(rows) == 0:
+                raise NotFoundException()
+            return [PropertyChild(**row) for row in rows]

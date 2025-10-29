@@ -7,7 +7,6 @@ from src.shared.exceptions.not_found import NotFoundException
 from src.shared.exceptions.database import DatabaseException
 from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
-    ParentChild,
     ParentConditionKeys,
     PropertyUser,
 )
@@ -28,13 +27,6 @@ class IIdentityRepo(ABC):
         property_id: UUID,
         user_id: UUID,
     ) -> PropertyUser:
-        pass
-
-    @abstractmethod
-    async def get_all_parent_children(
-        self,
-        parent_id: UUID,
-    ) -> List[ParentChild]:
         pass
 
     @abstractmethod
@@ -101,23 +93,6 @@ class IdentityRepo(IIdentityRepo):
                     message=f"User: {user_id} is not registered to property: {property_id}!",
                 )
             return PropertyUser(**rows[0])
-
-    async def get_all_parent_children(
-        self,
-        parent_id: UUID,
-    ) -> List[ParentChild]:
-        sql = """
-        SELECT *
-        FROM identity.parent_children
-        WHERE parent_id = $1;
-        """
-        async with self.pool.acquire() as connection:
-            rows, error = await try_except(connection.fetch, sql, parent_id)
-            if error:
-                raise DatabaseException(message=str(error))
-            if rows is None or len(rows) == 0:
-                raise NotFoundException()
-            return [ParentChild(**row) for row in rows]
 
     async def get_child_condition_keys(
         self,
