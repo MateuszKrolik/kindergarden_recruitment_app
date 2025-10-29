@@ -314,7 +314,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/{request_status}": {
+    "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/approved": {
         parameters: {
             query?: never;
             header?: never;
@@ -327,8 +327,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Set Property Parent Document Request Status */
-        patch: operations["set_property_parent_document_request_status_properties__property_id__parents__parent_id__parent_documents__parent_document_id__status__request_status__patch"];
+        /** Approve Property Parent Document Request */
+        patch: operations["approve_property_parent_document_request_properties__property_id__parents__parent_id__parent_documents__parent_document_id__status_approved_patch"];
         trace?: never;
     };
     "/properties/{property_id}/child-document-requests": {
@@ -382,7 +382,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/{request_status}": {
+    "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/approved": {
         parameters: {
             query?: never;
             header?: never;
@@ -395,8 +395,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Set Property Child Document Request Status */
-        patch: operations["set_property_child_document_request_status_properties__property_id__children__child_id__children_documents__child_document_id__status__request_status__patch"];
+        /** Approve Property Child Document Request */
+        patch: operations["approve_property_child_document_request_properties__property_id__children__child_id__children_documents__child_document_id__status_approved_patch"];
         trace?: never;
     };
     "/properties/{property_id}/parent-partners/{partner_id}/document-requests/{parent_partner_document_id}": {
@@ -467,7 +467,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/{request_status}": {
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/approved": {
         parameters: {
             query?: never;
             header?: never;
@@ -480,8 +480,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Set Property Parent Partner Document Request Status */
-        patch: operations["set_property_parent_partner_document_request_status_properties__property_id__parent_partners__partner_id__parent_documents__parent_partner_document_id__status__request_status__patch"];
+        /** Approve Property Parent Partner Document Request */
+        patch: operations["approve_property_parent_partner_document_request_properties__property_id__parent_partners__partner_id__parent_documents__parent_partner_document_id__status_approved_patch"];
         trace?: never;
     };
 }
@@ -1584,7 +1584,7 @@ export interface operations {
             };
         };
     };
-    set_property_parent_document_request_status_properties__property_id__parents__parent_id__parent_documents__parent_document_id__status__request_status__patch: {
+    approve_property_parent_document_request_properties__property_id__parents__parent_id__parent_documents__parent_document_id__status_approved_patch: {
         parameters: {
             query?: never;
             header?: never;
@@ -1592,7 +1592,6 @@ export interface operations {
                 property_id: string;
                 parent_id: string;
                 parent_document_id: string;
-                request_status: components["schemas"]["REQUEST_STATUS"];
             };
             cookie?: never;
         };
@@ -1722,7 +1721,7 @@ export interface operations {
             };
         };
     };
-    set_property_child_document_request_status_properties__property_id__children__child_id__children_documents__child_document_id__status__request_status__patch: {
+    approve_property_child_document_request_properties__property_id__children__child_id__children_documents__child_document_id__status_approved_patch: {
         parameters: {
             query?: never;
             header?: never;
@@ -1730,7 +1729,6 @@ export interface operations {
                 property_id: string;
                 child_id: string;
                 child_document_id: string;
-                request_status: components["schemas"]["REQUEST_STATUS"];
             };
             cookie?: never;
         };
@@ -1892,7 +1890,7 @@ export interface operations {
             };
         };
     };
-    set_property_parent_partner_document_request_status_properties__property_id__parent_partners__partner_id__parent_documents__parent_partner_document_id__status__request_status__patch: {
+    approve_property_parent_partner_document_request_properties__property_id__parent_partners__partner_id__parent_documents__parent_partner_document_id__status_approved_patch: {
         parameters: {
             query?: never;
             header?: never;
@@ -1900,7 +1898,6 @@ export interface operations {
                 property_id: string;
                 partner_id: string;
                 parent_partner_document_id: string;
-                request_status: components["schemas"]["REQUEST_STATUS"];
             };
             cookie?: never;
         };

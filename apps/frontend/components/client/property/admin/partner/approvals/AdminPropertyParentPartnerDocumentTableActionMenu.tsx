@@ -17,12 +17,11 @@ type AdminPropertyParentPartnerDocumentTableActionMenuProps = {
   jwt: string;
   adminId: string;
   request: PropertyParentPartnerDocument;
-  setPropertyParentPartnerDocumentApprovalRequestStatus(
+  approvePropertyParentPartnerDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
     partnerId: string,
     parentPartnerDocumentId: string,
-    requestStatus: REQUEST_STATUS,
   ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
   getParentPartnerDocumentURLByDocumentID(
     jwt: string,
@@ -34,7 +33,7 @@ export default function AdminPropertyParentPartnerDocumentTableActionMenu({
   jwt,
   adminId,
   request,
-  setPropertyParentPartnerDocumentApprovalRequestStatus,
+  approvePropertyParentPartnerDocumentApprovalRequest,
   getParentPartnerDocumentURLByDocumentID,
 }: AdminPropertyParentPartnerDocumentTableActionMenuProps) {
   return (
@@ -51,8 +50,8 @@ export default function AdminPropertyParentPartnerDocumentTableActionMenu({
           jwt={jwt}
           adminId={adminId}
           request={request}
-          setPropertyParentPartnerDocumentApprovalRequestStatus={
-            setPropertyParentPartnerDocumentApprovalRequestStatus
+          approvePropertyParentPartnerDocumentApprovalRequest={
+            approvePropertyParentPartnerDocumentApprovalRequest
           }
         />
         <DropdownMenuSeparator />
@@ -82,34 +81,42 @@ type SetStatusDropdownMenuItemProps = {
   jwt: string;
   adminId: string;
   request: PropertyParentPartnerDocument;
-  setPropertyParentPartnerDocumentApprovalRequestStatus(
+  approvePropertyParentPartnerDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
     partnerId: string,
     parentPartnerDocumentId: string,
-    requestStatus: REQUEST_STATUS,
   ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
 };
 
 const SetStatusDropdownMenuItem = ({
   jwt,
   request,
-  setPropertyParentPartnerDocumentApprovalRequestStatus,
+  approvePropertyParentPartnerDocumentApprovalRequest,
 }: SetStatusDropdownMenuItemProps) => {
   const handleStatusChange = async (status: REQUEST_STATUS) => {
-    const { error } =
-      await setPropertyParentPartnerDocumentApprovalRequestStatus(
-        jwt,
-        request.property_id,
-        request.partner_id,
-        request.parent_partner_document_id,
-        status,
-      );
-    if (error) {
-      toast.error(error.message);
-      return;
+    switch (status) {
+      case "approved":
+        const { error } =
+          await approvePropertyParentPartnerDocumentApprovalRequest(
+            jwt,
+            request.property_id,
+            request.partner_id,
+            request.parent_partner_document_id,
+          );
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
+        toast.success(
+          `Request: '${request.parent_partner_document_id}' approved successfuly!`,
+        );
+      case "rejected":
+        // TODO
+        toast.success(
+          `Request: '${request.parent_partner_document_id}' was rejected!`,
+        );
     }
-    toast.success(`Request ${status} successfuly!`);
   };
   return (
     <>

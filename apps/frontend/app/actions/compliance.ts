@@ -10,7 +10,6 @@ import {
   PropertyParentDocument,
   PropertyParentPartnerDocument,
 } from "@/types/modules/compliance/model";
-import { REQUEST_STATUS } from "@/types/modules/compliance/enum";
 import {
   PropertyChildDocumentRequest,
   PropertyParentDocumentRequest,
@@ -122,23 +121,21 @@ export async function getAllDocumentApprovalRequestsForGivenProperty(
   return { data: data, error: undefined };
 }
 
-export async function setPropertyParentDocumentApprovalRequestStatus(
+export async function approvePropertyParentDocumentApprovalRequest(
   jwt: string,
   propertyId: string,
   parentId: string,
   parentDocumentId: string,
-  requestStatus: REQUEST_STATUS,
 ): Promise<ApiResponse<PropertyParentDocument>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.PATCH(
-    "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/{request_status}",
+    "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/approved",
     {
       params: {
         path: {
           property_id: propertyId,
           parent_id: parentId,
           parent_document_id: parentDocumentId,
-          request_status: requestStatus,
         },
       },
     },
@@ -220,23 +217,21 @@ export async function getPropertyChildDocumentApprovalRequestByDocumentId(
   return { data: data, error: undefined };
 }
 
-export async function setPropertyChildDocumentApprovalRequestStatus(
+export async function approvePropertyChildDocumentApprovalRequest(
   jwt: string,
   propertyId: string,
   childId: string,
   childDocumentId: string,
-  requestStatus: REQUEST_STATUS,
 ): Promise<ApiResponse<PropertyChildDocument>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.PATCH(
-    "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/{request_status}",
+    "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/approved",
     {
       params: {
         path: {
           property_id: propertyId,
           child_id: childId,
           child_document_id: childDocumentId,
-          request_status: requestStatus,
         },
       },
     },
@@ -334,23 +329,21 @@ export async function getAllPartnerDocumentApprovalRequestsForGivenProperty(
   return { data: data, error: undefined };
 }
 
-export async function setPropertyParentPartnerDocumentApprovalRequestStatus(
+export async function approvePropertyParentPartnerDocumentApprovalRequest(
   jwt: string,
   propertyId: string,
   partnerId: string,
   parentPartnerDocumentId: string,
-  requestStatus: REQUEST_STATUS,
 ): Promise<ApiResponse<PropertyParentPartnerDocument>> {
   const api = getApiClient(jwt);
   const { data, error } = await api.PATCH(
-    "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/{request_status}",
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/approved",
     {
       params: {
         path: {
           property_id: propertyId,
           partner_id: partnerId,
           parent_partner_document_id: parentPartnerDocumentId,
-          request_status: requestStatus,
         },
       },
     },

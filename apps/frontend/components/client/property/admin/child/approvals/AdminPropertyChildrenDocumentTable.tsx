@@ -42,7 +42,6 @@ import {
   PagedResponse_PropertyChildDocument,
   PropertyChildDocument,
 } from "@/types/modules/compliance/model";
-import { REQUEST_STATUS } from "@/types/modules/compliance/enum";
 import AdminPropertyChildDocumentTableActionMenu from "./AdminPropertyChildDocumentTableActionMenu";
 
 interface AdminPropertyChildrenDocumentTableProps {
@@ -55,12 +54,11 @@ interface AdminPropertyChildrenDocumentTableProps {
     pageSize: number,
     pageNumber: number,
   ): Promise<ApiResponse<PagedResponse_PropertyChildDocument>>;
-  setPropertyChildDocumentApprovalRequestStatus(
+  approvePropertyChildDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
     childId: string,
     childDocumentId: string,
-    requestStatus: REQUEST_STATUS,
   ): Promise<ApiResponse<PropertyChildDocument>>;
   getChildDocumentURLByDocumentID(
     jwt: string,
@@ -73,7 +71,7 @@ export default function AdminPropertyChildrenDocumentTable({
   propertyId,
   adminId,
   getAllChildDocumentApprovalRequestsForGivenProperty,
-  setPropertyChildDocumentApprovalRequestStatus,
+  approvePropertyChildDocumentApprovalRequest,
   getChildDocumentURLByDocumentID,
 }: AdminPropertyChildrenDocumentTableProps) {
   const searchParams = useSearchParams();
@@ -215,8 +213,8 @@ export default function AdminPropertyChildrenDocumentTable({
             jwt={jwt}
             adminId={adminId}
             request={request}
-            setPropertyChildDocumentApprovalRequestStatus={
-              setPropertyChildDocumentApprovalRequestStatus
+            approvePropertyChildDocumentApprovalRequest={
+              approvePropertyChildDocumentApprovalRequest
             }
             getChildDocumentURLByDocumentID={getChildDocumentURLByDocumentID}
           />

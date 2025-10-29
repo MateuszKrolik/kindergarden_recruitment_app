@@ -2,7 +2,7 @@
 
 import {
   getAllChildDocumentApprovalRequestsForGivenProperty,
-  setPropertyChildDocumentApprovalRequestStatus,
+  approvePropertyChildDocumentApprovalRequest,
 } from "@/app/actions/compliance";
 import { getPropertyUser } from "@/app/actions/identity";
 import { getChildDocumentURLByDocumentID } from "@/app/actions/reporting";
@@ -41,8 +41,8 @@ export default async function Page({ params }: PageProps) {
       getAllChildDocumentApprovalRequestsForGivenProperty={
         getAllChildDocumentApprovalRequestsForGivenProperty
       }
-      setPropertyChildDocumentApprovalRequestStatus={
-        setPropertyChildDocumentApprovalRequestStatus
+      approvePropertyChildDocumentApprovalRequest={
+        approvePropertyChildDocumentApprovalRequest
       }
       getChildDocumentURLByDocumentID={getChildDocumentURLByDocumentID}
     />

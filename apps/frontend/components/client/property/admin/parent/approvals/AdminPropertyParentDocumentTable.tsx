@@ -43,7 +43,6 @@ import {
   PagedResponse_PropertyParentDocument,
   PropertyParentDocument,
 } from "@/types/modules/compliance/model";
-import { REQUEST_STATUS } from "@/types/modules/compliance/enum";
 
 interface AdminPropertyParentDocumentTableProps {
   jwt: string;
@@ -55,12 +54,11 @@ interface AdminPropertyParentDocumentTableProps {
     pageSize: number,
     pageNumber: number,
   ): Promise<ApiResponse<PagedResponse_PropertyParentDocument>>;
-  setPropertyParentDocumentApprovalRequestStatus(
+  approvePropertyParentDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-    requestStatus: REQUEST_STATUS,
   ): Promise<ApiResponse<PropertyParentDocument>>;
   getParentDocumentURLByDocumentID(
     jwt: string,
@@ -73,7 +71,7 @@ export default function AdminPropertyParentDocumentTable({
   propertyId,
   adminId,
   getAllDocumentApprovalRequestsForGivenProperty,
-  setPropertyParentDocumentApprovalRequestStatus,
+  approvePropertyParentDocumentApprovalRequest,
   getParentDocumentURLByDocumentID,
 }: AdminPropertyParentDocumentTableProps) {
   const searchParams = useSearchParams();
@@ -215,8 +213,8 @@ export default function AdminPropertyParentDocumentTable({
             jwt={jwt}
             adminId={adminId}
             request={request}
-            setPropertyParentDocumentApprovalRequestStatus={
-              setPropertyParentDocumentApprovalRequestStatus
+            approvePropertyParentDocumentApprovalRequest={
+              approvePropertyParentDocumentApprovalRequest
             }
             getParentDocumentURLByDocumentID={getParentDocumentURLByDocumentID}
           />

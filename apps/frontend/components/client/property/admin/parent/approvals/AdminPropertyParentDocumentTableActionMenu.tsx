@@ -17,12 +17,11 @@ type AdminPropertyParentDocumentTableActionMenuProps = {
   jwt: string;
   adminId: string;
   request: PropertyParentDocument;
-  setPropertyParentDocumentApprovalRequestStatus(
+  approvePropertyParentDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-    requestStatus: REQUEST_STATUS,
   ): Promise<ApiResponse<PropertyParentDocument>>;
   getParentDocumentURLByDocumentID(
     jwt: string,
@@ -34,7 +33,7 @@ export default function AdminPropertyParentDocumentTableActionMenu({
   jwt,
   adminId,
   request,
-  setPropertyParentDocumentApprovalRequestStatus,
+  approvePropertyParentDocumentApprovalRequest,
   getParentDocumentURLByDocumentID,
 }: AdminPropertyParentDocumentTableActionMenuProps) {
   return (
@@ -51,8 +50,8 @@ export default function AdminPropertyParentDocumentTableActionMenu({
           jwt={jwt}
           adminId={adminId}
           request={request}
-          setPropertyParentDocumentApprovalRequestStatus={
-            setPropertyParentDocumentApprovalRequestStatus
+          approvePropertyParentDocumentApprovalRequest={
+            approvePropertyParentDocumentApprovalRequest
           }
         />
         <DropdownMenuSeparator />
@@ -81,33 +80,39 @@ type SetStatusDropdownMenuItemProps = {
   jwt: string;
   adminId: string;
   request: PropertyParentDocument;
-  setPropertyParentDocumentApprovalRequestStatus(
+  approvePropertyParentDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
     userId: string,
     parentDocumentId: string,
-    requestStatus: REQUEST_STATUS,
   ): Promise<ApiResponse<PropertyParentDocument>>;
 };
 
 const SetStatusDropdownMenuItem = ({
   jwt,
   request,
-  setPropertyParentDocumentApprovalRequestStatus,
+  approvePropertyParentDocumentApprovalRequest,
 }: SetStatusDropdownMenuItemProps) => {
   const handleStatusChange = async (status: REQUEST_STATUS) => {
-    const { error } = await setPropertyParentDocumentApprovalRequestStatus(
-      jwt,
-      request.property_id,
-      request.user_id,
-      request.parent_document_id,
-      status,
-    );
-    if (error) {
-      toast.error(error.message);
-      return;
+    switch (status) {
+      case "approved":
+        const { error } = await approvePropertyParentDocumentApprovalRequest(
+          jwt,
+          request.property_id,
+          request.user_id,
+          request.parent_document_id,
+        );
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
+        toast.success(
+          `Request: '${request.parent_document_id}' approved successfuly!`,
+        );
+      case "rejected":
+        // TODO
+        toast.info(`Request: '${request.parent_document_id}' rejected!`);
     }
-    toast.success(`Request ${status} successfuly!`);
   };
   return (
     <>

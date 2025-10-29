@@ -2,7 +2,7 @@
 
 import {
   getAllPartnerDocumentApprovalRequestsForGivenProperty,
-  setPropertyParentPartnerDocumentApprovalRequestStatus,
+  approvePropertyParentPartnerDocumentApprovalRequest,
 } from "@/app/actions/compliance";
 import { getPropertyUser } from "@/app/actions/identity";
 import { getParentPartnerDocumentURLByDocumentID } from "@/app/actions/reporting";
@@ -41,8 +41,8 @@ export default async function Page({ params }: PageProps) {
       getAllPartnerDocumentApprovalRequestsForGivenProperty={
         getAllPartnerDocumentApprovalRequestsForGivenProperty
       }
-      setPropertyParentPartnerDocumentApprovalRequestStatus={
-        setPropertyParentPartnerDocumentApprovalRequestStatus
+      approvePropertyParentPartnerDocumentApprovalRequest={
+        approvePropertyParentPartnerDocumentApprovalRequest
       }
       getParentPartnerDocumentURLByDocumentID={
         getParentPartnerDocumentURLByDocumentID

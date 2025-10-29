@@ -132,8 +132,13 @@ export const ParentChildDocumentApprovalsTable = ({
       );
 
     if (error) {
+      if (error.code === 404) {
+        setData([]);
+        setError(null);
+        return;
+      }
       const errMsg = error.message;
-      toast.error(`Error: ${errMsg}`);
+      toast.error(errMsg);
       setError(errMsg);
       return;
     }

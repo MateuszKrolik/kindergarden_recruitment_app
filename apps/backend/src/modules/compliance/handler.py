@@ -8,7 +8,6 @@ from src.modules.compliance.dto import (
     PropertyParentPartnerDocumentRequest,
 )
 from src.modules.compliance.svc import IComplianceSvc
-from src.shared.exceptions.validation import ValidationException
 from src.shared.types.modules.compliance.enum import REQUEST_STATUS
 from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
@@ -129,28 +128,25 @@ class ComplianceHandler:
             )
 
         @self.router.patch(
-            "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/{request_status}",
+            "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/approved",
             status_code=status.HTTP_200_OK,
             responses={
                 200: {"model": PropertyParentDocument},
                 "default": {"model": HTTPError},
             },
         )
-        async def set_property_parent_document_request_status(
+        async def approve_property_parent_document_request(
             property_id: UUID,
             parent_id: UUID,
             parent_document_id: UUID,
-            request_status: REQUEST_STATUS,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
         ) -> PropertyParentDocument:
-            if request_status not in REQUEST_STATUS:
-                raise ValidationException(message="Invalid request status!")
             return await self.svc.set_property_parent_document_request_status(
                 property_id=property_id,
                 user_id=parent_id,
                 parent_document_id=parent_document_id,
-                request_status=request_status,
-                admin_id=user_result.get("id"),
+                request_status=REQUEST_STATUS.APPROVED,
+                admin_id=user_result.get("id", UUID(int=0)),
             )
 
         @self.router.get(
@@ -215,28 +211,25 @@ class ComplianceHandler:
             )
 
         @self.router.patch(
-            "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/{request_status}",
+            "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/approved",
             status_code=status.HTTP_200_OK,
             responses={
                 200: {"model": PropertyChildDocument},
                 "default": {"model": HTTPError},
             },
         )
-        async def set_property_child_document_request_status(
+        async def approve_property_child_document_request(
             property_id: UUID,
             child_id: UUID,
             child_document_id: UUID,
-            request_status: REQUEST_STATUS,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
         ) -> PropertyChildDocument:
-            if request_status not in REQUEST_STATUS:
-                raise ValidationException(message="Invalid request status!")
             return await self.svc.set_property_child_document_request_status(
                 property_id=property_id,
                 child_id=child_id,
                 child_document_id=child_document_id,
-                request_status=request_status,
-                admin_id=user_result.get("id"),
+                request_status=REQUEST_STATUS.APPROVED,
+                admin_id=user_result.get("id", UUID(int=0)),
             )
 
         @self.router.post(
@@ -320,26 +313,23 @@ class ComplianceHandler:
             )
 
         @self.router.patch(
-            "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/{request_status}",
+            "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/approved",
             status_code=status.HTTP_200_OK,
             responses={
                 200: {"model": PropertyParentPartnerDocument},
                 "default": {"model": HTTPError},
             },
         )
-        async def set_property_parent_partner_document_request_status(
+        async def approve_property_parent_partner_document_request(
             property_id: UUID,
             partner_id: UUID,
             parent_partner_document_id: UUID,
-            request_status: REQUEST_STATUS,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
         ) -> PropertyParentPartnerDocument:
-            if request_status not in REQUEST_STATUS:
-                raise ValidationException(message="Invalid request status!")
             return await self.svc.set_property_parent_partner_document_request_status(
                 property_id=property_id,
                 partner_id=partner_id,
                 parent_partner_document_id=parent_partner_document_id,
-                request_status=request_status,
-                admin_id=user_result.get("id"),
+                request_status=REQUEST_STATUS.APPROVED,
+                admin_id=user_result.get("id", UUID(int=0)),
             )
