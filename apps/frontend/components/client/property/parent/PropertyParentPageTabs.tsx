@@ -34,6 +34,7 @@ type PropertyParentPageTabsProps = {
   jwt: string;
   propertyId: string;
   userId: string;
+  hasPartner: boolean;
   getPropertyParentDocumentRequirements(
     jwt: string,
     propertyId: string,
@@ -146,6 +147,7 @@ export const PropertyParentPageTabs = ({
   jwt,
   propertyId,
   userId,
+  hasPartner,
   getParentDocumentByType,
   getPropertyParentDocumentRequirements,
   getAllDocumentApprovalRequestsForGivenPropertyParent,
@@ -171,7 +173,11 @@ export const PropertyParentPageTabs = ({
       <Tabs defaultValue="my-documents">
         <TabsList className="mx-auto">
           <TabsTrigger value="my-documents">My Documents</TabsTrigger>
-          <TabsTrigger value="partner-documents">Partner Documents</TabsTrigger>
+          {hasPartner && (
+            <TabsTrigger value="partner-documents">
+              Partner Documents
+            </TabsTrigger>
+          )}
           <TabsTrigger value="children-documents">
             Children Documents
           </TabsTrigger>
@@ -198,28 +204,30 @@ export const PropertyParentPageTabs = ({
             getDocumentURLByFilePath={getDocumentURLByFilePath}
           />
         </TabsContent>
-        <TabsContent value="partner-documents">
-          <PropertyParentPartnerDocumentTabs
-            jwt={jwt}
-            propertyId={propertyId}
-            userId={userId}
-            getParentPartnerDocumentByType={getParentPartnerDocumentByType}
-            getPropertyParentPartnerDocumentRequirements={
-              getPropertyParentPartnerDocumentRequirements
-            }
-            getAllDocumentApprovalRequestsForGivenPropertyParentPartner={
-              getAllDocumentApprovalRequestsForGivenPropertyParentPartner
-            }
-            getPropertyParentPartnerDocumentApprovalRequestByDocumentId={
-              getPropertyParentPartnerDocumentApprovalRequestByDocumentId
-            }
-            sendPropertyParentPartnerDocumentApprovalRequest={
-              sendPropertyParentPartnerDocumentApprovalRequest
-            }
-            saveParentPartnerDocument={saveParentPartnerDocument}
-            getDocumentURLByFilePath={getDocumentURLByFilePath}
-          />
-        </TabsContent>
+        {hasPartner && (
+          <TabsContent value="partner-documents">
+            <PropertyParentPartnerDocumentTabs
+              jwt={jwt}
+              propertyId={propertyId}
+              userId={userId}
+              getParentPartnerDocumentByType={getParentPartnerDocumentByType}
+              getPropertyParentPartnerDocumentRequirements={
+                getPropertyParentPartnerDocumentRequirements
+              }
+              getAllDocumentApprovalRequestsForGivenPropertyParentPartner={
+                getAllDocumentApprovalRequestsForGivenPropertyParentPartner
+              }
+              getPropertyParentPartnerDocumentApprovalRequestByDocumentId={
+                getPropertyParentPartnerDocumentApprovalRequestByDocumentId
+              }
+              sendPropertyParentPartnerDocumentApprovalRequest={
+                sendPropertyParentPartnerDocumentApprovalRequest
+              }
+              saveParentPartnerDocument={saveParentPartnerDocument}
+              getDocumentURLByFilePath={getDocumentURLByFilePath}
+            />
+          </TabsContent>
+        )}
         <TabsContent value="children-documents">
           <PropertyParentChildrenDocumentTabs
             jwt={jwt}

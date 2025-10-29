@@ -60,6 +60,7 @@ export default async function PropertyParentPage({
       jwt={jwt}
       propertyId={propertyId}
       userId={userId}
+      hasPartner={data.has_partner}
       getParentDocumentByType={getParentDocumentByType}
       getPropertyParentDocumentRequirements={
         getPropertyParentDocumentRequirements

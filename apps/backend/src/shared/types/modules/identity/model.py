@@ -16,6 +16,7 @@ class PropertyUser(BaseModel):
     property_id: UUID
     user_id: UUID
     role: PROPERTY_USER_ROLE
+    has_partner: bool
 
 
 class ChildConditionKeys(BaseModel):

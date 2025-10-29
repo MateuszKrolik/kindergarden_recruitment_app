@@ -271,13 +271,15 @@ class ComplianceSvc(IComplianceSvc):
             request_status=request_status,
             admin_id=admin_id,
         )
-        event = create_event(
-            type=COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED,
-            source=__name__,
-            version="1.0",
-            payload=data,
-        )
-        await self._publish_event(event)
+        match request_status:
+            case REQUEST_STATUS.APPROVED:
+                event = create_event(
+                    type=COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED,
+                    source=__name__,
+                    version="1.0",
+                    payload=data,
+                )
+                await self._publish_event(event)
         return data
 
     async def get_all_child_document_approval_requests_for_given_property(
@@ -352,13 +354,15 @@ class ComplianceSvc(IComplianceSvc):
             request_status=request_status,
             admin_id=admin_id,
         )
-        event = create_event(
-            type=COMPLIANCE_EVENT.PROPERTY_CHILD_DOCUMENT_APPROVED,
-            source=__name__,
-            version="1.0",
-            payload=data,
-        )
-        await self._publish_event(event)
+        match request_status:
+            case REQUEST_STATUS.APPROVED:
+                event = create_event(
+                    type=COMPLIANCE_EVENT.PROPERTY_CHILD_DOCUMENT_APPROVED,
+                    source=__name__,
+                    version="1.0",
+                    payload=data,
+                )
+                await self._publish_event(event)
         return data
 
     async def send_property_parent_partner_document_approval_request(
@@ -438,13 +442,15 @@ class ComplianceSvc(IComplianceSvc):
             request_status=request_status,
             admin_id=admin_id,
         )
-        event = create_event(
-            type=COMPLIANCE_EVENT.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
-            source=__name__,
-            version="1.0",
-            payload=data,
-        )
-        await self._publish_event(event)
+        match request_status:
+            case REQUEST_STATUS.APPROVED:
+                event = create_event(
+                    type=COMPLIANCE_EVENT.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
+                    source=__name__,
+                    version="1.0",
+                    payload=data,
+                )
+                await self._publish_event(event)
         return data
 
     async def _publish_event(self, event: EventEnvelope[T]):

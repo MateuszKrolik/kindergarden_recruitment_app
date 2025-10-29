@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS identity.property_users(
   property_id uuid DEFAULT gen_random_uuid(),
   user_id uuid DEFAULT gen_random_uuid(),
   role TEXT CHECK (role IN ('admin', 'parent')),
+  has_partner BOOLEAN DEFAULT FALSE,
   PRIMARY KEY (property_id, user_id)
 );
 

@@ -840,6 +840,8 @@ export interface components {
              */
             user_id: string;
             role: components["schemas"]["PROPERTY_USER_ROLE"];
+            /** Has Partner */
+            has_partner: boolean;
         };
         /**
          * REQUEST_STATUS
