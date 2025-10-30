@@ -27,7 +27,7 @@ import { COMPLIANCE_EVENTS } from "@/socket/events/modules/compliance";
 import socket from "@/socket";
 import { ApiResponse } from "@/types/response";
 import { PropertyChildDocument } from "@/types/modules/compliance/model";
-import AdminPropertyChildDocumentTableActionMenu from "../../dummy-approvals/AdminPropertyChildDocumentTableActionMenu";
+import AdminPropertyChildDocumentTableActionMenu from "./AdminPropertyChildDocumentTableActionMenu";
 
 type AdminPropertyChildDocumentApprovalsTableProps = {
   jwt: string;
