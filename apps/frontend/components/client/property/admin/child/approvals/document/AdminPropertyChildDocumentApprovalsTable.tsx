@@ -11,17 +11,10 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown } from "lucide-react";
-
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ArrowUpDown } from "lucide-react";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -30,30 +23,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { toast } from "sonner";
-import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { formPageResizeUrl, formTargetPageUrl } from "@/util/pagination";
 import { COMPLIANCE_EVENTS } from "@/socket/events/modules/compliance";
 import socket from "@/socket";
 import { ApiResponse } from "@/types/response";
-import {
-  PagedResponse_PropertyChildDocument,
-  PropertyChildDocument,
-} from "@/types/modules/compliance/model";
-import AdminPropertyChildDocumentTableActionMenu from "./AdminPropertyChildDocumentTableActionMenu";
+import { PropertyChildDocument } from "@/types/modules/compliance/model";
+import AdminPropertyChildDocumentTableActionMenu from "../../dummy-approvals/AdminPropertyChildDocumentTableActionMenu";
 
-interface AdminPropertyChildrenDocumentTableProps {
+type AdminPropertyChildDocumentApprovalsTableProps = {
   jwt: string;
   propertyId: string;
-  adminId: string;
-  getAllChildDocumentApprovalRequestsForGivenProperty(
+  childId: string;
+  userId: string;
+  getAllDocumentApprovalRequestsForGivenPropertyChild(
     jwt: string,
     propertyId: string,
-    pageSize: number,
-    pageNumber: number,
-  ): Promise<ApiResponse<PagedResponse_PropertyChildDocument>>;
+    childId: string,
+  ): Promise<ApiResponse<PropertyChildDocument[]>>;
   approvePropertyChildDocumentApprovalRequest(
     jwt: string,
     propertyId: string,
@@ -64,74 +49,40 @@ interface AdminPropertyChildrenDocumentTableProps {
     jwt: string,
     documentId: string,
   ): Promise<ApiResponse<string>>;
-}
+};
 
-export default function AdminPropertyChildrenDocumentTable({
+export const AdminPropertyChildDocumentApprovalsTable = ({
   jwt,
   propertyId,
-  adminId,
-  getAllChildDocumentApprovalRequestsForGivenProperty,
+  childId,
+  userId,
+  getAllDocumentApprovalRequestsForGivenPropertyChild,
   approvePropertyChildDocumentApprovalRequest,
   getChildDocumentURLByDocumentID,
-}: AdminPropertyChildrenDocumentTableProps) {
-  const searchParams = useSearchParams();
-  const pageNumberParam = searchParams.get("pageNumber");
-  const pageNumber = parseInt(pageNumberParam || "1");
-  const pageSizeParam = searchParams.get("pageSize");
-  const pageSize = parseInt(pageSizeParam || "1");
-  const [result, setResult] = useState<Array<PropertyChildDocument>>([]);
-  const [hasNextPage, setHasNextPage] = useState<boolean>(false);
-  const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
-  const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+}: AdminPropertyChildDocumentApprovalsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [totalPages, setTotalPages] = useState<number>(1);
-
-  const loadProperties = useCallback(
-    async (size: number, pageNumber: number) => {
-      setIsLoading(true);
-      const { data: result, error } =
-        await getAllChildDocumentApprovalRequestsForGivenProperty(
-          jwt,
-          propertyId,
-          size,
-          pageNumber,
-        );
-      if (error) {
-        toast.error(error.message);
-        setIsLoading(false);
-        return;
-      }
-
-      setResult(result.items);
-      setTotalCount(result.total);
-      setHasNextPage(result.has_next_page);
-      setHasPreviousPage(result.has_previous_page);
-      setTotalPages(result.total_pages);
-      setIsLoading(false);
-    },
-    [jwt, propertyId, getAllChildDocumentApprovalRequestsForGivenProperty],
-  );
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<PropertyChildDocument[]>([]);
 
   const columns: ColumnDef<PropertyChildDocument>[] = [
     {
-      accessorKey: "child_id",
+      accessorKey: "child_document_id",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Child ID
+            Document ID
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("child_id")}</div>
+        <div className="lowercase">{row.getValue("child_document_id")}</div>
       ),
     },
     {
@@ -149,23 +100,6 @@ export default function AdminPropertyChildrenDocumentTable({
       },
       cell: ({ row }) => (
         <div className="lowercase">{row.getValue("document_type")}</div>
-      ),
-    },
-    {
-      accessorKey: "point_value",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Point Value
-            <ArrowUpDown />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("point_value")}</div>
       ),
     },
     {
@@ -193,7 +127,7 @@ export default function AdminPropertyChildrenDocumentTable({
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Approved By
+            Approved By ID
             <ArrowUpDown />
           </Button>
         );
@@ -211,7 +145,7 @@ export default function AdminPropertyChildrenDocumentTable({
         return (
           <AdminPropertyChildDocumentTableActionMenu
             jwt={jwt}
-            adminId={adminId}
+            adminId={userId}
             request={request}
             approvePropertyChildDocumentApprovalRequest={
               approvePropertyChildDocumentApprovalRequest
@@ -223,31 +157,41 @@ export default function AdminPropertyChildrenDocumentTable({
     },
   ];
 
-  const table = useReactTable<PropertyChildDocument>({
-    data: result,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
+  const fetchData = useCallback(async () => {
+    const { data: result, error } =
+      await getAllDocumentApprovalRequestsForGivenPropertyChild(
+        jwt,
+        propertyId,
+        childId,
+      );
+
+    if (error) {
+      if (error.code === 404) {
+        setData([]);
+        setError(null);
+        return;
+      }
+      const errMsg = error.message;
+      toast.error(errMsg);
+      setError(errMsg);
+      return;
+    }
+
+    setData(result);
+  }, [
+    jwt,
+    propertyId,
+    childId,
+    getAllDocumentApprovalRequestsForGivenPropertyChild,
+  ]);
 
   useEffect(() => {
-    loadProperties(pageSize, pageNumber);
-  }, [loadProperties, pageNumber, pageSize]);
+    fetchData();
+  }, [fetchData]);
 
   useEffect(() => {
     function onRequestApproved(event: PropertyChildDocument) {
-      setResult((prev) => {
+      setData((prev) => {
         const existingIndex = prev.findIndex(
           (doc) => doc.child_document_id === event.child_document_id,
         );
@@ -271,10 +215,7 @@ export default function AdminPropertyChildrenDocumentTable({
     }
 
     function onRequestSent(event: PropertyChildDocument) {
-      setResult((prev) => [...prev, event]);
-      toast.success(
-        `Document: ${event.child_document_id} was just sent for approval!`,
-      );
+      setData((prev) => [...prev, event]);
     }
 
     socket.on(
@@ -298,6 +239,24 @@ export default function AdminPropertyChildrenDocumentTable({
       );
     };
   }, []);
+
+  const table = useReactTable<PropertyChildDocument>({
+    data: error ? [] : data,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  });
 
   return (
     <div className="w-full max-w-4xl">
@@ -323,11 +282,7 @@ export default function AdminPropertyChildrenDocumentTable({
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length}>Loading...</TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -356,61 +311,6 @@ export default function AdminPropertyChildrenDocumentTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
-          Page {pageNumber} of {totalPages} • {totalCount} total items
-        </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              Page size: {pageSize} <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Rows per page</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {[1, 2].map((size) => (
-              <DropdownMenuItem key={size} asChild>
-                <Link key={size} href={formPageResizeUrl(size)}>
-                  {size}
-                </Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!hasPreviousPage || isLoading}
-            asChild={hasPreviousPage && !isLoading}
-          >
-            {hasPreviousPage && !isLoading ? (
-              <Link href={formTargetPageUrl(pageNumber - 1, pageSize)}>
-                Previous
-              </Link>
-            ) : (
-              <span>Previous</span>
-            )}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!hasNextPage || isLoading}
-            asChild={hasNextPage && !isLoading}
-          >
-            {hasNextPage && !isLoading ? (
-              <Link href={formTargetPageUrl(pageNumber + 1, pageSize)}>
-                Next
-              </Link>
-            ) : (
-              <span>Next</span>
-            )}
-          </Button>
-        </div>
-      </div>
     </div>
   );
-}
+};

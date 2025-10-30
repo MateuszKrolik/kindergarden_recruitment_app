@@ -1,0 +1,67 @@
+"use client";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AdminPropertyChildParentDocumentApprovalsTable } from "./document/AdminPropertyChildParentDocumentApprovalsTable";
+import { PropertyParentDocument } from "@/types/modules/compliance/model";
+import { ApiResponse } from "@/types/response";
+
+type AdminPropertyChildParentApprovalsTabsProps = {
+  jwt: string;
+  userId: string;
+  propertyId: string;
+  parentId: string;
+  getAllDocumentApprovalRequestsForGivenPropertyParent(
+    jwt: string,
+    propertyId: string,
+    userId: string,
+  ): Promise<ApiResponse<PropertyParentDocument[]>>;
+  approvePropertyParentDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    userId: string,
+    parentDocumentId: string,
+  ): Promise<ApiResponse<PropertyParentDocument>>;
+  getParentDocumentURLByDocumentID(
+    jwt: string,
+    docId: string,
+  ): Promise<ApiResponse<string>>;
+};
+
+export const AdminPropertyChildParentApprovalsTabs = ({
+  jwt,
+  userId,
+  propertyId,
+  parentId,
+  getAllDocumentApprovalRequestsForGivenPropertyParent,
+  approvePropertyParentDocumentApprovalRequest,
+  getParentDocumentURLByDocumentID,
+}: AdminPropertyChildParentApprovalsTabsProps) => {
+  return (
+    <div className="w-full max-w-4xl">
+      <Tabs defaultValue="document-requests">
+        <TabsList className="mx-auto">
+          <TabsTrigger value="document-requests">Document requests</TabsTrigger>
+          <TabsTrigger value="requests">Requests</TabsTrigger>
+        </TabsList>
+        <TabsContent value="document-requests">
+          <AdminPropertyChildParentDocumentApprovalsTable
+            jwt={jwt}
+            userId={userId}
+            propertyId={propertyId}
+            parentId={parentId}
+            getAllDocumentApprovalRequestsForGivenPropertyParent={
+              getAllDocumentApprovalRequestsForGivenPropertyParent
+            }
+            approvePropertyParentDocumentApprovalRequest={
+              approvePropertyParentDocumentApprovalRequest
+            }
+            getParentDocumentURLByDocumentID={getParentDocumentURLByDocumentID}
+          />
+        </TabsContent>
+        <TabsContent value="requests">
+          <h1>{`Parent ID: ${parentId}`}</h1>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};

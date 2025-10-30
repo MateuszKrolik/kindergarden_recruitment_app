@@ -3,6 +3,7 @@ import asyncio
 import boto3
 
 from src.shared.exceptions.storage import StorageException
+from src.shared.exceptions.not_found import NotFoundException
 from src.shared.utils.query import try_except
 
 
@@ -47,6 +48,8 @@ class S3Repository(IS3Repository):
         url, error = await try_except(lambda: asyncio.to_thread(_generate_url))
         if error:
             raise StorageException(message=str(error))
+        if url is None:
+            raise NotFoundException()
         return url
 
     async def upload_file(
@@ -68,4 +71,6 @@ class S3Repository(IS3Repository):
         path, error = await try_except(lambda: asyncio.to_thread(_upload_file))
         if error:
             raise StorageException(message=str(error))
+        if path is None:
+            raise NotFoundException()
         return path
