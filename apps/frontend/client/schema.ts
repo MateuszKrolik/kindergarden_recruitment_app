@@ -729,11 +729,24 @@ export interface components {
              */
             child_document_id: string;
             request_status: components["schemas"]["REQUEST_STATUS"];
-            /** Approved By */
-            approved_by: string | null;
             document_type: components["schemas"]["CHILD_DOCUMENT_TYPE"];
             /** Point Value */
             point_value: number;
+            /**
+             * Requestor Id
+             * Format: uuid
+             */
+            requestor_id: string;
+            /** Requestor Name */
+            requestor_name: string;
+            /** Requestor Email */
+            requestor_email: string;
+            /** Approved By */
+            approved_by: string | null;
+            /** Approved By Name */
+            approved_by_name: string | null;
+            /** Approved By Email */
+            approved_by_email: string | null;
         };
         /** PropertyChildDocumentRequest */
         PropertyChildDocumentRequest: {
@@ -772,11 +785,24 @@ export interface components {
              */
             parent_document_id: string;
             request_status: components["schemas"]["REQUEST_STATUS"];
-            /** Approved By */
-            approved_by: string | null;
             document_type: components["schemas"]["DOCUMENT_TYPE"];
             /** Point Value */
             point_value: number;
+            /**
+             * Requestor Id
+             * Format: uuid
+             */
+            requestor_id: string;
+            /** Requestor Name */
+            requestor_name: string;
+            /** Requestor Email */
+            requestor_email: string;
+            /** Approved By */
+            approved_by: string | null;
+            /** Approved By Name */
+            approved_by_name: string | null;
+            /** Approved By Email */
+            approved_by_email: string | null;
         };
         /** PropertyParentDocumentRequest */
         PropertyParentDocumentRequest: {
@@ -815,11 +841,24 @@ export interface components {
              */
             parent_partner_document_id: string;
             request_status: components["schemas"]["REQUEST_STATUS"];
-            /** Approved By */
-            approved_by: string | null;
             document_type: components["schemas"]["DOCUMENT_TYPE"];
             /** Point Value */
             point_value: number;
+            /**
+             * Requestor Id
+             * Format: uuid
+             */
+            requestor_id: string;
+            /** Requestor Name */
+            requestor_name: string;
+            /** Requestor Email */
+            requestor_email: string;
+            /** Approved By */
+            approved_by: string | null;
+            /** Approved By Name */
+            approved_by_name: string | null;
+            /** Approved By Email */
+            approved_by_email: string | null;
         };
         /** PropertyParentPartnerDocumentRequest */
         PropertyParentPartnerDocumentRequest: {

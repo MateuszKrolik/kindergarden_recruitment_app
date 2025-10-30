@@ -186,7 +186,7 @@ export default function AdminPropertyChildrenDocumentTable({
       ),
     },
     {
-      accessorKey: "approved_by",
+      accessorKey: "approved_by_name",
       header: ({ column }) => {
         return (
           <Button
@@ -199,7 +199,7 @@ export default function AdminPropertyChildrenDocumentTable({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("approved_by")}</div>
+        <div className="lowercase">{row.getValue("approved_by_name")}</div>
       ),
     },
     {
@@ -258,6 +258,8 @@ export default function AdminPropertyChildrenDocumentTable({
             ...updated[existingIndex],
             request_status: event.request_status,
             approved_by: event.approved_by,
+            approved_by_name: event.approved_by_name,
+            approved_by_email: event.approved_by_email,
           };
           return updated;
         }
@@ -313,9 +315,9 @@ export default function AdminPropertyChildrenDocumentTable({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}

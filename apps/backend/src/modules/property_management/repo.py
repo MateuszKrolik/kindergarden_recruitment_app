@@ -196,7 +196,7 @@ class PropertyManagementRepo(IPropertyManagementRepo):
                 sql,
                 property_id,
                 page_size,
-                calculate_offset(page_size=page_size, page_number=page_size),
+                calculate_offset(page_size=page_size, page_number=page_number),
             )
             if error:
                 raise DatabaseException(message=str(error))

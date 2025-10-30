@@ -61,6 +61,10 @@ class IComplianceRepo(ABC):
         parent_document_id: UUID,
         document_type: DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyParentDocument:
         pass
 
@@ -71,7 +75,10 @@ class IComplianceRepo(ABC):
         user_id: UUID,
         parent_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyParentDocument:
         pass
 
@@ -92,6 +99,10 @@ class IComplianceRepo(ABC):
         child_document_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyChildDocument:
         pass
 
@@ -111,7 +122,10 @@ class IComplianceRepo(ABC):
         child_id: UUID,
         child_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyChildDocument:
         pass
 
@@ -123,6 +137,10 @@ class IComplianceRepo(ABC):
         parent_partner_document_id: UUID,
         document_type: DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyParentPartnerDocument:
         pass
 
@@ -159,7 +177,10 @@ class IComplianceRepo(ABC):
         partner_id: UUID,
         parent_partner_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyParentPartnerDocument:
         pass
 
@@ -269,6 +290,10 @@ class ComplianceRepo(IComplianceRepo):
         parent_document_id: UUID,
         document_type: DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyParentDocument:
         sql = """
         INSERT INTO compliance.property_parent_documents(
@@ -276,13 +301,21 @@ class ComplianceRepo(IComplianceRepo):
             user_id,
             parent_document_id,
             document_type,
-            point_value
+            point_value,
+            -- REQUESTOR DATA
+            requestor_id,
+            requestor_name,
+            requestor_email
         ) VALUES (
             $1,
             $2,
             $3,
             $4,
-            $5
+            $5,
+            -- REQUESTOR DATA
+            $6,
+            $7,
+            $8
         ) RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -294,6 +327,10 @@ class ComplianceRepo(IComplianceRepo):
                 parent_document_id,
                 document_type,
                 point_value,
+                # REQUESTOR DATA
+                requestor_id,
+                requestor_name,
+                requestor_email,
             )
             if error:
                 raise DatabaseException(message=str(error))
@@ -309,12 +346,15 @@ class ComplianceRepo(IComplianceRepo):
         user_id: UUID,
         parent_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyParentDocument:
         sql = """
         UPDATE compliance.property_parent_documents
-        SET request_status = $1, approved_by = $2
-        WHERE property_id = $3 AND user_id = $4 AND parent_document_id = $5
+        SET request_status = $1, approved_by = $2, approved_by_name = $3, approved_by_email = $4 
+        WHERE property_id = $5 AND user_id = $6 AND parent_document_id = $7
         RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -322,7 +362,11 @@ class ComplianceRepo(IComplianceRepo):
                 connection.fetchrow,
                 sql,
                 request_status,
+                # APPROVER DATA
                 admin_id,
+                admin_name,
+                admin_email,
+                # APPROVER DATA
                 property_id,
                 user_id,
                 parent_document_id,
@@ -377,6 +421,10 @@ class ComplianceRepo(IComplianceRepo):
         child_document_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyChildDocument:
         sql = """
         INSERT INTO compliance.property_children_documents(
@@ -384,13 +432,21 @@ class ComplianceRepo(IComplianceRepo):
             child_id,
             child_document_id,
             document_type,
-            point_value
+            point_value,
+            -- REQUESTOR DATA
+            requestor_id,
+            requestor_name,
+            requestor_email
         ) VALUES (
             $1,
             $2,
             $3,
             $4,
-            $5
+            $5,
+            -- REQUESTOR DATA
+            $6,
+            $7,
+            $8
         ) RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -402,6 +458,9 @@ class ComplianceRepo(IComplianceRepo):
                 child_document_id,
                 document_type,
                 point_value,
+                requestor_id,
+                requestor_name,
+                requestor_email,
             )
             if error:
                 raise DatabaseException(message=str(error))
@@ -440,12 +499,15 @@ class ComplianceRepo(IComplianceRepo):
         child_id: UUID,
         child_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyChildDocument:
         sql = """
         UPDATE compliance.property_children_documents
-        SET request_status = $1, approved_by = $2
-        WHERE property_id = $3 AND child_id = $4 AND child_document_id = $5
+        SET request_status = $1, approved_by = $2, approved_by_name = $3, approved_by_email = $4 
+        WHERE property_id = $5 AND child_id = $6 AND child_document_id = $7
         RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -453,7 +515,11 @@ class ComplianceRepo(IComplianceRepo):
                 connection.fetchrow,
                 sql,
                 request_status,
+                # APPROVER DATA
                 admin_id,
+                admin_name,
+                admin_email,
+                # APPROVER DATA
                 property_id,
                 child_id,
                 child_document_id,
@@ -473,6 +539,10 @@ class ComplianceRepo(IComplianceRepo):
         parent_partner_document_id: UUID,
         document_type: DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyParentPartnerDocument:
         sql = """
         INSERT INTO compliance.property_parent_partner_documents(
@@ -480,13 +550,21 @@ class ComplianceRepo(IComplianceRepo):
             partner_id,
             parent_partner_document_id,
             document_type,
-            point_value
+            point_value,
+            -- REQUESTOR DATA
+            requestor_id,
+            requestor_name,
+            requestor_email
         ) VALUES (
             $1,
             $2,
             $3,
             $4,
-            $5
+            $5,
+            -- REQUESTOR DATA
+            $6,
+            $7,
+            $8
         ) RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -498,6 +576,10 @@ class ComplianceRepo(IComplianceRepo):
                 parent_partner_document_id,
                 document_type,
                 point_value,
+                # REQUESTOR DATA
+                requestor_id,
+                requestor_name,
+                requestor_email,
             )
             if error:
                 raise DatabaseException(message=str(error))
@@ -595,12 +677,15 @@ class ComplianceRepo(IComplianceRepo):
         partner_id: UUID,
         parent_partner_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyParentPartnerDocument:
         sql = """
         UPDATE compliance.property_parent_partner_documents
-        SET request_status = $1, approved_by = $2
-        WHERE property_id = $3 AND partner_id = $4 AND parent_partner_document_id = $5
+        SET request_status = $1, approved_by = $2, approved_by_name = $3, approved_by_email = $4 
+        WHERE property_id = $5 AND partner_id = $6 AND parent_partner_document_id = $7
         RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -608,7 +693,11 @@ class ComplianceRepo(IComplianceRepo):
                 connection.fetchrow,
                 sql,
                 request_status,
+                # APPROVER DATA
                 admin_id,
+                admin_name,
+                admin_email,
+                # APPROVER DATA
                 property_id,
                 partner_id,
                 parent_partner_document_id,

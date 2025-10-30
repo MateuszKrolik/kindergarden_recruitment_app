@@ -54,23 +54,6 @@ export const ParentDocumentApprovalsTable = ({
 
   const columns: ColumnDef<PropertyParentDocument>[] = [
     {
-      accessorKey: "parent_document_id",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Document ID
-            <ArrowUpDown />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("parent_document_id")}</div>
-      ),
-    },
-    {
       accessorKey: "document_type",
       header: ({ column }) => {
         return (
@@ -85,6 +68,23 @@ export const ParentDocumentApprovalsTable = ({
       },
       cell: ({ row }) => (
         <div className="lowercase">{row.getValue("document_type")}</div>
+      ),
+    },
+    {
+      accessorKey: "point_value",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Point Value
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("point_value")}</div>
       ),
     },
     {
@@ -105,20 +105,20 @@ export const ParentDocumentApprovalsTable = ({
       ),
     },
     {
-      accessorKey: "approved_by",
+      accessorKey: "approved_by_name",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Approved By ID
+            Approved By
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("approved_by")}</div>
+        <div className="lowercase">{row.getValue("approved_by_name")}</div>
       ),
     },
   ];
@@ -168,6 +168,8 @@ export const ParentDocumentApprovalsTable = ({
             ...updated[existingIndex],
             request_status: event.request_status,
             approved_by: event.approved_by,
+            approved_by_name: event.approved_by_name,
+            approved_by_email: event.approved_by_email,
           };
           return updated;
         }

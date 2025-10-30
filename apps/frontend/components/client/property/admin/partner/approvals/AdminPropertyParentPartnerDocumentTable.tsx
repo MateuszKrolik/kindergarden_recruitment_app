@@ -188,7 +188,7 @@ export default function AdminPropertyParentPartnerDocumentTable({
       ),
     },
     {
-      accessorKey: "approved_by",
+      accessorKey: "approved_by_name",
       header: ({ column }) => {
         return (
           <Button
@@ -201,7 +201,7 @@ export default function AdminPropertyParentPartnerDocumentTable({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("approved_by")}</div>
+        <div className="lowercase">{row.getValue("approved_by_name")}</div>
       ),
     },
     {
@@ -263,6 +263,8 @@ export default function AdminPropertyParentPartnerDocumentTable({
             ...updated[existingIndex],
             request_status: event.request_status,
             approved_by: event.approved_by,
+            approved_by_name: event.approved_by_name,
+            approved_by_email: event.approved_by_email,
           };
           return updated;
         }

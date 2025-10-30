@@ -66,6 +66,10 @@ class IComplianceSvc(ABC):
         parent_document_id: UUID,
         document_type: DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyParentDocument:
         pass
 
@@ -76,7 +80,10 @@ class IComplianceSvc(ABC):
         user_id: UUID,
         parent_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyParentDocument:
         pass
 
@@ -97,6 +104,10 @@ class IComplianceSvc(ABC):
         child_document_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyChildDocument:
         pass
 
@@ -116,7 +127,10 @@ class IComplianceSvc(ABC):
         child_id: UUID,
         child_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyChildDocument:
         pass
 
@@ -128,6 +142,10 @@ class IComplianceSvc(ABC):
         parent_partner_document_id: UUID,
         document_type: DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyParentPartnerDocument:
         pass
 
@@ -164,7 +182,10 @@ class IComplianceSvc(ABC):
         partner_id: UUID,
         parent_partner_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyParentPartnerDocument:
         pass
 
@@ -232,6 +253,10 @@ class ComplianceSvc(IComplianceSvc):
         parent_document_id: UUID,
         document_type: DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyParentDocument:
         data = await self.repo.send_property_parent_document_approval_request(
             property_id=property_id,
@@ -239,6 +264,10 @@ class ComplianceSvc(IComplianceSvc):
             parent_document_id=parent_document_id,
             document_type=document_type,
             point_value=point_value,
+            # REQUESTOR DATA
+            requestor_id=requestor_id,
+            requestor_name=requestor_name,
+            requestor_email=requestor_email,
         )
         _, socket_error = await try_except(
             self.socket_server.emit,
@@ -255,7 +284,10 @@ class ComplianceSvc(IComplianceSvc):
         user_id: UUID,
         parent_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyParentDocument:
         is_admin = await self.identity_client.is_property_admin(
             property_id=property_id, user_id=admin_id
@@ -269,7 +301,10 @@ class ComplianceSvc(IComplianceSvc):
             user_id=user_id,
             parent_document_id=parent_document_id,
             request_status=request_status,
+            # APPROVER DATA
             admin_id=admin_id,
+            admin_name=admin_name,
+            admin_email=admin_email,
         )
         match request_status:
             case REQUEST_STATUS.APPROVED:
@@ -301,6 +336,10 @@ class ComplianceSvc(IComplianceSvc):
         child_document_id: UUID,
         document_type: CHILD_DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyChildDocument:
         data = await self.repo.send_property_child_document_approval_request(
             property_id=property_id,
@@ -308,6 +347,10 @@ class ComplianceSvc(IComplianceSvc):
             child_document_id=child_document_id,
             document_type=document_type,
             point_value=point_value,
+            # REQUESTOR DATA
+            requestor_id=requestor_id,
+            requestor_name=requestor_name,
+            requestor_email=requestor_email,
         )
         _, socket_error = await try_except(
             self.socket_server.emit,
@@ -338,7 +381,10 @@ class ComplianceSvc(IComplianceSvc):
         child_id: UUID,
         child_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyChildDocument:
         is_admin = await self.identity_client.is_property_admin(
             property_id=property_id, user_id=admin_id
@@ -352,7 +398,10 @@ class ComplianceSvc(IComplianceSvc):
             child_id=child_id,
             child_document_id=child_document_id,
             request_status=request_status,
+            # APPROVER DATA
             admin_id=admin_id,
+            admin_name=admin_name,
+            admin_email=admin_email,
         )
         match request_status:
             case REQUEST_STATUS.APPROVED:
@@ -372,6 +421,10 @@ class ComplianceSvc(IComplianceSvc):
         parent_partner_document_id: UUID,
         document_type: DOCUMENT_TYPE,
         point_value: int,
+        # REQUESTOR DATA
+        requestor_id: UUID,
+        requestor_name: str,
+        requestor_email: str,
     ) -> PropertyParentPartnerDocument:
         data = await self.repo.send_property_parent_partner_document_approval_request(
             property_id=property_id,
@@ -379,6 +432,10 @@ class ComplianceSvc(IComplianceSvc):
             parent_partner_document_id=parent_partner_document_id,
             document_type=document_type,
             point_value=point_value,
+            # REQUESTOR DATA
+            requestor_id=requestor_id,
+            requestor_name=requestor_name,
+            requestor_email=requestor_email,
         )
         _, socket_error = await try_except(
             self.socket_server.emit,
@@ -426,7 +483,10 @@ class ComplianceSvc(IComplianceSvc):
         partner_id: UUID,
         parent_partner_document_id: UUID,
         request_status: REQUEST_STATUS,
+        # APPROVER DATA
         admin_id: UUID,
+        admin_name: str,
+        admin_email: str,
     ) -> PropertyParentPartnerDocument:
         is_admin = await self.identity_client.is_property_admin(
             property_id=property_id, user_id=admin_id
@@ -440,7 +500,10 @@ class ComplianceSvc(IComplianceSvc):
             partner_id=partner_id,
             parent_partner_document_id=parent_partner_document_id,
             request_status=request_status,
+            # APPROVER DATA
             admin_id=admin_id,
+            admin_name=admin_name,
+            admin_email=admin_email,
         )
         match request_status:
             case REQUEST_STATUS.APPROVED:

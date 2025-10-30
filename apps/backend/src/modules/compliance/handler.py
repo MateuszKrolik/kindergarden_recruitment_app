@@ -125,6 +125,10 @@ class ComplianceHandler:
                 parent_document_id=parent_doc_id,
                 document_type=body.document_type,
                 point_value=body.point_value,
+                # REQUESTOR DATA
+                requestor_id=user_result.get("id", UUID(int=0)),
+                requestor_name=user_result.get("name", "-"),
+                requestor_email=user_result.get("email", "-"),
             )
 
         @self.router.patch(
@@ -147,6 +151,8 @@ class ComplianceHandler:
                 parent_document_id=parent_document_id,
                 request_status=REQUEST_STATUS.APPROVED,
                 admin_id=user_result.get("id", UUID(int=0)),
+                admin_name=user_result.get("name", "-"),
+                admin_email=user_result.get("email", "-"),
             )
 
         @self.router.get(
@@ -188,6 +194,10 @@ class ComplianceHandler:
                 child_document_id=child_document_id,
                 document_type=body.document_type,
                 point_value=body.point_value,
+                # REQUESTOR DATA
+                requestor_id=user_result.get("id", UUID(int=0)),
+                requestor_name=user_result.get("name", "-"),
+                requestor_email=user_result.get("email", "-"),
             )
 
         @self.router.get(
@@ -230,6 +240,8 @@ class ComplianceHandler:
                 child_document_id=child_document_id,
                 request_status=REQUEST_STATUS.APPROVED,
                 admin_id=user_result.get("id", UUID(int=0)),
+                admin_name=user_result.get("name", "-"),
+                admin_email=user_result.get("email", "-"),
             )
 
         @self.router.post(
@@ -254,6 +266,10 @@ class ComplianceHandler:
                     parent_partner_document_id=parent_partner_document_id,
                     document_type=body.document_type,
                     point_value=body.point_value,
+                    # REQUESTOR DATA
+                    requestor_id=user_result.get("id", UUID(int=0)),
+                    requestor_name=user_result.get("name", "-"),
+                    requestor_email=user_result.get("email", "-"),
                 )
             )
 
@@ -332,4 +348,6 @@ class ComplianceHandler:
                 parent_partner_document_id=parent_partner_document_id,
                 request_status=REQUEST_STATUS.APPROVED,
                 admin_id=user_result.get("id", UUID(int=0)),
+                admin_name=user_result.get("name", "-"),
+                admin_email=user_result.get("email", "-"),
             )

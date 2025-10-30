@@ -11,9 +11,16 @@ class PropertyParentDocument(BaseModel):
     user_id: UUID
     parent_document_id: UUID
     request_status: REQUEST_STATUS
-    approved_by: Optional[UUID]
     document_type: DOCUMENT_TYPE
     point_value: int
+    # REQUESTOR DATA
+    requestor_id: UUID
+    requestor_name: str
+    requestor_email: str
+    # APPROVER DATA
+    approved_by: Optional[UUID]
+    approved_by_name: Optional[str]
+    approved_by_email: Optional[str]
 
 
 class PropertyChildDocument(BaseModel):
@@ -21,9 +28,16 @@ class PropertyChildDocument(BaseModel):
     child_id: UUID
     child_document_id: UUID
     request_status: REQUEST_STATUS
-    approved_by: Optional[UUID]
     document_type: CHILD_DOCUMENT_TYPE
     point_value: int
+    # REQUESTOR DATA
+    requestor_id: UUID
+    requestor_name: str
+    requestor_email: str
+    # APPROVER DATA
+    approved_by: Optional[UUID]
+    approved_by_name: Optional[str]
+    approved_by_email: Optional[str]
 
 
 class PropertyParentPartnerDocument(BaseModel):
@@ -31,6 +45,13 @@ class PropertyParentPartnerDocument(BaseModel):
     partner_id: UUID
     parent_partner_document_id: UUID
     request_status: REQUEST_STATUS
-    approved_by: Optional[UUID]
     document_type: DOCUMENT_TYPE
     point_value: int
+    # REQUESTOR DATA
+    requestor_id: UUID
+    requestor_name: str
+    requestor_email: str
+    # APPROVER DATA
+    approved_by: Optional[UUID]
+    approved_by_name: Optional[str]
+    approved_by_email: Optional[str]
