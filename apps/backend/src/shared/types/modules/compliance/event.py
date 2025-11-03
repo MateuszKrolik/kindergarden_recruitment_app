@@ -1,14 +1,29 @@
-from enum import StrEnum
+from src.shared.types.modules.compliance.model import (
+    PropertyChildDocument,
+    PropertyParentDocument,
+    PropertyParentPartnerDocument,
+)
 
 
-class COMPLIANCE_EVENT(StrEnum):
-    PROPERTY_PARENT_DOCUMENT_APPROVED = "property.parent.document.approved"
-    PROPERTY_PARENT_DOCUMENT_REQUESTED = "property.parent.document.requested"
-    PROPERTY_CHILD_DOCUMENT_APPROVED = "property.child.document.approved"
-    PROPERTY_CHILD_DOCUMENT_REQUESTED = "property.child.document.requested"
-    PROPERTY_PARENT_PARTNER_DOCUMENT_REQUESTED = (
-        "property.parent.partner.document.requested"
-    )
-    PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED = (
-        "property.parent.partner.document.approved"
-    )
+class PropertyParentDocumentApproved(PropertyParentDocument):
+    pass
+
+
+class PropertyChildDocumentApproved(PropertyChildDocument):
+    pass
+
+
+class PropertyParentPartnerDocumentApproved(PropertyParentPartnerDocument):
+    pass
+
+
+class PropertyParentDocumentRejected(PropertyParentDocument):
+    pass
+
+
+class PropertyChildDocumentRejected(PropertyChildDocument):
+    pass
+
+
+class PropertyParentPartnerDocumentRejected(PropertyParentPartnerDocument):
+    pass

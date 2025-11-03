@@ -6,6 +6,7 @@ from src.modules.compliance.dto import (
     PropertyChildDocumentRequest,
     PropertyParentDocumentRequest,
     PropertyParentPartnerDocumentRequest,
+    RejectRequestBody,
 )
 from src.modules.compliance.svc import IComplianceSvc
 from src.shared.types.modules.compliance.enum import REQUEST_STATUS
@@ -350,4 +351,82 @@ class ComplianceHandler:
                 admin_id=user_result.get("id", UUID(int=0)),
                 admin_name=user_result.get("name", "-"),
                 admin_email=user_result.get("email", "-"),
+            )
+
+        @self.router.patch(
+            "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/rejected",
+            status_code=status.HTTP_200_OK,
+            responses={
+                200: {"model": PropertyParentDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def reject_property_parent_document_request(
+            property_id: UUID,
+            parent_id: UUID,
+            parent_document_id: UUID,
+            body: RejectRequestBody,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> PropertyParentDocument:
+            return await self.svc.set_property_parent_document_request_status(
+                property_id=property_id,
+                user_id=parent_id,
+                parent_document_id=parent_document_id,
+                request_status=REQUEST_STATUS.REJECTED,
+                admin_id=user_result.get("id", UUID(int=0)),
+                admin_name=user_result.get("name", "-"),
+                admin_email=user_result.get("email", "-"),
+                rejection_reason=body.rejection_reason,
+            )
+
+        @self.router.patch(
+            "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/rejected",
+            status_code=status.HTTP_200_OK,
+            responses={
+                200: {"model": PropertyChildDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def reject_property_child_document_request(
+            property_id: UUID,
+            child_id: UUID,
+            child_document_id: UUID,
+            body: RejectRequestBody,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> PropertyChildDocument:
+            return await self.svc.set_property_child_document_request_status(
+                property_id=property_id,
+                child_id=child_id,
+                child_document_id=child_document_id,
+                request_status=REQUEST_STATUS.REJECTED,
+                admin_id=user_result.get("id", UUID(int=0)),
+                admin_name=user_result.get("name", "-"),
+                admin_email=user_result.get("email", "-"),
+                rejection_reason=body.rejection_reason,
+            )
+
+        @self.router.patch(
+            "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/rejected",
+            status_code=status.HTTP_200_OK,
+            responses={
+                200: {"model": PropertyParentPartnerDocument},
+                "default": {"model": HTTPError},
+            },
+        )
+        async def reject_property_parent_partner_document_request(
+            property_id: UUID,
+            partner_id: UUID,
+            parent_partner_document_id: UUID,
+            body: RejectRequestBody,
+            user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),
+        ) -> PropertyParentPartnerDocument:
+            return await self.svc.set_property_parent_partner_document_request_status(
+                property_id=property_id,
+                partner_id=partner_id,
+                parent_partner_document_id=parent_partner_document_id,
+                request_status=REQUEST_STATUS.REJECTED,
+                admin_id=user_result.get("id", UUID(int=0)),
+                admin_name=user_result.get("name", "-"),
+                admin_email=user_result.get("email", "-"),
+                rejection_reason=body.rejection_reason,
             )

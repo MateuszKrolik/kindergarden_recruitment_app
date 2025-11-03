@@ -43,11 +43,11 @@ import {
   PagedResponse_PropertyParentPartnerDocument,
   PropertyParentPartnerDocument,
 } from "@/types/modules/compliance/model";
+import { RejectRequestBody } from "@/types/modules/compliance/dto";
 
 interface AdminPropertyParentPartnerDocumentTableProps {
   jwt: string;
   propertyId: string;
-  adminId: string;
   getAllPartnerDocumentApprovalRequestsForGivenProperty(
     jwt: string,
     propertyId: string,
@@ -64,15 +64,22 @@ interface AdminPropertyParentPartnerDocumentTableProps {
     jwt: string,
     documentId: string,
   ): Promise<ApiResponse<string>>;
+  rejectPropertyParentPartnerDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    partnerId: string,
+    parentPartnerDocumentId: string,
+    body: RejectRequestBody,
+  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
 }
 
 export default function AdminPropertyParentPartnerDocumentTable({
   jwt,
   propertyId,
-  adminId,
   getAllPartnerDocumentApprovalRequestsForGivenProperty,
   approvePropertyParentPartnerDocumentApprovalRequest,
   getParentPartnerDocumentURLByDocumentID,
+  rejectPropertyParentPartnerDocumentApprovalRequest,
 }: AdminPropertyParentPartnerDocumentTableProps) {
   const searchParams = useSearchParams();
   const pageNumberParam = searchParams.get("pageNumber");
@@ -213,7 +220,6 @@ export default function AdminPropertyParentPartnerDocumentTable({
         return (
           <AdminPropertyParentPartnerDocumentTableActionMenu
             jwt={jwt}
-            adminId={adminId}
             request={request}
             approvePropertyParentPartnerDocumentApprovalRequest={
               approvePropertyParentPartnerDocumentApprovalRequest
@@ -221,11 +227,35 @@ export default function AdminPropertyParentPartnerDocumentTable({
             getParentPartnerDocumentURLByDocumentID={
               getParentPartnerDocumentURLByDocumentID
             }
+            rejectPropertyParentPartnerDocumentApprovalRequest={
+              rejectPropertyParentPartnerDocumentApprovalRequest
+            }
           />
         );
       },
     },
   ];
+
+  if (result.some((row) => row.request_status === "rejected")) {
+    const rejectionReasonColumn: ColumnDef<PropertyParentPartnerDocument> = {
+      accessorKey: "rejection_reason",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Rejection Reason
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("rejection_reason")}</div>
+      ),
+    };
+    columns.splice(columns.length - 1, 0, rejectionReasonColumn);
+  }
 
   const table = useReactTable<PropertyParentPartnerDocument>({
     data: result,
@@ -250,7 +280,7 @@ export default function AdminPropertyParentPartnerDocumentTable({
   }, [loadProperties, pageNumber, pageSize]);
 
   useEffect(() => {
-    function onRequestApproved(event: PropertyParentPartnerDocument) {
+    function onRequestUpdated(event: PropertyParentPartnerDocument) {
       setResult((prev) => {
         const existingIndex = prev.findIndex(
           (doc) =>
@@ -265,6 +295,7 @@ export default function AdminPropertyParentPartnerDocumentTable({
             approved_by: event.approved_by,
             approved_by_name: event.approved_by_name,
             approved_by_email: event.approved_by_email,
+            rejection_reason: event.rejection_reason,
           };
           return updated;
         }
@@ -272,9 +303,14 @@ export default function AdminPropertyParentPartnerDocumentTable({
         return prev;
       });
 
-      toast.success(
-        `Document: ${event.parent_partner_document_id} was just approved! 🎉`,
-      );
+      switch (event.request_status) {
+        case "approved":
+          toast.success(
+            `Document: ${event.document_type} was just approved! 🎉`,
+          );
+        case "rejected":
+          toast.info(`Document: ${event.document_type} was just rejected.`);
+      }
     }
 
     function onRequestSent(event: PropertyParentPartnerDocument) {
@@ -285,8 +321,8 @@ export default function AdminPropertyParentPartnerDocumentTable({
     }
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
-      onRequestApproved,
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_UPDATED,
+      onRequestUpdated,
     );
 
     socket.on(
@@ -296,8 +332,8 @@ export default function AdminPropertyParentPartnerDocumentTable({
 
     return () => {
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
-        onRequestApproved,
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_UPDATED,
+        onRequestUpdated,
       );
       socket.off(
         COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_REQUESTED,

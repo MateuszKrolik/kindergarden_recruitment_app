@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS compliance.property_parent_documents(
   approved_by uuid,
   approved_by_name TEXT,
   approved_by_email TEXT,
+  rejection_reason TEXT,
   PRIMARY KEY (property_id, user_id, parent_document_id)
 );
 
@@ -52,6 +53,7 @@ CREATE TABLE IF NOT EXISTS compliance.property_children_documents(
   approved_by uuid,
   approved_by_name TEXT,
   approved_by_email TEXT,
+  rejection_reason TEXT,
   PRIMARY KEY (property_id, child_id, child_document_id)
 );
 
@@ -80,6 +82,7 @@ CREATE TABLE IF NOT EXISTS compliance.property_parent_partner_documents(
   approved_by uuid,
   approved_by_name TEXT,
   approved_by_email TEXT,
+  rejection_reason TEXT,
   PRIMARY KEY (property_id, partner_id, parent_partner_document_id)
 );
 

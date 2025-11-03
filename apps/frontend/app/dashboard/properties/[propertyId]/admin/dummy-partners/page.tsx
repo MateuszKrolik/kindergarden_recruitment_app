@@ -3,6 +3,7 @@
 import {
   getAllPartnerDocumentApprovalRequestsForGivenProperty,
   approvePropertyParentPartnerDocumentApprovalRequest,
+  rejectPropertyParentPartnerDocumentApprovalRequest,
 } from "@/app/actions/compliance";
 import { getPropertyUser } from "@/app/actions/identity";
 import { getParentPartnerDocumentURLByDocumentID } from "@/app/actions/reporting";
@@ -37,7 +38,6 @@ export default async function Page({ params }: PageProps) {
     <AdminPropertyParentPartnerDocumentTable
       jwt={jwt}
       propertyId={propertyId}
-      adminId={userId}
       getAllPartnerDocumentApprovalRequestsForGivenProperty={
         getAllPartnerDocumentApprovalRequestsForGivenProperty
       }
@@ -46,6 +46,9 @@ export default async function Page({ params }: PageProps) {
       }
       getParentPartnerDocumentURLByDocumentID={
         getParentPartnerDocumentURLByDocumentID
+      }
+      rejectPropertyParentPartnerDocumentApprovalRequest={
+        rejectPropertyParentPartnerDocumentApprovalRequest
       }
     />
   );

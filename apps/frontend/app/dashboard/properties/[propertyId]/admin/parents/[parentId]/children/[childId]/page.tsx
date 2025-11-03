@@ -7,6 +7,9 @@ import {
   getAllDocumentApprovalRequestsForGivenPropertyChild,
   getAllDocumentApprovalRequestsForGivenPropertyParent,
   getAllDocumentApprovalRequestsForGivenPropertyParentPartner,
+  rejectPropertyChildDocumentApprovalRequest,
+  rejectPropertyParentDocumentApprovalRequest,
+  rejectPropertyParentPartnerDocumentApprovalRequest,
 } from "@/app/actions/compliance";
 import { getPropertyUser } from "@/app/actions/identity";
 import {
@@ -70,6 +73,15 @@ export default async function Page({ params }: PageProps) {
       }
       getParentPartnerDocumentURLByDocumentID={
         getParentPartnerDocumentURLByDocumentID
+      }
+      rejectPropertyChildDocumentApprovalRequest={
+        rejectPropertyChildDocumentApprovalRequest
+      }
+      rejectPropertyParentDocumentApprovalRequest={
+        rejectPropertyParentDocumentApprovalRequest
+      }
+      rejectPropertyParentPartnerDocumentApprovalRequest={
+        rejectPropertyParentPartnerDocumentApprovalRequest
       }
     />
   );

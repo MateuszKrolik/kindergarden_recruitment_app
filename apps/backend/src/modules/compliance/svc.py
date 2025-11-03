@@ -1,15 +1,22 @@
 import json
 from logging import getLogger
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from src.modules.compliance.client import IIdentityClient
 from src.modules.compliance.repo import IComplianceRepo
 from src.shared.exceptions.forbidden import ForbiddenException
 from src.shared.types.event import T, EventEnvelope
-from src.shared.types.modules.compliance.event import COMPLIANCE_EVENT
-from src.shared.types.modules.compliance.enum import REQUEST_STATUS
+from src.shared.types.modules.compliance.enum import REQUEST_STATUS, COMPLIANCE_EVENT
+from src.shared.types.modules.compliance.event import (
+    PropertyChildDocumentApproved,
+    PropertyChildDocumentRejected,
+    PropertyParentDocumentApproved,
+    PropertyParentDocumentRejected,
+    PropertyParentPartnerDocumentApproved,
+    PropertyParentPartnerDocumentRejected,
+)
 from src.shared.types.modules.compliance.model import (
     PropertyChildDocument,
     PropertyParentDocument,
@@ -84,6 +91,7 @@ class IComplianceSvc(ABC):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyParentDocument:
         pass
 
@@ -131,6 +139,7 @@ class IComplianceSvc(ABC):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyChildDocument:
         pass
 
@@ -186,6 +195,7 @@ class IComplianceSvc(ABC):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyParentPartnerDocument:
         pass
 
@@ -288,6 +298,7 @@ class ComplianceSvc(IComplianceSvc):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyParentDocument:
         is_admin = await self.identity_client.is_property_admin(
             property_id=property_id, user_id=admin_id
@@ -305,6 +316,7 @@ class ComplianceSvc(IComplianceSvc):
             admin_id=admin_id,
             admin_name=admin_name,
             admin_email=admin_email,
+            rejection_reason=rejection_reason,
         )
         match request_status:
             case REQUEST_STATUS.APPROVED:
@@ -312,7 +324,15 @@ class ComplianceSvc(IComplianceSvc):
                     type=COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_APPROVED,
                     source=__name__,
                     version="1.0",
-                    payload=data,
+                    payload=PropertyParentDocumentApproved(**data.model_dump()),
+                )
+                await self._publish_event(event)
+            case REQUEST_STATUS.REJECTED:
+                event = create_event(
+                    type=COMPLIANCE_EVENT.PROPERTY_PARENT_DOCUMENT_REJECTED,
+                    source=__name__,
+                    version="1.0",
+                    payload=PropertyParentDocumentRejected(**data.model_dump()),
                 )
                 await self._publish_event(event)
         return data
@@ -385,6 +405,7 @@ class ComplianceSvc(IComplianceSvc):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyChildDocument:
         is_admin = await self.identity_client.is_property_admin(
             property_id=property_id, user_id=admin_id
@@ -402,6 +423,7 @@ class ComplianceSvc(IComplianceSvc):
             admin_id=admin_id,
             admin_name=admin_name,
             admin_email=admin_email,
+            rejection_reason=rejection_reason,
         )
         match request_status:
             case REQUEST_STATUS.APPROVED:
@@ -409,7 +431,15 @@ class ComplianceSvc(IComplianceSvc):
                     type=COMPLIANCE_EVENT.PROPERTY_CHILD_DOCUMENT_APPROVED,
                     source=__name__,
                     version="1.0",
-                    payload=data,
+                    payload=PropertyChildDocumentApproved(**data.model_dump()),
+                )
+                await self._publish_event(event)
+            case REQUEST_STATUS.REJECTED:
+                event = create_event(
+                    type=COMPLIANCE_EVENT.PROPERTY_CHILD_DOCUMENT_REJECTED,
+                    source=__name__,
+                    version="1.0",
+                    payload=PropertyChildDocumentRejected(**data.model_dump()),
                 )
                 await self._publish_event(event)
         return data
@@ -487,6 +517,7 @@ class ComplianceSvc(IComplianceSvc):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyParentPartnerDocument:
         is_admin = await self.identity_client.is_property_admin(
             property_id=property_id, user_id=admin_id
@@ -504,6 +535,7 @@ class ComplianceSvc(IComplianceSvc):
             admin_id=admin_id,
             admin_name=admin_name,
             admin_email=admin_email,
+            rejection_reason=rejection_reason,
         )
         match request_status:
             case REQUEST_STATUS.APPROVED:
@@ -511,7 +543,16 @@ class ComplianceSvc(IComplianceSvc):
                     type=COMPLIANCE_EVENT.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
                     source=__name__,
                     version="1.0",
-                    payload=data,
+                    payload=PropertyParentPartnerDocumentApproved(**data.model_dump()),
+                )
+                await self._publish_event(event)
+        match request_status:
+            case REQUEST_STATUS.REJECTED:
+                event = create_event(
+                    type=COMPLIANCE_EVENT.PROPERTY_PARENT_PARTNER_DOCUMENT_REJECTED,
+                    source=__name__,
+                    version="1.0",
+                    payload=PropertyParentPartnerDocumentRejected(**data.model_dump()),
                 )
                 await self._publish_event(event)
         return data

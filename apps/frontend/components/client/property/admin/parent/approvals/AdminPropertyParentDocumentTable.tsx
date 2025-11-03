@@ -43,6 +43,7 @@ import {
   PagedResponse_PropertyParentDocument,
   PropertyParentDocument,
 } from "@/types/modules/compliance/model";
+import { RejectRequestBody } from "@/types/modules/compliance/dto";
 
 interface AdminPropertyParentDocumentTableProps {
   jwt: string;
@@ -64,6 +65,13 @@ interface AdminPropertyParentDocumentTableProps {
     jwt: string,
     docId: string,
   ): Promise<ApiResponse<string>>;
+  rejectPropertyParentDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    parentId: string,
+    parentDocumentId: string,
+    body: RejectRequestBody,
+  ): Promise<ApiResponse<PropertyParentDocument>>;
 }
 
 export default function AdminPropertyParentDocumentTable({
@@ -73,6 +81,7 @@ export default function AdminPropertyParentDocumentTable({
   getAllDocumentApprovalRequestsForGivenProperty,
   approvePropertyParentDocumentApprovalRequest,
   getParentDocumentURLByDocumentID,
+  rejectPropertyParentDocumentApprovalRequest,
 }: AdminPropertyParentDocumentTableProps) {
   const searchParams = useSearchParams();
   const pageNumberParam = searchParams.get("pageNumber");
@@ -211,17 +220,40 @@ export default function AdminPropertyParentDocumentTable({
         return (
           <AdminPropertyParentDocumentTableActionMenu
             jwt={jwt}
-            adminId={adminId}
             request={request}
             approvePropertyParentDocumentApprovalRequest={
               approvePropertyParentDocumentApprovalRequest
             }
             getParentDocumentURLByDocumentID={getParentDocumentURLByDocumentID}
+            rejectPropertyParentDocumentApprovalRequest={
+              rejectPropertyParentDocumentApprovalRequest
+            }
           />
         );
       },
     },
   ];
+
+  if (result.some((row) => row.request_status === "rejected")) {
+    const rejectionReasonColumn: ColumnDef<PropertyParentDocument> = {
+      accessorKey: "rejection_reason",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Rejection Reason
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("rejection_reason")}</div>
+      ),
+    };
+    columns.splice(columns.length - 1, 0, rejectionReasonColumn);
+  }
 
   const table = useReactTable<PropertyParentDocument>({
     data: result,
@@ -246,7 +278,7 @@ export default function AdminPropertyParentDocumentTable({
   }, [loadProperties, pageNumber, pageSize]);
 
   useEffect(() => {
-    function onRequestApproved(event: PropertyParentDocument) {
+    function onRequestUpdated(event: PropertyParentDocument) {
       setResult((prev) => {
         const existingIndex = prev.findIndex(
           (doc) => doc.parent_document_id === event.parent_document_id,
@@ -260,6 +292,7 @@ export default function AdminPropertyParentDocumentTable({
             approved_by: event.approved_by,
             approved_by_name: event.approved_by_name,
             approved_by_email: event.approved_by_email,
+            rejection_reason: event.rejection_reason,
           };
           return updated;
         }
@@ -267,9 +300,14 @@ export default function AdminPropertyParentDocumentTable({
         return prev;
       });
 
-      toast.success(
-        `Document: ${event.parent_document_id} was just approved! 🎉`,
-      );
+      switch (event.request_status) {
+        case "approved":
+          toast.success(
+            `Document: ${event.document_type} was just approved! 🎉`,
+          );
+        case "rejected":
+          toast.info(`Document: ${event.document_type} was just rejected.`);
+      }
     }
 
     function onRequestSent(event: PropertyParentDocument) {
@@ -280,8 +318,8 @@ export default function AdminPropertyParentDocumentTable({
     }
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
-      onRequestApproved,
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_UPDATED,
+      onRequestUpdated,
     );
 
     socket.on(
@@ -291,8 +329,8 @@ export default function AdminPropertyParentDocumentTable({
 
     return () => {
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
-        onRequestApproved,
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_UPDATED,
+        onRequestUpdated,
       );
       socket.off(
         COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,

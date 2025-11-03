@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminPropertyChildDocumentApprovalsTable } from "./document/AdminPropertyChildDocumentApprovalsTable";
 import { ApiResponse } from "@/types/response";
 import { PropertyChildDocument } from "@/types/modules/compliance/model";
+import { RejectRequestBody } from "@/types/modules/compliance/dto";
 
 type AdminPropertyChildDocumentApprovalsTabsProps = {
   jwt: string;
@@ -25,6 +26,13 @@ type AdminPropertyChildDocumentApprovalsTabsProps = {
     jwt: string,
     documentId: string,
   ): Promise<ApiResponse<string>>;
+  rejectPropertyChildDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    childId: string,
+    childDocumentId: string,
+    body: RejectRequestBody,
+  ): Promise<ApiResponse<PropertyChildDocument>>;
 };
 
 export const AdminPropertyChildDocumentApprovalsTabs = ({
@@ -35,6 +43,7 @@ export const AdminPropertyChildDocumentApprovalsTabs = ({
   getAllDocumentApprovalRequestsForGivenPropertyChild,
   approvePropertyChildDocumentApprovalRequest,
   getChildDocumentURLByDocumentID,
+  rejectPropertyChildDocumentApprovalRequest,
 }: AdminPropertyChildDocumentApprovalsTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
@@ -56,6 +65,9 @@ export const AdminPropertyChildDocumentApprovalsTabs = ({
               approvePropertyChildDocumentApprovalRequest
             }
             getChildDocumentURLByDocumentID={getChildDocumentURLByDocumentID}
+            rejectPropertyChildDocumentApprovalRequest={
+              rejectPropertyChildDocumentApprovalRequest
+            }
           />
         </TabsContent>
         <TabsContent value="requests">

@@ -21,6 +21,7 @@ class PropertyParentDocument(BaseModel):
     approved_by: Optional[UUID]
     approved_by_name: Optional[str]
     approved_by_email: Optional[str]
+    rejection_reason: Optional[str]
 
 
 class PropertyChildDocument(BaseModel):
@@ -38,6 +39,7 @@ class PropertyChildDocument(BaseModel):
     approved_by: Optional[UUID]
     approved_by_name: Optional[str]
     approved_by_email: Optional[str]
+    rejection_reason: Optional[str]
 
 
 class PropertyParentPartnerDocument(BaseModel):
@@ -55,3 +57,4 @@ class PropertyParentPartnerDocument(BaseModel):
     approved_by: Optional[UUID]
     approved_by_name: Optional[str]
     approved_by_email: Optional[str]
+    rejection_reason: Optional[str]

@@ -1,5 +1,4 @@
 import logging
-import asyncio
 import os
 from asyncpg import create_pool
 from fastapi import FastAPI, HTTPException
@@ -26,32 +25,33 @@ from src.shared.handlers.exception_handler import (
     validation_exception_handler,
 )
 from src.shared.middlewares.auth import auth_middleware
-import uvicorn
 import redis.asyncio as redis
 import socketio
 
 
-async def main():
-    app = FastAPI()
+app = FastAPI()
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(DomainException, domain_exception_handler)
+app.add_exception_handler(Exception, unhandled_exception_handler)
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
 
-    app.add_exception_handler(HTTPException, http_exception_handler)
-    app.add_exception_handler(RequestValidationError, validation_exception_handler)
-    app.add_exception_handler(DomainException, domain_exception_handler)
-    app.add_exception_handler(Exception, unhandled_exception_handler)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
-    sio = socketio.AsyncServer(
-        async_mode="asgi",
-        cors_allowed_origins=os.getenv("FRONTEND_URL", "http://localhost:3000"),
-    )
+sio = socketio.AsyncServer(
+    async_mode="asgi",
+    cors_allowed_origins=os.getenv("FRONTEND_URL", "http://localhost:3000"),
+)
 
-    socket_app = socketio.ASGIApp(sio, app)
+socket_app = socketio.ASGIApp(sio, app)
 
+
+@app.on_event("startup")
+async def on_startup():
     pool = await create_pool(
         os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost/auth")
     )
@@ -110,11 +110,3 @@ async def main():
         auth_middleware=auth_middleware,
     )
     app.include_router(compliance_handler.router, tags=["compliance"])
-
-    config = uvicorn.Config(socket_app, host="0.0.0.0", port=3001, log_level="info")
-    server = uvicorn.Server(config)
-    await server.serve()
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

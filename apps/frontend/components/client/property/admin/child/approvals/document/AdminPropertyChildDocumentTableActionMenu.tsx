@@ -12,7 +12,8 @@ import { toast } from "sonner";
 import { ApiResponse } from "@/types/response";
 import { PropertyChildDocument } from "@/types/modules/compliance/model";
 import { useState } from "react";
-import { RejectDocumentModal } from "./RejectDocumentModal";
+import { RejectDocumentModal } from "../RejectDocumentModal";
+import { RejectRequestBody } from "@/types/modules/compliance/dto";
 
 type AdminPropertyChildDocumentTableActionMenuProps = {
   jwt: string;
@@ -28,6 +29,13 @@ type AdminPropertyChildDocumentTableActionMenuProps = {
     jwt: string,
     documentId: string,
   ): Promise<ApiResponse<string>>;
+  rejectPropertyChildDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    childId: string,
+    childDocumentId: string,
+    body: RejectRequestBody,
+  ): Promise<ApiResponse<PropertyChildDocument>>;
 };
 
 export default function AdminPropertyChildDocumentTableActionMenu({
@@ -35,6 +43,7 @@ export default function AdminPropertyChildDocumentTableActionMenu({
   request,
   approvePropertyChildDocumentApprovalRequest,
   getChildDocumentURLByDocumentID,
+  rejectPropertyChildDocumentApprovalRequest,
 }: AdminPropertyChildDocumentTableActionMenuProps) {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] =
@@ -57,9 +66,20 @@ export default function AdminPropertyChildDocumentTableActionMenu({
   };
 
   const handleRejected = async (reason: string, req: PropertyChildDocument) => {
-    // TODO
-    toast.info(`Request: '${request.child_document_id}' rejected!`);
-    alert(`Reason: ${reason}, ReqID: ${req.child_document_id}`);
+    const { error } = await rejectPropertyChildDocumentApprovalRequest(
+      jwt,
+      req.property_id,
+      req.child_id,
+      req.child_document_id,
+      {
+        rejection_reason: reason,
+      },
+    );
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.info(`Request: '${request.child_document_id}' rejected succesfully!`);
   };
   return (
     <>

@@ -10,6 +10,7 @@ import {
   PropertyParentDocument,
   PropertyParentPartnerDocument,
 } from "@/types/modules/compliance/model";
+import { RejectRequestBody } from "@/types/modules/compliance/dto";
 
 type AdminPropertyChildTabsProps = {
   jwt: string;
@@ -62,6 +63,27 @@ type AdminPropertyChildTabsProps = {
     jwt: string,
     documentId: string,
   ): Promise<ApiResponse<string>>;
+  rejectPropertyChildDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    childId: string,
+    childDocumentId: string,
+    body: RejectRequestBody,
+  ): Promise<ApiResponse<PropertyChildDocument>>;
+  rejectPropertyParentDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    parentId: string,
+    parentDocumentId: string,
+    body: RejectRequestBody,
+  ): Promise<ApiResponse<PropertyParentDocument>>;
+  rejectPropertyParentPartnerDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    partnerId: string,
+    parentPartnerDocumentId: string,
+    body: RejectRequestBody,
+  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
 };
 
 export const AdminPropertyChildTabs = ({
@@ -79,6 +101,9 @@ export const AdminPropertyChildTabs = ({
   getParentDocumentURLByDocumentID,
   approvePropertyParentPartnerDocumentApprovalRequest,
   getParentPartnerDocumentURLByDocumentID,
+  rejectPropertyChildDocumentApprovalRequest,
+  rejectPropertyParentDocumentApprovalRequest,
+  rejectPropertyParentPartnerDocumentApprovalRequest,
 }: AdminPropertyChildTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
@@ -101,6 +126,9 @@ export const AdminPropertyChildTabs = ({
               approvePropertyChildDocumentApprovalRequest
             }
             getChildDocumentURLByDocumentID={getChildDocumentURLByDocumentID}
+            rejectPropertyChildDocumentApprovalRequest={
+              rejectPropertyChildDocumentApprovalRequest
+            }
           />
         </TabsContent>
         <TabsContent value="parent">
@@ -116,12 +144,14 @@ export const AdminPropertyChildTabs = ({
               approvePropertyParentDocumentApprovalRequest
             }
             getParentDocumentURLByDocumentID={getParentDocumentURLByDocumentID}
+            rejectPropertyParentDocumentApprovalRequest={
+              rejectPropertyParentDocumentApprovalRequest
+            }
           />
         </TabsContent>
         <TabsContent value="partner">
           <AdminPropertyChildParentPartnerApprovalsTabs
             jwt={jwt}
-            userId={userId}
             propertyId={propertyId}
             parentId={parentId}
             getAllDocumentApprovalRequestsForGivenPropertyParentPartner={
@@ -132,6 +162,9 @@ export const AdminPropertyChildTabs = ({
             }
             getParentPartnerDocumentURLByDocumentID={
               getParentPartnerDocumentURLByDocumentID
+            }
+            rejectPropertyParentPartnerDocumentApprovalRequest={
+              rejectPropertyParentPartnerDocumentApprovalRequest
             }
           />
         </TabsContent>

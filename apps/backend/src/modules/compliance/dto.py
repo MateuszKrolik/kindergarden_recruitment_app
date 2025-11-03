@@ -16,3 +16,7 @@ class PropertyChildDocumentRequest(BaseModel):
 class PropertyParentPartnerDocumentRequest(BaseModel):
     document_type: DOCUMENT_TYPE
     point_value: int
+
+
+class RejectRequestBody(BaseModel):
+    rejection_reason: str

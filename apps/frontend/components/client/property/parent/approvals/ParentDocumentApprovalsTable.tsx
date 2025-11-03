@@ -123,6 +123,27 @@ export const ParentDocumentApprovalsTable = ({
     },
   ];
 
+  if (data.some((row) => row.request_status === "rejected")) {
+    const rejectionReasonColumn: ColumnDef<PropertyParentDocument> = {
+      accessorKey: "rejection_reason",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Rejection Reason
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("rejection_reason")}</div>
+      ),
+    };
+    columns.splice(columns.length - 1, 0, rejectionReasonColumn);
+  }
+
   const fetchData = useCallback(async () => {
     const { data: result, error } =
       await getAllDocumentApprovalRequestsForGivenPropertyParent(
@@ -156,7 +177,7 @@ export const ParentDocumentApprovalsTable = ({
   }, [fetchData]);
 
   useEffect(() => {
-    function onRequestApproved(event: PropertyParentDocument) {
+    function onRequestUpdated(event: PropertyParentDocument) {
       setData((prev) => {
         const existingIndex = prev.findIndex(
           (doc) => doc.parent_document_id === event.parent_document_id,
@@ -170,6 +191,7 @@ export const ParentDocumentApprovalsTable = ({
             approved_by: event.approved_by,
             approved_by_name: event.approved_by_name,
             approved_by_email: event.approved_by_email,
+            rejection_reason: event.rejection_reason,
           };
           return updated;
         }
@@ -177,9 +199,14 @@ export const ParentDocumentApprovalsTable = ({
         return prev;
       });
 
-      toast.success(
-        `Document: ${event.parent_document_id} was just approved! 🎉`,
-      );
+      switch (event.request_status) {
+        case "approved":
+          toast.success(
+            `Document: ${event.document_type} was just approved! 🎉`,
+          );
+        case "rejected":
+          toast.info(`Document: ${event.document_type} was just rejected.`);
+      }
     }
 
     function onRequestSent(event: PropertyParentDocument) {
@@ -190,8 +217,8 @@ export const ParentDocumentApprovalsTable = ({
     }
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
-      onRequestApproved,
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_UPDATED,
+      onRequestUpdated,
     );
 
     socket.on(
@@ -201,8 +228,8 @@ export const ParentDocumentApprovalsTable = ({
 
     return () => {
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_APPROVED,
-        onRequestApproved,
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_UPDATED,
+        onRequestUpdated,
       );
       socket.off(
         COMPLIANCE_EVENTS.PROPERTY_PARENT_DOCUMENT_REQUESTED,
@@ -212,7 +239,7 @@ export const ParentDocumentApprovalsTable = ({
   }, []);
 
   const table = useReactTable<PropertyParentDocument>({
-    data: error || data instanceof Error ? [] : data,
+    data: error ? [] : data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

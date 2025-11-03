@@ -4,10 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminPropertyChildParentPartnerDocumentApprovalsTable } from "./document/AdminPropertyChildParentPartnerDocumentApprovalsTable";
 import { ApiResponse } from "@/types/response";
 import { PropertyParentPartnerDocument } from "@/types/modules/compliance/model";
+import { RejectRequestBody } from "@/types/modules/compliance/dto";
 
 type AdminPropertyChildParentPartnerApprovalsTabsProps = {
   jwt: string;
-  userId: string;
   propertyId: string;
   parentId: string;
   getAllDocumentApprovalRequestsForGivenPropertyParentPartner(
@@ -25,16 +25,23 @@ type AdminPropertyChildParentPartnerApprovalsTabsProps = {
     jwt: string,
     documentId: string,
   ): Promise<ApiResponse<string>>;
+  rejectPropertyParentPartnerDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    partnerId: string,
+    parentPartnerDocumentId: string,
+    body: RejectRequestBody,
+  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
 };
 
 export const AdminPropertyChildParentPartnerApprovalsTabs = ({
   jwt,
-  userId,
   propertyId,
   parentId,
   getAllDocumentApprovalRequestsForGivenPropertyParentPartner,
   approvePropertyParentPartnerDocumentApprovalRequest,
   getParentPartnerDocumentURLByDocumentID,
+  rejectPropertyParentPartnerDocumentApprovalRequest,
 }: AdminPropertyChildParentPartnerApprovalsTabsProps) => {
   return (
     <div className="w-full max-w-4xl">
@@ -46,7 +53,6 @@ export const AdminPropertyChildParentPartnerApprovalsTabs = ({
         <TabsContent value="document-requests">
           <AdminPropertyChildParentPartnerDocumentApprovalsTable
             jwt={jwt}
-            userId={userId}
             propertyId={propertyId}
             parentId={parentId}
             getAllDocumentApprovalRequestsForGivenPropertyParentPartner={
@@ -57,6 +63,9 @@ export const AdminPropertyChildParentPartnerApprovalsTabs = ({
             }
             getParentPartnerDocumentURLByDocumentID={
               getParentPartnerDocumentURLByDocumentID
+            }
+            rejectPropertyParentPartnerDocumentApprovalRequest={
+              rejectPropertyParentPartnerDocumentApprovalRequest
             }
           />
         </TabsContent>

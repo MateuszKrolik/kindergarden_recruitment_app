@@ -8,3 +8,5 @@ export type PropertyParentDocumentRequest =
 
 export type PropertyParentPartnerDocumentRequest =
   components["schemas"]["PropertyParentPartnerDocumentRequest"];
+
+export type RejectRequestBody = components["schemas"]["RejectRequestBody"];

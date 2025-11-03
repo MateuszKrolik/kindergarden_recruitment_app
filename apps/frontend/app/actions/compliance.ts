@@ -14,6 +14,7 @@ import {
   PropertyChildDocumentRequest,
   PropertyParentDocumentRequest,
   PropertyParentPartnerDocumentRequest,
+  RejectRequestBody,
 } from "@/types/modules/compliance/dto";
 
 export async function getAllDocumentApprovalRequestsForGivenPropertyParent(
@@ -346,6 +347,81 @@ export async function approvePropertyParentPartnerDocumentApprovalRequest(
           parent_partner_document_id: parentPartnerDocumentId,
         },
       },
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function rejectPropertyParentDocumentApprovalRequest(
+  jwt: string,
+  propertyId: string,
+  parentId: string,
+  parentDocumentId: string,
+  body: RejectRequestBody,
+): Promise<ApiResponse<PropertyParentDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.PATCH(
+    "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/rejected",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+          parent_id: parentId,
+          parent_document_id: parentDocumentId,
+        },
+      },
+      body: body,
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function rejectPropertyChildDocumentApprovalRequest(
+  jwt: string,
+  propertyId: string,
+  childId: string,
+  childDocumentId: string,
+  body: RejectRequestBody,
+): Promise<ApiResponse<PropertyChildDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.PATCH(
+    "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/rejected",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+          child_id: childId,
+          child_document_id: childDocumentId,
+        },
+      },
+      body: body,
+    },
+  );
+  if (error) return { data: undefined, error: error };
+  return { data: data, error: undefined };
+}
+
+export async function rejectPropertyParentPartnerDocumentApprovalRequest(
+  jwt: string,
+  propertyId: string,
+  partnerId: string,
+  parentPartnerDocumentId: string,
+  body: RejectRequestBody,
+): Promise<ApiResponse<PropertyParentPartnerDocument>> {
+  const api = getApiClient(jwt);
+  const { data, error } = await api.PATCH(
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/rejected",
+    {
+      params: {
+        path: {
+          property_id: propertyId,
+          partner_id: partnerId,
+          parent_partner_document_id: parentPartnerDocumentId,
+        },
+      },
+      body: body,
     },
   );
   if (error) return { data: undefined, error: error };

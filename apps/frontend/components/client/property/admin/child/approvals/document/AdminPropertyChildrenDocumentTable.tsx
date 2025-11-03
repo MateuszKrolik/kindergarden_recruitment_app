@@ -43,6 +43,7 @@ import {
   PropertyChildDocument,
 } from "@/types/modules/compliance/model";
 import AdminPropertyChildDocumentTableActionMenu from "./AdminPropertyChildDocumentTableActionMenu";
+import { RejectRequestBody } from "@/types/modules/compliance/dto";
 
 interface AdminPropertyChildrenDocumentTableProps {
   jwt: string;
@@ -64,6 +65,13 @@ interface AdminPropertyChildrenDocumentTableProps {
     jwt: string,
     documentId: string,
   ): Promise<ApiResponse<string>>;
+  rejectPropertyChildDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    childId: string,
+    childDocumentId: string,
+    body: RejectRequestBody,
+  ): Promise<ApiResponse<PropertyChildDocument>>;
 }
 
 export default function AdminPropertyChildrenDocumentTable({
@@ -73,6 +81,7 @@ export default function AdminPropertyChildrenDocumentTable({
   getAllChildDocumentApprovalRequestsForGivenProperty,
   approvePropertyChildDocumentApprovalRequest,
   getChildDocumentURLByDocumentID,
+  rejectPropertyChildDocumentApprovalRequest,
 }: AdminPropertyChildrenDocumentTableProps) {
   const searchParams = useSearchParams();
   const pageNumberParam = searchParams.get("pageNumber");
@@ -186,6 +195,24 @@ export default function AdminPropertyChildrenDocumentTable({
       ),
     },
     {
+      accessorKey: "rejection_reason",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Rejection Reason
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) =>
+        row.getValue("request_status") === "rejected" && (
+          <div className="lowercase">{row.getValue("rejection_reason")}</div>
+        ),
+    },
+    {
       accessorKey: "approved_by_name",
       header: ({ column }) => {
         return (
@@ -217,6 +244,9 @@ export default function AdminPropertyChildrenDocumentTable({
               approvePropertyChildDocumentApprovalRequest
             }
             getChildDocumentURLByDocumentID={getChildDocumentURLByDocumentID}
+            rejectPropertyChildDocumentApprovalRequest={
+              rejectPropertyChildDocumentApprovalRequest
+            }
           />
         );
       },
@@ -246,7 +276,7 @@ export default function AdminPropertyChildrenDocumentTable({
   }, [loadProperties, pageNumber, pageSize]);
 
   useEffect(() => {
-    function onRequestApproved(event: PropertyChildDocument) {
+    function onRequestUpdated(event: PropertyChildDocument) {
       setResult((prev) => {
         const existingIndex = prev.findIndex(
           (doc) => doc.child_document_id === event.child_document_id,
@@ -260,6 +290,7 @@ export default function AdminPropertyChildrenDocumentTable({
             approved_by: event.approved_by,
             approved_by_name: event.approved_by_name,
             approved_by_email: event.approved_by_email,
+            rejection_reason: event.rejection_reason,
           };
           return updated;
         }
@@ -267,9 +298,14 @@ export default function AdminPropertyChildrenDocumentTable({
         return prev;
       });
 
-      toast.success(
-        `Document: ${event.child_document_id} was just approved! 🎉`,
-      );
+      switch (event.request_status) {
+        case "approved":
+          toast.success(
+            `Document: ${event.document_type} was just approved! 🎉`,
+          );
+        case "rejected":
+          toast.info(`Document: ${event.document_type} was just rejected.`);
+      }
     }
 
     function onRequestSent(event: PropertyChildDocument) {
@@ -280,8 +316,8 @@ export default function AdminPropertyChildrenDocumentTable({
     }
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_APPROVED,
-      onRequestApproved,
+      COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_UPDATED,
+      onRequestUpdated,
     );
 
     socket.on(
@@ -291,8 +327,8 @@ export default function AdminPropertyChildrenDocumentTable({
 
     return () => {
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_APPROVED,
-        onRequestApproved,
+        COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_UPDATED,
+        onRequestUpdated,
       );
       socket.off(
         COMPLIANCE_EVENTS.PROPERTY_CHILD_DOCUMENT_REQUESTED,
@@ -315,9 +351,9 @@ export default function AdminPropertyChildrenDocumentTable({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}

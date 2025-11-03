@@ -28,10 +28,10 @@ import socket from "@/socket";
 import { ApiResponse } from "@/types/response";
 import { PropertyParentPartnerDocument } from "@/types/modules/compliance/model";
 import AdminPropertyParentPartnerDocumentTableActionMenu from "../../../../partner/approvals/AdminPropertyParentPartnerDocumentTableActionMenu";
+import { RejectRequestBody } from "@/types/modules/compliance/dto";
 
 type AdminPropertyChildParentPartnerDocumentApprovalsTableProps = {
   jwt: string;
-  userId: string;
   propertyId: string;
   parentId: string;
   getAllDocumentApprovalRequestsForGivenPropertyParentPartner(
@@ -49,16 +49,23 @@ type AdminPropertyChildParentPartnerDocumentApprovalsTableProps = {
     jwt: string,
     documentId: string,
   ): Promise<ApiResponse<string>>;
+  rejectPropertyParentPartnerDocumentApprovalRequest(
+    jwt: string,
+    propertyId: string,
+    partnerId: string,
+    parentPartnerDocumentId: string,
+    body: RejectRequestBody,
+  ): Promise<ApiResponse<PropertyParentPartnerDocument>>;
 };
 
 export const AdminPropertyChildParentPartnerDocumentApprovalsTable = ({
   jwt,
-  userId,
   propertyId,
   parentId,
   getAllDocumentApprovalRequestsForGivenPropertyParentPartner,
   approvePropertyParentPartnerDocumentApprovalRequest,
   getParentPartnerDocumentURLByDocumentID,
+  rejectPropertyParentPartnerDocumentApprovalRequest,
 }: AdminPropertyChildParentPartnerDocumentApprovalsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -145,7 +152,6 @@ export const AdminPropertyChildParentPartnerDocumentApprovalsTable = ({
         return (
           <AdminPropertyParentPartnerDocumentTableActionMenu
             jwt={jwt}
-            adminId={userId}
             request={request}
             approvePropertyParentPartnerDocumentApprovalRequest={
               approvePropertyParentPartnerDocumentApprovalRequest
@@ -153,11 +159,35 @@ export const AdminPropertyChildParentPartnerDocumentApprovalsTable = ({
             getParentPartnerDocumentURLByDocumentID={
               getParentPartnerDocumentURLByDocumentID
             }
+            rejectPropertyParentPartnerDocumentApprovalRequest={
+              rejectPropertyParentPartnerDocumentApprovalRequest
+            }
           />
         );
       },
     },
   ];
+
+  if (data.some((row) => row.request_status === "rejected")) {
+    const rejectionReasonColumn: ColumnDef<PropertyParentPartnerDocument> = {
+      accessorKey: "rejection_reason",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Rejection Reason
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("rejection_reason")}</div>
+      ),
+    };
+    columns.splice(columns.length - 1, 0, rejectionReasonColumn);
+  }
 
   const fetchData = useCallback(async () => {
     const { data: result, error } =
@@ -192,7 +222,7 @@ export const AdminPropertyChildParentPartnerDocumentApprovalsTable = ({
   }, [fetchData]);
 
   useEffect(() => {
-    function onRequestApproved(event: PropertyParentPartnerDocument) {
+    function onRequestUpdated(event: PropertyParentPartnerDocument) {
       setData((prev) => {
         const existingIndex = prev.findIndex(
           (doc) =>
@@ -207,6 +237,7 @@ export const AdminPropertyChildParentPartnerDocumentApprovalsTable = ({
             approved_by: event.approved_by,
             approved_by_name: event.approved_by_name,
             approved_by_email: event.approved_by_email,
+            rejection_reason: event.rejection_reason,
           };
           return updated;
         }
@@ -214,9 +245,14 @@ export const AdminPropertyChildParentPartnerDocumentApprovalsTable = ({
         return prev;
       });
 
-      toast.success(
-        `Document: ${event.parent_partner_document_id} was just approved! 🎉`,
-      );
+      switch (event.request_status) {
+        case "approved":
+          toast.success(
+            `Document: ${event.document_type} was just approved! 🎉`,
+          );
+        case "rejected":
+          toast.info(`Document: ${event.document_type} was just rejected.`);
+      }
     }
 
     function onRequestSent(event: PropertyParentPartnerDocument) {
@@ -227,8 +263,8 @@ export const AdminPropertyChildParentPartnerDocumentApprovalsTable = ({
     }
 
     socket.on(
-      COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
-      onRequestApproved,
+      COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_UPDATED,
+      onRequestUpdated,
     );
 
     socket.on(
@@ -238,8 +274,8 @@ export const AdminPropertyChildParentPartnerDocumentApprovalsTable = ({
 
     return () => {
       socket.off(
-        COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_APPROVED,
-        onRequestApproved,
+        COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_UPDATED,
+        onRequestUpdated,
       );
       socket.off(
         COMPLIANCE_EVENTS.PROPERTY_PARENT_PARTNER_DOCUMENT_REQUESTED,

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from asyncpg import Pool
@@ -79,6 +79,7 @@ class IComplianceRepo(ABC):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyParentDocument:
         pass
 
@@ -126,6 +127,7 @@ class IComplianceRepo(ABC):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyChildDocument:
         pass
 
@@ -181,6 +183,7 @@ class IComplianceRepo(ABC):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyParentPartnerDocument:
         pass
 
@@ -350,11 +353,12 @@ class ComplianceRepo(IComplianceRepo):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyParentDocument:
         sql = """
         UPDATE compliance.property_parent_documents
-        SET request_status = $1, approved_by = $2, approved_by_name = $3, approved_by_email = $4 
-        WHERE property_id = $5 AND user_id = $6 AND parent_document_id = $7
+        SET request_status = $1, approved_by = $2, approved_by_name = $3, approved_by_email = $4, rejection_reason = $5 
+        WHERE property_id = $6 AND user_id = $7 AND parent_document_id = $8
         RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -366,6 +370,7 @@ class ComplianceRepo(IComplianceRepo):
                 admin_id,
                 admin_name,
                 admin_email,
+                rejection_reason,
                 # APPROVER DATA
                 property_id,
                 user_id,
@@ -503,11 +508,12 @@ class ComplianceRepo(IComplianceRepo):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyChildDocument:
         sql = """
         UPDATE compliance.property_children_documents
-        SET request_status = $1, approved_by = $2, approved_by_name = $3, approved_by_email = $4 
-        WHERE property_id = $5 AND child_id = $6 AND child_document_id = $7
+        SET request_status = $1, approved_by = $2, approved_by_name = $3, approved_by_email = $4, rejection_reason = $5 
+        WHERE property_id = $6 AND child_id = $7 AND child_document_id = $8
         RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -519,6 +525,7 @@ class ComplianceRepo(IComplianceRepo):
                 admin_id,
                 admin_name,
                 admin_email,
+                rejection_reason,
                 # APPROVER DATA
                 property_id,
                 child_id,
@@ -681,11 +688,12 @@ class ComplianceRepo(IComplianceRepo):
         admin_id: UUID,
         admin_name: str,
         admin_email: str,
+        rejection_reason: Optional[str] = None,
     ) -> PropertyParentPartnerDocument:
         sql = """
         UPDATE compliance.property_parent_partner_documents
-        SET request_status = $1, approved_by = $2, approved_by_name = $3, approved_by_email = $4 
-        WHERE property_id = $5 AND partner_id = $6 AND parent_partner_document_id = $7
+        SET request_status = $1, approved_by = $2, approved_by_name = $3, approved_by_email = $4, rejection_reason = $5 
+        WHERE property_id = $6 AND partner_id = $7 AND parent_partner_document_id = $8
         RETURNING *;
         """
         async with self.pool.acquire() as connection:
@@ -697,6 +705,7 @@ class ComplianceRepo(IComplianceRepo):
                 admin_id,
                 admin_name,
                 admin_email,
+                rejection_reason,
                 # APPROVER DATA
                 property_id,
                 partner_id,

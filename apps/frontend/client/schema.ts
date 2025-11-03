@@ -484,6 +484,57 @@ export interface paths {
         patch: operations["approve_property_parent_partner_document_request_properties__property_id__parent_partners__partner_id__parent_documents__parent_partner_document_id__status_approved_patch"];
         trace?: never;
     };
+    "/properties/{property_id}/parents/{parent_id}/parent-documents/{parent_document_id}/status/rejected": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Reject Property Parent Document Request */
+        patch: operations["reject_property_parent_document_request_properties__property_id__parents__parent_id__parent_documents__parent_document_id__status_rejected_patch"];
+        trace?: never;
+    };
+    "/properties/{property_id}/children/{child_id}/children-documents/{child_document_id}/status/rejected": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Reject Property Child Document Request */
+        patch: operations["reject_property_child_document_request_properties__property_id__children__child_id__children_documents__child_document_id__status_rejected_patch"];
+        trace?: never;
+    };
+    "/properties/{property_id}/parent-partners/{partner_id}/parent-documents/{parent_partner_document_id}/status/rejected": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Reject Property Parent Partner Document Request */
+        patch: operations["reject_property_parent_partner_document_request_properties__property_id__parent_partners__partner_id__parent_documents__parent_partner_document_id__status_rejected_patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -747,6 +798,8 @@ export interface components {
             approved_by_name: string | null;
             /** Approved By Email */
             approved_by_email: string | null;
+            /** Rejection Reason */
+            rejection_reason: string | null;
         };
         /** PropertyChildDocumentRequest */
         PropertyChildDocumentRequest: {
@@ -803,6 +856,8 @@ export interface components {
             approved_by_name: string | null;
             /** Approved By Email */
             approved_by_email: string | null;
+            /** Rejection Reason */
+            rejection_reason: string | null;
         };
         /** PropertyParentDocumentRequest */
         PropertyParentDocumentRequest: {
@@ -859,6 +914,8 @@ export interface components {
             approved_by_name: string | null;
             /** Approved By Email */
             approved_by_email: string | null;
+            /** Rejection Reason */
+            rejection_reason: string | null;
         };
         /** PropertyParentPartnerDocumentRequest */
         PropertyParentPartnerDocumentRequest: {
@@ -892,6 +949,11 @@ export interface components {
          * @enum {string}
          */
         REQUIREMENT_TYPE: "always" | "conditional";
+        /** RejectRequestBody */
+        RejectRequestBody: {
+            /** Rejection Reason */
+            rejection_reason: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1941,6 +2003,117 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyParentPartnerDocument"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    reject_property_parent_document_request_properties__property_id__parents__parent_id__parent_documents__parent_document_id__status_rejected_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                property_id: string;
+                parent_id: string;
+                parent_document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectRequestBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyParentDocument"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    reject_property_child_document_request_properties__property_id__children__child_id__children_documents__child_document_id__status_rejected_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                property_id: string;
+                child_id: string;
+                child_document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectRequestBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyChildDocument"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPError"];
+                };
+            };
+        };
+    };
+    reject_property_parent_partner_document_request_properties__property_id__parent_partners__partner_id__parent_documents__parent_partner_document_id__status_rejected_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                property_id: string;
+                partner_id: string;
+                parent_partner_document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectRequestBody"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
