@@ -30,7 +30,7 @@ class IdentityHandler:
                 "default": {"model": HTTPError},
             },
         )
-        async def get_properties(
+        async def get_property_user(
             property_id: UUID,
             user_id: UUID,
             user_result: AuthMiddlewareResponse = Depends(self.auth_middleware),

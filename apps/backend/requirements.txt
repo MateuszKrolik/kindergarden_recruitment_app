@@ -6,5 +6,6 @@ httpx
 PyJWT
 boto3
 redis
+aiocache[redis]
 python-socketio[asyncio]
 cryptography
