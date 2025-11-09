@@ -4,7 +4,7 @@ from uuid import UUID
 
 from src.modules.identity.cache import IDENTITY_NAMESPACE, get_property_user_key_builder
 from src.modules.identity.repo import IIdentityRepo
-from src.shared.decorators.cache import cached_redis
+from src.shared.decorators.cache import redis_cache
 from src.shared.types.modules.identity.enum import PROPERTY_USER_ROLE
 from src.shared.types.modules.identity.model import (
     ChildConditionKeys,
@@ -62,24 +62,17 @@ class IdentitySvc(IIdentitySvc):
     ) -> ParentConditionKeys:
         return await self.repo.get_parent_condition_keys(user_id)
 
+    @redis_cache(
+        key_builder=get_property_user_key_builder, namespace=IDENTITY_NAMESPACE
+    )
     async def get_property_user(
         self,
         property_id: UUID,
         user_id: UUID,
     ) -> PropertyUser:
-        @cached_redis(
-            key_builder=get_property_user_key_builder, namespace=IDENTITY_NAMESPACE
+        return await self.repo.get_property_user(
+            property_id=property_id, user_id=user_id
         )
-        async def _(
-            property_id: UUID,
-            user_id: UUID,
-        ) -> PropertyUser:
-            logging.info("Cache miss for call: 'get_property_user'.")
-            return await self.repo.get_property_user(
-                property_id=property_id, user_id=user_id
-            )
-
-        return await _(property_id=property_id, user_id=user_id)
 
     async def get_child_condition_keys(
         self,
